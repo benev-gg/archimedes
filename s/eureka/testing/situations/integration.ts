@@ -19,6 +19,8 @@ export type MyComponents = {
 }
 
 export async function setupIntegrationSituation() {
+	const tickRateHz = 10
+
 	const hostFibers = new Netfibers()
 	const clientFibers = new Netfibers()
 	Fiber.entangle(hostFibers.megafiber, clientFibers.megafiber)
@@ -33,11 +35,12 @@ export async function setupIntegrationSituation() {
 	hub.invoke(hostSpoke)
 
 	const client = await SessionClient.make({
-		hz: 60,
+		hz: tickRateHz,
 		spoke: clientSpoke,
 		pastSimulator: setupSimulator(),
 		futureSimulator: setupSimulator(),
 	})
+
 
 	// TODO
 }
