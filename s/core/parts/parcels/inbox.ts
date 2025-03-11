@@ -59,6 +59,7 @@ export class ParcelInbox<P> {
 
 		return ready
 			.sort(sortById)
+			.filter(this.#nanny.removeDuplicates)
 			.filter(this.#nanny.removeDisorderly)
 			.map(getPayload)
 	}
