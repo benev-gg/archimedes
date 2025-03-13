@@ -10,14 +10,14 @@ export type Schema = {
 	input: any
 }
 
-export type StateDispatch<State> = ["state", State]
-export type DeltaDispatch<Delta> = ["delta", Delta]
-export type InputDispatch<Input> = ["input", Input]
+export type StateDispatch<xSchema extends Schema> = ["state", xSchema["state"]]
+export type DeltaDispatch<xSchema extends Schema> = ["delta", xSchema["delta"]]
+export type InputDispatch<xSchema extends Schema> = ["input", xSchema["input"]]
 
 export type Dispatch<xSchema extends Schema> = (
-	| StateDispatch<xSchema["state"]>
-	| DeltaDispatch<xSchema["delta"]>
-	| InputDispatch<xSchema["input"]>
+	| StateDispatch<xSchema>
+	| DeltaDispatch<xSchema>
+	| InputDispatch<xSchema>
 )
 
 export type Telegram<xSchema extends Schema> = Authored<Dispatch<xSchema>[]>

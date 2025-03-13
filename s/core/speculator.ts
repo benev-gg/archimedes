@@ -7,7 +7,7 @@ import {AuthorId, InputDispatch, InputTelegram, Schema, Telegram} from "./types.
 
 export class Speculator<xSchema extends Schema> {
 	#currentTick = 0
-	#chronicle = new Chronicle<InputTelegram<xSchema["input"]>>()
+	#chronicle = new Chronicle<InputTelegram<xSchema>>()
 
 	constructor(
 		public authorId: AuthorId,
@@ -37,8 +37,8 @@ export class Speculator<xSchema extends Schema> {
 	}
 
 	sendInputs(inputs: xSchema["input"][]) {
-		const dispatches: InputDispatch<xSchema["input"]>[] = inputs.map(input => ["input", input])
-		const telegram: InputTelegram<xSchema["input"]> = [this.authorId, dispatches]
+		const dispatches: InputDispatch<xSchema>[] = inputs.map(input => ["input", input])
+		const telegram: InputTelegram<xSchema> = [this.authorId, dispatches]
 
 		// immediately send down the wire
 		this.liaison.send([telegram])
