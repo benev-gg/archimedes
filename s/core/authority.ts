@@ -4,27 +4,30 @@ import {Simulator} from "./simulator.js"
 import {Ticker} from "../tools/ticker.js"
 import {IdCounter} from "../tools/id-counter.js"
 import {isInputDispatch} from "./utils/is-input-dispatch.js"
-import {InputTelegram, Schema, StateDispatch, Telegram} from "./types.js"
+import {DeltaDispatch, InputDispatch, Schema, StateDispatch, Telegram} from "./types.js"
 
 export class Authority<xSchema extends Schema> {
 	idCounter = new IdCounter()
-	liaisons = new Set<Liaison<Telegram<xSchema>[]>>()
+	liaisons = new Set<Liaison<Telegram<xSchema>>>()
 	authorId = this.idCounter.next()
+	currentTick = 0
 
 	constructor(public simulator: Simulator<xSchema>) {}
 
 	tick() {
-		const inputTelegrams = this.#collectInputTelegrams()
-		const delta = this.simulator.simulate(inputTelegrams)
+		const tick = ++this.currentTick
+		const inputDispatches = this.#collectInputDispatches()
+		const delta = this.simulator.simulate([tick, inputDispatches])
+		const deltaDispatch: DeltaDispatch<xSchema> = ["delta", delta]
 
-		const broadcast: Telegram<xSchema>[] = [
-			...inputTelegrams,
-			[this.authorId, [["delta", delta]]],
+		const broadcast: Telegram<xSchema> = [
+			tick,
+			[...inputDispatches, deltaDispatch],
 		]
 
 		for (const liaison of this.liaisons) {
-			const relevantTelegrams = this.simulator.tailor(liaison.authorId, structuredClone(broadcast))
-			liaison.queue(relevantTelegrams)
+			const tailored = this.simulator.tailor(liaison.authorId, broadcast)
+			liaison.queue(tailored)
 		}
 	}
 
@@ -37,11 +40,12 @@ export class Authority<xSchema extends Schema> {
 		return [this.authorId, [dispatch]]
 	}
 
-	#collectInputTelegrams() {
-		const telegrams: InputTelegram<xSchema>[] = []
+	#collectInputDispatches() {
+		const dispatches: InputDispatch<xSchema>[] = []
+
 		for (const liaison of this.liaisons)
-			liaison.recv().flat()
-				.map(([_, dispatches]) => [
+			liaison.recv()
+				.map(([_, dispatches]) => ["input", [
 
 					// overwrite author id to prevent spoofing
 					liaison.authorId,
@@ -49,9 +53,10 @@ export class Authority<xSchema extends Schema> {
 					// filter for inputs
 					dispatches.filter(isInputDispatch),
 
-				] as InputTelegram<xSchema>)
-				.forEach(t => telegrams.push(t))
-		return telegrams
+				]] as InputDispatch<xSchema>)
+				.forEach(t => dispatches.push(t))
+
+		return dispatches
 	}
 }
 

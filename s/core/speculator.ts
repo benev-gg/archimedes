@@ -3,15 +3,17 @@ import {Liaison} from "./liaison.js"
 import {loop} from "../tools/loop.js"
 import {Simulator} from "./simulator.js"
 import {Chronicle} from "../tools/chronicle.js"
-import {AuthorId, InputDispatch, InputTelegram, Schema, Telegram} from "./types.js"
+import {AuthorId, Schema, Telegram} from "./types.js"
 
 export class Speculator<xSchema extends Schema> {
 	#currentTick = 0
-	#chronicle = new Chronicle<InputTelegram<xSchema>>()
+	#chronicle = new Chronicle<xSchema["input"]>()
+
+	maxIncomingTicks = 5
 
 	constructor(
 		public authorId: AuthorId,
-		public liaison: Liaison<Telegram<xSchema>[]>,
+		public liaison: Liaison<Telegram<xSchema>>,
 		public pastSimulator: Simulator<xSchema>,
 		public futureSimulator: Simulator<xSchema>,
 		public hz: number,
@@ -23,29 +25,48 @@ export class Speculator<xSchema extends Schema> {
 	}
 
 	tick() {
-		this.#currentTick += 1
+		const telegrams = this.liaison.recv().slice(-this.maxIncomingTicks)
+		const lastTelegram = telegrams.at(-1)
 
-		const telegrams = this.liaison.recv().flat()
-		this.pastSimulator.simulate(telegrams)
+		for (const telegram of telegrams)
+			this.pastSimulator.simulate(telegram)
+
+		if (lastTelegram) {
+			const [latestTick] = lastTelegram
+			this.#currentTick = latestTick
+		}
+		else this.#currentTick += 1
 
 		// roll-forward
 		this.futureSimulator.state = structuredClone(this.pastSimulator.state)
+
 		for (const t of loop(this.ticksAhead)) {
-			const scheduledTelegrams = this.#chronicle.at(t)
-			this.futureSimulator.simulate(scheduledTelegrams)
+			for (const inputs of this.#chronicle.at(t)) {
+				this.futureSimulator.simulate(
+					makeTelegramForInputs(t, this.authorId, inputs)
+				)
+			}
 		}
 	}
 
 	sendInputs(inputs: xSchema["input"][]) {
-		const dispatches: InputDispatch<xSchema>[] = inputs.map(input => ["input", input])
-		const telegram: InputTelegram<xSchema> = [this.authorId, dispatches]
+		const futureTick = this.#currentTick + this.ticksAhead
 
 		// immediately send down the wire
-		this.liaison.send([telegram])
+		this.liaison.send(makeTelegramForInputs(futureTick, this.authorId, inputs))
 
 		// schedule local inputs into the future
-		const futureTick = this.#currentTick + this.ticksAhead
-		this.#chronicle.add(telegram, futureTick)
+		this.#chronicle.add(inputs, futureTick)
 	}
+}
+
+////////////////////////////////////////////////////////////
+
+function makeTelegramForInputs<xSchema extends Schema>(
+		futureTick: number,
+		authorId: number,
+		inputs: xSchema["input"][],
+	): Telegram<xSchema> {
+	return [futureTick, [["input", [authorId, inputs]]]]
 }
 

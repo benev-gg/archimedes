@@ -8,7 +8,7 @@ export abstract class Simulator<xSchema extends Schema> {
 
 	constructor(public state: xSchema["state"]) {}
 
-	abstract simulate(telegrams: Telegram<xSchema>[]): xSchema["delta"]
-	abstract tailor(authorId: AuthorId, telegrams: Telegram<xSchema>[]): Telegram<xSchema>[]
+	abstract simulate(telegrams: Telegram<xSchema>): xSchema["delta"]
+	abstract tailor(authorId: AuthorId, telegrams: Telegram<xSchema>): Telegram<xSchema>
 }
 
