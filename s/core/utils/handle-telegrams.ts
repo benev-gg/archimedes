@@ -1,19 +1,13 @@
 
 import {AuthorId, Schema, Telegram} from "../types.js"
 
-export function handleTelegrams<xSchema extends Schema>(
-		telegrams: Telegram<xSchema>[],
-		callbacks: DispatchCallbacks<xSchema>,
-	) {
-	for (const telegram of telegrams)
-		handleTelegram(telegram, callbacks)
-}
-
 export function handleTelegram<xSchema extends Schema>(
 		telegram: Telegram<xSchema>,
 		callbacks: DispatchCallbacks<xSchema>,
 	) {
+
 	const [authorId, dispatches] = telegram
+
 	for (const [key, content] of dispatches) {
 		switch (key) {
 

@@ -24,7 +24,7 @@ export class SessionClient<xSimulator extends Simulator<any>> {
 		).remote as MetaApi["host"]
 
 		const {hostAuthorId, clientAuthorId} = await meta.hello()
-		const liaison = new Liaison<Telegram<any>[]>(hostAuthorId, options.spoke.fibers.sub.primary)
+		const liaison = new Liaison<Telegram<any>>(hostAuthorId, options.spoke.fibers.sub.primary)
 		const seat = new Seat(options.spoke, liaison)
 
 		const speculator = new Speculator(

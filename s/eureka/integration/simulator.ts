@@ -23,10 +23,10 @@ export class EurekaSimulator
 		assembly.on.deleted(id => void this.#deltas.push(["delete", id]))
 	}
 
-	simulate(telegrams: Telegram<EurekaSchema<C>>[]): EurekaSchema<C>["delta"] {
+	simulate(telegram: Telegram<EurekaSchema<C>>): EurekaSchema<C>["delta"] {
 		this.#deltas = []
 
-		Simulator.handleTelegrams(telegrams, {
+		Simulator.handleTelegram(telegram, {
 			input: (inputs) => {
 				this.assembly.context.inputs.add(inputs)
 			},
@@ -56,31 +56,34 @@ export class EurekaSimulator
 		return this.#deltas
 	}
 
-	tailor(audienceAuthorId: AuthorId, telegrams: Telegram<EurekaSchema<C>>[]): Telegram<EurekaSchema<C>>[] {
+	tailor(audienceAuthorId: AuthorId, telegram: Telegram<EurekaSchema<C>>): Telegram<EurekaSchema<C>> {
 		const relevantEntities = this.assembly.context.relevance.author(audienceAuthorId)
-		return telegrams.map(([telegramAuthorId, dispatches]) => {
-			const relevantDispatches: Dispatch<EurekaSchema<C>>[] = []
-			for (const [kind, x] of dispatches) {
-				switch (kind) {
+		const [telegramAuthorId, dispatches] = telegram
+		const relevantDispatches: Dispatch<EurekaSchema<C>>[] = []
+		for (const [kind, x] of dispatches) {
+			switch (kind) {
 
-					case "state":
-						relevantDispatches.push([kind, x.filter(([id]) => relevantEntities.has(id))])
-						break
+				case "state": {
+					relevantDispatches.push([kind, x.filter(([id]) => relevantEntities.has(id))])
+				} break
 
-					case "delta":
-						relevantDispatches.push([kind, x.filter(([deltaKind, y]) => {
-							if (deltaKind === "update") return relevantEntities.has(y[0])
-							else return relevantEntities.has(y)
-						})])
-						break
+				case "delta": {
+					relevantDispatches.push([kind, x.filter(([deltaKind, y]) => {
+						if (deltaKind === "update") return relevantEntities.has(y[0])
+						else return relevantEntities.has(y)
+					})])
+				} break
 
-					case "input":
-						relevantDispatches.push([kind, x.filter(([id]) => relevantEntities.has(id))])
-						break
-				}
+				case "input": {
+					const [authorId, inputEntries] = x
+					relevantDispatches.push([
+						kind,
+						[authorId, inputEntries.filter(([id]) => relevantEntities.has(id))],
+					])
+				} break
 			}
-			return [telegramAuthorId, dispatches]
-		})
+		}
+		return [telegramAuthorId, relevantDispatches]
 	}
 }
 

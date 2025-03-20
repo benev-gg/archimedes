@@ -13,7 +13,7 @@ export type Schema = {
 
 export type StateDispatch<xSchema extends Schema> = ["state", xSchema["state"]]
 export type DeltaDispatch<xSchema extends Schema> = ["delta", xSchema["delta"]]
-export type InputDispatch<xSchema extends Schema> = ["input", Authored<xSchema["input"][]>]
+export type InputDispatch<xSchema extends Schema> = ["input", Authored<xSchema["input"]>]
 
 export type Dispatch<xSchema extends Schema> = (
 	| StateDispatch<xSchema>

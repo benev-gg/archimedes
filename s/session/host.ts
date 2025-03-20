@@ -28,9 +28,9 @@ export class SessionHost<xSimulator extends Simulator<any>> {
 			const authorId = authority.idCounter.next()
 			console.log(`client connected: ${authorId}`)
 
-			const liaison = new Liaison<Telegram<any>[]>(authorId, spoke.fibers.sub.primary)
+			const liaison = new Liaison<Telegram<any>>(authorId, spoke.fibers.sub.primary)
 			authority.liaisons.add(liaison)
-			liaison.send([authority.getStateTelegram()])
+			liaison.send(authority.getStateTelegram())
 
 			const seat = new Seat(spoke, liaison)
 			this.seats.set(authorId, seat)
