@@ -28,7 +28,7 @@ Archimedes isn't finished yet, it's under active development.
 # 🤯 Eureka
 
 > [***"Eureka! I have found it!"***](https://en.wikipedia.org/wiki/Eureka_%28word%29)  
-> &nbsp; &nbsp; — *Archimedes, before 212 BC*  
+> &nbsp; &nbsp; — *Archimedes, sometime before 212 BC*  
 
 ## An elegant ECS framework
 

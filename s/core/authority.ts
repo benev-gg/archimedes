@@ -27,7 +27,7 @@ export class Authority<xSchema extends Schema> {
 
 		for (const liaison of this.liaisons) {
 			const tailored = this.simulator.tailor(liaison.authorId, broadcast)
-			liaison.queue(tailored)
+			liaison.send(tailored)
 		}
 	}
 
