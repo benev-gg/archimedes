@@ -34,16 +34,6 @@ export class Fiber<M = any> {
 		)
 	}
 
-	/** produce a partner fiber which will receive messages sent from this fiber, and vice-versa */
-	makeEntangledPartner() {
-		const partner = new Fiber<M>()
-		this.reliable.send.on(m => partner.reliable.recv(m))
-		this.unreliable.send.on(m => partner.unreliable.recv(m))
-		partner.reliable.send.on(m => this.reliable.recv(m))
-		partner.unreliable.send.on(m => this.unreliable.recv(m))
-		return partner
-	}
-
 	/** create a fiber as a proxy to the given cable */
 	static fromCable<M>(cable: StdCable) {
 		const fiber = new Fiber<M>()
@@ -53,24 +43,12 @@ export class Fiber<M = any> {
 
 	/** weld two fibers together: messages sent to one are received by the other */
 	static entangle<M>(alice: Fiber<M>, bob: Fiber<M>) {
-		const detanglers = [
+		return disposers(
 			alice.reliable.send.on(m => bob.reliable.recv(m)),
 			alice.unreliable.send.on(m => bob.unreliable.recv(m)),
 			bob.reliable.send.on(m => alice.reliable.recv(m)),
 			bob.unreliable.send.on(m => alice.unreliable.recv(m)),
-		]
-		return () => detanglers.forEach(f => f())
-	}
-
-	/** create two fibers that are welded together: sending to one is recieved by the other */
-	static entangledPair<M>() {
-		const alice = new Fiber<M>()
-		const bob = new Fiber<M>()
-		alice.reliable.send.on(m => bob.reliable.recv(m))
-		alice.unreliable.send.on(m => bob.unreliable.recv(m))
-		bob.reliable.send.on(m => alice.reliable.recv(m))
-		bob.unreliable.send.on(m => alice.unreliable.recv(m))
-		return [alice, bob] as [Fiber<M>, Fiber<M>]
+		)
 	}
 
 	/** roll multiple subfibers into a single megafiber */
