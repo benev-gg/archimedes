@@ -66,5 +66,20 @@ export class Assembly<Context, C extends Components> {
 		for (const system of this.systems)
 			system.execute(this)
 	}
+
+	replicate<Context, C extends Components>(
+			upstream: Assembly<any, any>,
+			context: Context,
+			systems: System[],
+		) {
+		const downstream = new Assembly<Context, C>(context, systems)
+		const unattachers = [
+			upstream.on.created((...p) => downstream.on.created.publish(...p)),
+			upstream.on.updated((...p) => downstream.on.updated.publish(...p)),
+			upstream.on.deleted((...p) => downstream.on.deleted.publish(...p)),
+		]
+		const detach = () => unattachers.forEach(f => f())
+		return [downstream, detach]
+	}
 }
 
