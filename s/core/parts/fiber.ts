@@ -51,6 +51,14 @@ export class Fiber<M = any> {
 		)
 	}
 
+	/** create two fibers that are entangled together: messages sent to one are received by the other */
+	static makeEntangledPair<M>() {
+		const alice = new this<M>()
+		const bob = new this<M>()
+		const detangle = this.entangle(alice, bob)
+		return [alice, bob, detangle] as [Fiber<M>, Fiber<M>, () => void]
+	}
+
 	/** roll multiple subfibers into a single megafiber */
 	static multiplex<C extends {[key: string]: Fiber<any>}>(fibers: C) {
 		const megafiber = new Fiber<{[K in keyof C]: [K, FiberData<C[K]>]}[keyof C]>()

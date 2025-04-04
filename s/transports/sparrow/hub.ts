@@ -1,18 +1,20 @@
 
-import {Sparrow} from "sparrow-rtc"
+import {ConnectOptions, Sparrow, StdCable} from "sparrow-rtc"
 import {Hub} from "../../session/parts/hub.js"
 import {Spoke} from "../../session/parts/spoke.js"
-import {Netfibers} from "../../session/parts/netfibers.js"
 import {netfibersFromCable} from "./utils/netfibers-from-cable.js"
+
+export type HubSparrowOptions = Omit<ConnectOptions<StdCable>, "closed" | "welcome" | "cableConfig">
 
 export async function sparrowHub(options: {
 		closed: () => void
-		connected: (netfibers: Netfibers) => () => void
+		sparrow?: HubSparrowOptions,
 	}) {
 
 	const hub = new Hub()
 
 	const sparrow = await Sparrow.host({
+		...(options.sparrow ?? {}),
 		closed: options.closed,
 		welcome: _prospect => connection => {
 			const fibers = netfibersFromCable(connection.cable)
