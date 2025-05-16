@@ -1,12 +1,12 @@
 
-import {Suite, expect} from "cynic"
+import {Science, test, expect} from "@e280/science"
 import {setupIntegrationSituation} from "./situations/integration.js"
 
-export default <Suite>{
+export default Science.suite({
 
-	async "we host a game, we join it"() {
+	"we host a game, we join it": test(async() => {
 		const integration = setupIntegrationSituation()
 		// TODO establish an archimedes loopback that is
-	},
-}
+	}),
+})
 

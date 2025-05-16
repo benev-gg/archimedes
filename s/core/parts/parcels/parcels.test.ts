@@ -1,12 +1,12 @@
 
-import {Suite, expect} from "cynic"
+import {Science, test, expect} from "@e280/science"
 import {ParcelInbox} from "./inbox.js"
 import {Parceller} from "./parceller.js"
 import {loop} from "../../../tools/loop.js"
 
-export default <Suite>{
+export default Science.suite({
 
-	async "one parcel"() {
+	"one parcel": test(async() => {
 		let now = 0
 		const outbox = new Parceller<string>(() => now)
 		const inbox = new ParcelInbox<string>(100, 20, () => now)
@@ -14,11 +14,11 @@ export default <Suite>{
 		inbox.give(parcel)
 		now = 1000
 		const payloads = inbox.take()
-		expect(payloads.length).equals(1)
-		expect(payloads.at(0)).equals("hello")
-	},
+		expect(payloads.length).is(1)
+		expect(payloads.at(0)).is("hello")
+	}),
 
-	async "many parcels"() {
+	"many parcels": test(async() => {
 		let now = 0
 		const outbox = new Parceller<string>(() => now)
 		const inbox = new ParcelInbox<string>(100, 20, () => now)
@@ -32,10 +32,10 @@ export default <Suite>{
 		})
 		now = 1000
 		const payloads = inbox.take()
-		expect(payloads.length).equals(100)
-	},
+		expect(payloads.length).is(100)
+	}),
 
-	async "out of order packets are corrected"() {
+	"out of order packets are corrected": test(async() => {
 		let now = 0
 		const outbox = new Parceller<string>(() => now)
 		const inbox = new ParcelInbox<string>(100, 20, () => now)
@@ -66,13 +66,13 @@ export default <Suite>{
 
 		now = 300
 		const payloads = inbox.take()
-		expect(payloads.length).equals(30)
-		expect(payloads.at(5)).equals("a")
-		expect(payloads.at(15)).equals("b")
-		expect(payloads.at(25)).equals("c")
-	},
+		expect(payloads.length).is(30)
+		expect(payloads.at(5)).is("a")
+		expect(payloads.at(15)).is("b")
+		expect(payloads.at(25)).is("c")
+	}),
 
-	async "literally do the buffering"() {
+	"literally do the buffering": test(async() => {
 		let now = 0
 		const outbox = new Parceller<string>(() => now)
 		const inbox = new ParcelInbox<string>(100, 20, () => now)
@@ -88,19 +88,19 @@ export default <Suite>{
 			inbox.give(parcel)
 		}
 
-		expect(inbox.take().length).equals(0)
+		expect(inbox.take().length).is(0)
 
 		now = 510
-		expect(inbox.take().length).equals(10)
+		expect(inbox.take().length).is(10)
 
 		now = 520
-		expect(inbox.take().length).equals(10)
+		expect(inbox.take().length).is(10)
 
 		now = 600
-		expect(inbox.take().length).equals(0)
-	},
+		expect(inbox.take().length).is(0)
+	}),
 
-	async "specific abberation/jitter adjustment"() {
+	"specific abberation/jitter adjustment": test(async() => {
 		let now = 0
 		const outbox = new Parceller<string>(() => now)
 		const inbox = new ParcelInbox<string>(100, 20, () => now)
@@ -125,12 +125,12 @@ export default <Suite>{
 
 		// the first 20 should be available by now
 		now = 309
-		expect(inbox.take().length).equals(20)
+		expect(inbox.take().length).is(20)
 
 		// the last special one should have been moved earlier,
 		// thus available by now
 		now = 320
-		expect(inbox.take().length).equals(1)
-	},
-}
+		expect(inbox.take().length).is(1)
+	}),
+})
 
