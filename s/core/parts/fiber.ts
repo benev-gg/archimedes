@@ -12,8 +12,8 @@ export class Bicomm<I, O = I> {
 	recv = pub<[I]>()
 }
 
-/** infer a fiber's data type */
-export type FiberData<F extends Fiber<any>> = (
+/** infer a fiber's input data type */
+export type FiberInput<F extends Fiber<any>> = (
 	F extends Fiber<infer M>
 		? M
 		: never
@@ -61,7 +61,7 @@ export class Fiber<I = any, O = I> {
 
 	/** roll multiple subfibers into a single megafiber */
 	static multiplex<C extends {[key: string]: Fiber}>(fibers: C) {
-		const megafiber = new Fiber<{[K in keyof C]: [K, FiberData<C[K]>]}[keyof C]>()
+		const megafiber = new Fiber<{[K in keyof C]: [K, FiberInput<C[K]>]}[keyof C]>()
 
 		for (const [key, subfiber] of Object.entries(fibers)) {
 			subfiber.reliable.send.on(x => megafiber.reliable.send([key, x]))
