@@ -1,5 +1,5 @@
 
-import {Map2} from "@benev/slate"
+import {MapG} from "@benev/slate"
 
 import {Hub} from "./parts/hub.js"
 import {Seat} from "./parts/seat.js"
@@ -11,7 +11,7 @@ import {AuthorId, InferSimulatorSchema, Telegram} from "../core/types.js"
 
 export class SessionHost<xSimulator extends Simulator<any>> {
 	authority: Authority<InferSimulatorSchema<xSimulator>>
-	seats = new Map2<AuthorId, Seat>()
+	seats = new MapG<AuthorId, Seat>()
 	on = new HostOn()
 
 	#cleanup = () => {}
