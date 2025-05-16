@@ -1,5 +1,5 @@
 
-import {fns} from "renraku/x/index.js"
+import {fns} from "renraku"
 
 export const makeMetaClientApi = () => fns({})
 

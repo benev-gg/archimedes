@@ -1,9 +1,10 @@
 
+import {endpoint} from "renraku"
+
 import {Seat} from "./parts/seat.js"
 import {Spoke} from "./parts/spoke.js"
 import {MetaApi} from "./meta/types.js"
 import {Liaison} from "../core/liaison.js"
-import {endpoint} from "renraku/x/index.js"
 import {FiberRpc} from "./parts/fiber-rpc.js"
 import {Simulator} from "../core/simulator.js"
 import {Speculator} from "../core/speculator.js"

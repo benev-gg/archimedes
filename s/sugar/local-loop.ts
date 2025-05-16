@@ -36,7 +36,7 @@ export async function localLoop<xContext extends EurekaContext, xComponents exte
 
 	return {
 		host,
-		sparrow,
+		// sparrow,
 		ticker: host.authority.makeTicker(options.hz)
 	}
 }

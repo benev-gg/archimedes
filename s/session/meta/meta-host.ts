@@ -1,5 +1,5 @@
 
-import {fns} from "renraku/x/index.js"
+import {fns} from "renraku"
 import {Liaison} from "../../core/liaison.js"
 import {Authority} from "../../core/authority.js"
 

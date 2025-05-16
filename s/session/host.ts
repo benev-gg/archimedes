@@ -34,7 +34,7 @@ export class SessionHost<xSimulator extends Simulator<any>> {
 
 			const seat = new Seat(spoke, liaison)
 			this.seats.set(authorId, seat)
-			this.on.seated.publish(seat)
+			this.on.seated.pub(seat)
 
 			return () => {
 				authority.liaisons.delete(liaison)
@@ -48,7 +48,7 @@ export class SessionHost<xSimulator extends Simulator<any>> {
 		if (!seat) return undefined
 		seat.disconnect()
 		this.seats.delete(authorId)
-		this.on.unseated.publish(seat)
+		this.on.unseated.pub(seat)
 	}
 
 	disconnectAll() {
