@@ -7,9 +7,9 @@ import {disposers} from "../../tools/disposers.js"
 import {onChannelMessage} from "../utils/on-channel-message.js"
 
 /** an arbitrary data channel */
-export class Bicomm<M> {
-	send = pub<[M]>()
-	recv = pub<[M]>()
+export class Bicomm<I, O = I> {
+	send = pub<[O]>()
+	recv = pub<[I]>()
 }
 
 /** infer a fiber's data type */
@@ -20,23 +20,23 @@ export type FiberData<F extends Fiber<any>> = (
 )
 
 /** a virtualized cable */
-export class Fiber<M = any> {
-	reliable = new Bicomm<M>()
-	unreliable = new Bicomm<M>()
+export class Fiber<I = any, O = I> {
+	reliable = new Bicomm<I, O>()
+	unreliable = new Bicomm<I, O>()
 
 	/** this fiber becomes a proxy of the cable */
 	entangleCable(cable: StdCable) {
-		this.reliable.send.on(m => cable.reliable.send(encode(m)))
-		this.unreliable.send.on(m => cable.unreliable.send(encode(m)))
+		this.reliable.send.on(output => cable.reliable.send(encode(output)))
+		this.unreliable.send.on(output => cable.unreliable.send(encode(output)))
 		return disposers(
-			onChannelMessage(cable.reliable, b => this.reliable.recv(decode(b) as M)),
-			onChannelMessage(cable.unreliable, b => this.unreliable.recv(decode(b) as M)),
+			onChannelMessage(cable.reliable, input => this.reliable.recv(decode(input) as I)),
+			onChannelMessage(cable.unreliable, input => this.unreliable.recv(decode(input) as I)),
 		)
 	}
 
 	/** create a fiber as a proxy to the given cable */
-	static fromCable<M>(cable: StdCable) {
-		const fiber = new Fiber<M>()
+	static fromCable<I = any, O = I>(cable: StdCable) {
+		const fiber = new Fiber<I, O>()
 		fiber.entangleCable(cable)
 		return fiber
 	}
@@ -55,12 +55,12 @@ export class Fiber<M = any> {
 	static makeEntangledPair<M>() {
 		const alice = new this<M>()
 		const bob = new this<M>()
-		const detangle = this.entangle(alice, bob)
+		const detangle = this.entangle<M>(alice, bob)
 		return [alice, bob, detangle] as [Fiber<M>, Fiber<M>, () => void]
 	}
 
 	/** roll multiple subfibers into a single megafiber */
-	static multiplex<C extends {[key: string]: Fiber<any>}>(fibers: C) {
+	static multiplex<C extends {[key: string]: Fiber}>(fibers: C) {
 		const megafiber = new Fiber<{[K in keyof C]: [K, FiberData<C[K]>]}[keyof C]>()
 
 		for (const [key, subfiber] of Object.entries(fibers)) {
