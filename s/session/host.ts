@@ -1,5 +1,5 @@
 
-import {MapG} from "@benev/slate"
+import {MapG} from "@e280/stz"
 
 import {Hub} from "./parts/hub.js"
 import {Seat} from "./parts/seat.js"

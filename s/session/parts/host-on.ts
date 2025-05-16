@@ -1,9 +1,9 @@
 
+import {sub} from "@e280/stz"
 import {Seat} from "./seat.js"
-import {pubsub} from "@benev/slate"
 
 export class HostOn {
-	seated = pubsub<[Seat]>()
-	unseated = pubsub<[Seat]>()
+	seated = sub<[Seat]>()
+	unseated = sub<[Seat]>()
 }
 

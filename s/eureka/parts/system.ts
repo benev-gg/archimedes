@@ -1,11 +1,11 @@
 
-import {Map2} from "@benev/slate"
+import {MapG} from "@e280/stz"
 import {Entity} from "./entity.js"
 import {Assembly} from "./assembly.js"
 import {SystemFn, UnknownComponents} from "./types.js"
 
 export class System {
-	#cacheMap = new Map2<number, Entity>()
+	#cacheMap = new MapG<number, Entity>()
 	#cacheArray: Entity[] = []
 
 	constructor(

@@ -1,10 +1,10 @@
 
-import {Map2} from "@benev/slate"
+import {MapG} from "@e280/stz"
 import {InputEntry} from "../types.js"
 import {EntityId} from "../../parts/types.js"
 
 export class Inputs {
-	#inbox = new Map2<EntityId, unknown[]>()
+	#inbox = new MapG<EntityId, unknown[]>()
 
 	add(entries: InputEntry[]) {
 		for (const [id, newInputs] of entries) {

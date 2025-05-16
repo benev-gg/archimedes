@@ -1,5 +1,5 @@
 
-import {pubsub} from "@benev/slate"
+import {sub} from "@e280/stz"
 import {Averager} from "../../tools/averager.js"
 import {IdCounter} from "../../tools/id-counter.js"
 
@@ -10,7 +10,7 @@ type PingId = number
 type Timestamp = number
 
 export class Pingponger {
-	onRtt = pubsub<[number]>()
+	onRtt = sub<[number]>()
 
 	#rtt = 99
 	#timeout = 3000
@@ -58,7 +58,7 @@ export class Pingponger {
 		this.#averager.add(this.#rtt)
 
 		this.#pending.delete(pingId)
-		this.onRtt.publish(this.#rtt)
+		this.onRtt.pub(this.#rtt)
 	}
 
 	#prune() {

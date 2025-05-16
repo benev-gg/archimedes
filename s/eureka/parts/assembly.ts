@@ -1,18 +1,18 @@
 
-import {Map2, pubsub} from "@benev/slate"
+import {MapG, sub} from "@e280/stz"
 import {System} from "./system.js"
 import {Entity} from "./entity.js"
 import {IdCounter} from "../../tools/id-counter.js"
 import {Components, EntityId, PartialEntityEntry} from "./types.js"
 
 export class Assembly<Context, C extends Components> {
-	#entities = new Map2<number, Entity<Partial<C>>>()
+	#entities = new MapG<number, Entity<Partial<C>>>()
 	counter = new IdCounter()
 
 	on = {
-		created: pubsub<[Entity<Partial<C>>]>(),
-		updated: pubsub<[Entity<Partial<C>>]>(),
-		deleted: pubsub<[EntityId]>(),
+		created: sub<[Entity<Partial<C>>]>(),
+		updated: sub<[Entity<Partial<C>>]>(),
+		deleted: sub<[EntityId]>(),
 	}
 
 	constructor(public context: Context, private systems: System[]) {}
@@ -31,7 +31,7 @@ export class Assembly<Context, C extends Components> {
 		entity.components = components
 		for (const system of this.systems)
 			system.cacheUpdate(id, entity)
-		this.on.created.publish(entity)
+		this.on.created.pub(entity)
 		return entity
 	}
 
@@ -46,12 +46,12 @@ export class Assembly<Context, C extends Components> {
 		this.#entities.delete(id)
 		for (const system of this.systems)
 			system.cacheDelete(id)
-		this.on.deleted.publish(id)
+		this.on.deleted.pub(id)
 	}
 
 	/** forget everything and start from a new state */
 	overwrite(entries: PartialEntityEntry<C>[]) {
-		const data = new Map2(entries)
+		const data = new MapG(entries)
 
 		for (const [id, components] of data)
 			this.write(id, components)
@@ -74,9 +74,9 @@ export class Assembly<Context, C extends Components> {
 		) {
 		const downstream = new Assembly<Context, C>(context, systems)
 		const unattachers = [
-			upstream.on.created((...p) => downstream.on.created.publish(...p)),
-			upstream.on.updated((...p) => downstream.on.updated.publish(...p)),
-			upstream.on.deleted((...p) => downstream.on.deleted.publish(...p)),
+			upstream.on.created((...p) => downstream.on.created.pub(...p)),
+			upstream.on.updated((...p) => downstream.on.updated.pub(...p)),
+			upstream.on.deleted((...p) => downstream.on.deleted.pub(...p)),
 		]
 		const detach = () => unattachers.forEach(f => f())
 		return [downstream, detach]

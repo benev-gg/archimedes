@@ -1,8 +1,8 @@
 
+import {sub} from "@e280/stz"
 import {Seat} from "./seat.js"
-import {pubsub} from "@benev/slate"
 
 export class ClientOn {
-	disconnected = pubsub<[Seat]>()
+	disconnected = sub<[Seat]>()
 }
 
