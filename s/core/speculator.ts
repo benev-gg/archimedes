@@ -4,6 +4,7 @@ import {loop} from "../tools/loop.js"
 import {Simulator} from "./simulator.js"
 import {Chronicle} from "../tools/chronicle.js"
 import {AuthorId, Schema, Telegram} from "./types.js"
+import {makeTelegramForInputs} from "./utils/make-telegram-for-inputs.js"
 
 export class Speculator<xSchema extends Schema> {
 	#currentTick = 0
@@ -58,15 +59,5 @@ export class Speculator<xSchema extends Schema> {
 		// schedule local inputs into the future
 		this.#chronicle.add(inputs, futureTick)
 	}
-}
-
-////////////////////////////////////////////////////////////
-
-function makeTelegramForInputs<xSchema extends Schema>(
-		futureTick: number,
-		authorId: number,
-		inputs: xSchema["input"][],
-	): Telegram<xSchema> {
-	return [futureTick, [["input", [authorId, inputs]]]]
 }
 
