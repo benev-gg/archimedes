@@ -1,12 +1,38 @@
 
+import {loop} from "@e280/stz"
 import {Science, test, expect} from "@e280/science"
-import {setupIntegrationSituation} from "./situations/integration.js"
+
+import {EasyHost} from "../../sugar/easy-host.js"
+import {setupEurekaDemo} from "./situations/integration.js"
+import {EurekaSimulator} from "../integration/simulator.js"
 
 export default Science.suite({
 
 	"we host a game, we join it": test(async() => {
-		const integration = setupIntegrationSituation()
-		// TODO establish an archimedes loopback that is
+		const host = new EasyHost({
+			hz: 10,
+			makeSimulator: () => {
+				const {world} = setupEurekaDemo()
+				return new EurekaSimulator(world)
+			},
+		})
+		const client = await host.localClient()
+
+		const {world} = host.session.simulator
+		const warrior = world.create({health: 100, bleeding: 1})
+
+		for (const _ of loop(50)) {
+			host.session.authority.tick()
+			client.speculator.tick()
+		}
+
+		expect(warrior.components.health).is(50)
+
+		const clientWarrior = client.pastSimulator.world
+			.require<typeof warrior.components>(warrior.id)
+
+		expect(clientWarrior).ok()
+		expect(clientWarrior.health).is(50)
 	}),
 })
 

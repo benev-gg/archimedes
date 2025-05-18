@@ -1,36 +1,45 @@
 
 import {MapG} from "@e280/stz"
+import {endpoint} from "renraku"
 
 import {Hub} from "./parts/hub.js"
 import {Seat} from "./parts/seat.js"
+import {MetaApi} from "./meta/types.js"
 import {HostOn} from "./parts/host-on.js"
 import {Liaison} from "../core/liaison.js"
+import {FiberRpc} from "./parts/fiber-rpc.js"
 import {Authority} from "../core/authority.js"
 import {Simulator} from "../core/simulator.js"
+import {makeMetaHostApi} from "./meta/meta-host.js"
 import {AuthorId, InferSimulatorSchema, Telegram} from "../core/types.js"
 
-export class SessionHost<xSimulator extends Simulator<any>> {
+export class SessionHost<xSimulator extends Simulator> {
 	authority: Authority<InferSimulatorSchema<xSimulator>>
 	seats = new MapG<AuthorId, Seat>()
 	on = new HostOn()
 
 	#cleanup = () => {}
 
-	constructor(options: {
-			hub: Hub
-			simulator: xSimulator,
-		}) {
+	constructor(
+			public hub: Hub,
+			public simulator: xSimulator,
+		) {
 
-		const authority = new Authority(options.simulator)
+		const authority = new Authority(simulator)
 		this.authority = authority
 
-		this.#cleanup = options.hub.onSpoke(spoke => {
+		this.#cleanup = hub.onSpoke(spoke => {
 			const authorId = authority.idCounter.next()
 			console.log(`client connected: ${authorId}`)
 
 			const liaison = new Liaison<Telegram<any>>(authorId, spoke.fibers.sub.primary)
 			authority.liaisons.add(liaison)
 			liaison.send(authority.getStateTelegram())
+
+			new FiberRpc<MetaApi["host"]>(
+				spoke.fibers.sub.meta,
+				endpoint(makeMetaHostApi({authority, liaison})),
+			).remote as MetaApi["client"]
 
 			const seat = new Seat(spoke, liaison)
 			this.seats.set(authorId, seat)

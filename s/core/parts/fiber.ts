@@ -19,10 +19,18 @@ export type FiberInput<F extends Fiber<any>> = (
 		: never
 )
 
-/** a virtualized cable */
+/** network interface */
 export class Fiber<I = any, O = I> {
 	reliable = new Bicomm<I, O>()
 	unreliable = new Bicomm<I, O>()
+
+	/** create another fiber that is the remote end connected to this one */
+	extrude() {
+		const alice = this
+		const bob = new Fiber<O, I>()
+		const detach = Fiber.entangle(alice, bob)
+		return [bob, detach] as [Fiber<O, I>, () => void]
+	}
 
 	/** this fiber becomes a proxy of the cable */
 	attachCable(cable: StdCable) {
@@ -42,7 +50,7 @@ export class Fiber<I = any, O = I> {
 	}
 
 	/** weld two fibers together: messages sent to one are received by the other */
-	static entangle<M>(alice: Fiber<M>, bob: Fiber<M>) {
+	static entangle<I, O = I>(alice: Fiber<I, O>, bob: Fiber<O, I>) {
 		return disposers(
 			alice.reliable.send.on(m => bob.reliable.recv(m)),
 			alice.unreliable.send.on(m => bob.unreliable.recv(m)),

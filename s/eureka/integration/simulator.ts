@@ -1,8 +1,8 @@
 
+import {World} from "../parts/world.js"
 import {EurekaSchema} from "./types.js"
 import {EurekaContext} from "./context.js"
 import {Components} from "../parts/types.js"
-import {World} from "../parts/world.js"
 import {Simulator} from "../../core/simulator.js"
 import {AuthorId, Dispatch, Telegram} from "../../core/types.js"
 
@@ -13,11 +13,8 @@ export class EurekaSimulator
 	#deltas: EurekaSchema<C>["delta"] = []
 	#authorityId = 0
 
-	constructor(
-			public world: World<xContext, C>,
-			state: EurekaSchema<C>["state"],
-		) {
-		super(state)
+	constructor(public world: World<xContext, C>) {
+		super([...world.data()])
 		world.onEntity((id, entity) => void this.#deltas.push([id, entity?.components ?? null]))
 	}
 

@@ -1,13 +1,18 @@
 
 import {Spoke} from "./spoke.js"
+
 export type SpokeListener = (spoke: Spoke) => () => void
 
 export class Hub {
+	spokes = new Set<Spoke>()
 	#listeners = new Set<SpokeListener>()
 
 	/** an incoming spoke has appeared, dispatch all onSpoke listeners */
-	invoke(spoke: Spoke) {
+	addSpoke(spoke: Spoke) {
+		this.spokes.add(spoke)
+
 		const disconnectedFns: (() => void)[] = []
+
 		for (const fn of this.#listeners) {
 
 			// call every spoke listener
@@ -18,7 +23,10 @@ export class Hub {
 		}
 
 		// when this spoke is disconnected, call every listener's disconnected callback
-		return () => disconnectedFns.forEach(d => d())
+		return () => {
+			this.spokes.delete(spoke)
+			disconnectedFns.forEach(d => d())
+		}
 	}
 
 	/** add a spoke listener to respond to incoming spokes */

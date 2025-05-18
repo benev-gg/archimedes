@@ -11,8 +11,8 @@ import {Speculator} from "../core/speculator.js"
 import {makeMetaClientApi} from "./meta/meta-client.js"
 import {InferSimulatorSchema, Telegram} from "../core/types.js"
 
-export class SessionClient<xSimulator extends Simulator<any>> {
-	static async make<xSimulator extends Simulator<any>>(options: {
+export class SessionClient<xSimulator extends Simulator> {
+	static async make<xSimulator extends Simulator>(options: {
 			hz: number
 			spoke: Spoke
 			pastSimulator: xSimulator
@@ -28,7 +28,7 @@ export class SessionClient<xSimulator extends Simulator<any>> {
 		const liaison = new Liaison<Telegram<any>>(hostAuthorId, options.spoke.fibers.sub.primary)
 		const seat = new Seat(options.spoke, liaison)
 
-		const speculator = new Speculator(
+		const speculator = new Speculator<InferSimulatorSchema<xSimulator>>(
 			clientAuthorId,
 			liaison,
 			options.pastSimulator,
@@ -36,11 +36,18 @@ export class SessionClient<xSimulator extends Simulator<any>> {
 			options.hz,
 		)
 
-		return new this(seat, speculator)
+		return new this<xSimulator>(
+			seat,
+			options.pastSimulator,
+			options.futureSimulator,
+			speculator,
+		)
 	}
 
 	constructor(
 		public seat: Seat,
+		public pastSimulator: xSimulator,
+		public futureSimulator: xSimulator,
 		public speculator: Speculator<InferSimulatorSchema<xSimulator>>,
 	) {}
 
