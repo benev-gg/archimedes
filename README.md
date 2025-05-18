@@ -97,7 +97,7 @@ Archimedes isn't finished yet, it's under active development.
   ```
   - Systems are executed sequentially, from top to bottom.
   - You can organize your systems into separate files, of course.
-  - Please notice that I painstakingly designed all of this for immaculate typescript typings.
+  - Please notice that I painstakingly designed all of this for immaculate typescript typings. You are welcome 😌
 
 ### Running a Eureka world that does stuff
 
@@ -114,6 +114,10 @@ Okay, now it's time to put something into the world and watch something happen.
   // we see that the bleeding behavior worked.
   warrior.components.health // 99
   ```
+- Alright, that's the basics, go ahead and setup a 60hz tickloop.
+  ```ts
+  setInterval(() => world.execute(), 1000 / 60)
+  ```
 
 ### Entity method reference
 
@@ -127,7 +131,30 @@ Okay, now it's time to put something into the world and watch something happen.
   entity.components.bleeding // 1
   ```
   - The components object is a proxy, and setting its properties automatically informs the eureka about the change.
-- `entity.write` — manually inform eureka that you've made changes inside the entity's components.
+    ```ts
+    entity.components.bleeding = 0 // change auto-detected
+    entity.components.health += 25 // change auto-detected
+    ```
+  - You can also delete components, and that'll be detected
+    ```ts
+    delete entity.components.bleeding // auto-detected
+    ```
+  - If you want to change a component's shape in terms of components, you can do this:
+    ```ts
+    entity.components.health // unhappy typescript, entity doesn't have health
+
+    // updating the entity
+    const entityWithHealth = world.update(entity.id, {
+      ...entity.components,
+      health: 100,
+    })
+
+    entityWithHealth.components.health // happy typescript, knows it has health
+
+    // note, this is really a typescript ergonomics thing
+    entity === entityWithHealth // true
+    ```
+- `entity.write()` — manually inform eureka that you've made changes inside the entity's components.
   ```ts
   entity.components.myObject.health += 1 // change inside object, not auto-detected
   entity.write() // manually tell eureka about the change
@@ -136,46 +163,46 @@ Okay, now it's time to put something into the world and watch something happen.
 ### World method reference
 
 Creating and updating entities.
-- `world.create` — a new entity.
+- `world.create(components)` — a new entity.
   ```ts
   const wizard = world.create({health: 100, mana: 50, manaRegen: 1})
   ```
-- `world.update` — create or update an entity.
+- `world.update(id, components)` — create or update an entity.
   ```ts
   world.write(wizard.id, {health: 100, mana: 75, manaRegen: 1})
   ```
 
 Getting entities.
-- `world.get` — get an entity by id, or return undefined if not present.
+- `world.get(id)` — get an entity by id, or return undefined if not present.
   ```ts
   const entity = world.get(id)
   ```
-- `world.require` — get an entity by id, or throw an error if not present.
+- `world.require(id)` — get an entity by id, or throw an error if not present.
   ```ts
   const entity = world.require(id)
   ```
-- `world.all` — iterate over all entities
+- `world.all()` — iterate over all entities
   ```ts
   for (const entity of world.all)
     console.log(entity.id)
   ```
 
 Removing entities.
-- `world.delete` — remove an entity from the world.
+- `world.delete(id)` — remove an entity from the world.
   ```ts
   world.delete(id)
   ```
-- `world.clear` — remove *everything* from the world.
+- `world.clear()` — remove *everything* from the world.
   ```ts
-  world.clear(id)
+  world.clear()
   ```
 
 Full-world data operations.
-- `world.data` — iterate over all entity data.
+- `world.data()` — iterate over all entity data.
   ```ts
   const data = [...world.data()]
   ```
-- `world.overwrite` — create or update all entities with the provided data.
+- `world.overwrite(data)` — create or update all entities with the provided data.
   ```ts
   const entity = world.overwrite(data)
   ```
