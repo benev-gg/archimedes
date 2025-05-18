@@ -13,10 +13,10 @@ type MyComponents = {
 export function setupHealthSituation() {
 	const eureka = setupEureka<MyContext, MyComponents>()
 
-	const assembly = eureka.assembly(new MyContext(), [
+	const world = eureka.world(new MyContext(), [
 		eureka.system("health")
 			.select("health").andMaybe("bleeding")
-			.fn((entities, assembly) => {
+			.fn((entities, world) => {
 				for (const {id, components} of entities) {
 
 					// process bleeding
@@ -25,19 +25,19 @@ export function setupHealthSituation() {
 
 					// process death
 					if (components.health <= 0)
-						assembly.delete(id)
+						world.delete(id)
 				}
 			}),
 
 		eureka.system("mana")
 			.select("mana").andMaybe("manaRegen")
-			.fn((entities, _assembly) => {
+			.fn((entities, _world) => {
 				for (const {components} of entities)
 					if (components.manaRegen)
 						components.mana += components.manaRegen
 			}),
 	])
 
-	return {assembly}
+	return {world}
 }
 

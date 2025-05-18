@@ -1,7 +1,7 @@
 
 import {MapG} from "@e280/stz"
 import {Entity} from "./entity.js"
-import {Assembly} from "./assembly.js"
+import {World} from "./world.js"
 import {SystemFn, UnknownComponents} from "./types.js"
 
 export class System {
@@ -15,19 +15,20 @@ export class System {
 		public fn: SystemFn<any, any, any, any>,
 	) {}
 
-	execute(assembly: Assembly<any, any>) {
-		this.fn(this.#cacheArray, assembly)
+	execute(world: World<any, any>) {
+		this.fn(this.#cacheArray, world)
 	}
 
-	cacheUpdate(id: number, entity: Entity) {
-		if (this.#matching(entity)) this.#cacheMap.set(id, entity)
-		else this.#cacheMap.delete(id)
-		this.#cacheArray = [...this.#cacheMap.values()]
-	}
-
-	cacheDelete(id: number) {
-		this.#cacheMap.delete(id)
-		this.#cacheArray = [...this.#cacheMap.values()]
+	cache(id: number, entity: Entity | null) {
+		if (entity) {
+			if (this.#matching(entity)) this.#cacheMap.set(id, entity)
+			else this.#cacheMap.delete(id)
+			this.#cacheArray = [...this.#cacheMap.values()]
+		}
+		else {
+			this.#cacheMap.delete(id)
+			this.#cacheArray = [...this.#cacheMap.values()]
+		}
 	}
 
 	#matching(entity: UnknownComponents) {

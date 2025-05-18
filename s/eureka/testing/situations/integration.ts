@@ -46,18 +46,18 @@ export async function setupIntegrationSituation() {
 }
 
 function setupSimulator() {
-	const {assembly} = setupEurekaParts()
-	return new EurekaSimulator<MyContext, MyComponents>(assembly, [])
+	const {world: world} = setupEurekaParts()
+	return new EurekaSimulator<MyContext, MyComponents>(world, [])
 }
 
 function setupEurekaParts() {
 	const eureka = setupEureka<MyContext, MyComponents>()
 	const context = new MyContext()
-	const assembly = eureka.assembly(context, [
+	const world = eureka.world(context, [
 
 		eureka.system("health")
 			.select("health").andMaybe("bleeding")
-			.fn((entities, assembly) => {
+			.fn((entities, world) => {
 				for (const {id, components} of entities) {
 
 					// process bleeding
@@ -66,19 +66,19 @@ function setupEurekaParts() {
 
 					// process death
 					if (components.health <= 0)
-						assembly.delete(id)
+						world.delete(id)
 				}
 			}),
 
 		eureka.system("mana")
 			.select("mana").andMaybe("manaRegen")
-			.fn((entities, _assembly) => {
+			.fn((entities, _world) => {
 				for (const {components} of entities)
 					if (components.manaRegen)
 						components.mana += components.manaRegen
 			}),
 
 	])
-	return {assembly}
+	return {world}
 }
 

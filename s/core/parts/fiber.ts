@@ -25,7 +25,7 @@ export class Fiber<I = any, O = I> {
 	unreliable = new Bicomm<I, O>()
 
 	/** this fiber becomes a proxy of the cable */
-	entangleCable(cable: StdCable) {
+	attachCable(cable: StdCable) {
 		this.reliable.send.on(output => cable.reliable.send(encode(output)))
 		this.unreliable.send.on(output => cable.unreliable.send(encode(output)))
 		return disposers(
@@ -37,7 +37,7 @@ export class Fiber<I = any, O = I> {
 	/** create a fiber as a proxy to the given cable */
 	static fromCable<I = any, O = I>(cable: StdCable) {
 		const fiber = new Fiber<I, O>()
-		fiber.entangleCable(cable)
+		fiber.attachCable(cable)
 		return fiber
 	}
 

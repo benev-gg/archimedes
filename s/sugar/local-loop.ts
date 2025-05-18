@@ -4,25 +4,25 @@ import {Fiber} from "../core/parts/fiber.js"
 import {SessionHost} from "../session/host.js"
 import {Spoke} from "../session/parts/spoke.js"
 import {setupEureka} from "../eureka/eureka.js"
-import {Assembly} from "../eureka/parts/assembly.js"
+import {World} from "../eureka/parts/world.js"
 import {Netfibers} from "../session/parts/netfibers.js"
 import {EurekaContext} from "../eureka/integration/context.js"
+import {Components, EntityData} from "../eureka/parts/types.js"
 import {EurekaSimulator} from "../eureka/integration/simulator.js"
-import {Components, PartialEntityEntry} from "../eureka/parts/types.js"
 
 export async function localLoop<xContext extends EurekaContext, xComponents extends Components>(options: {
 		hz: number
 		closed?: () => void
 		setup: (e: ReturnType<typeof setupEureka<xContext, xComponents>>) => {
-			assembly: Assembly<xContext, xComponents>
-			initialState: PartialEntityEntry<xComponents>[]
+			world: World<xContext, xComponents>
+			initialState: EntityData<xComponents>[]
 		}
 	}) {
 
 	const {hub, hostSpoke, clientSpoke} = createNetworking()
 
-	const {assembly, initialState} = options.setup(setupEureka())
-	const simulator = new EurekaSimulator<xContext, xComponents>(assembly, initialState)
+	const {world, initialState} = options.setup(setupEureka())
+	const simulator = new EurekaSimulator<xContext, xComponents>(world, initialState)
 
 	// const {hub, sparrow} = await sparrowHub({
 	// 	closed: options.closed ?? (() => {}),

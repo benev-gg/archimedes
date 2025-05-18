@@ -1,6 +1,6 @@
 
+import {World} from "./parts/world.js"
 import {System} from "./parts/system.js"
-import {Assembly} from "./parts/assembly.js"
 import {Components, SystemFn} from "./parts/types.js"
 
 export const setupEureka = <Context, C extends Components>() => ({
@@ -13,8 +13,8 @@ export const setupEureka = <Context, C extends Components>() => ({
 		}),
 	}),
 
-	assembly: (context: Context, systems: System[]) => (
-		new Assembly<Context, C>(context, systems)
+	world: (context: Context, systems: System[]) => (
+		new World<Context, C>(context, systems)
 	),
 })
 
