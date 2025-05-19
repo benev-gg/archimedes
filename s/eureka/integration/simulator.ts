@@ -2,7 +2,7 @@
 import {World} from "../parts/world.js"
 import {EurekaSchema} from "./types.js"
 import {EurekaContext} from "./context.js"
-import {Components} from "../parts/types.js"
+import {Components, EntityId} from "../parts/types.js"
 import {Simulator} from "../../core/simulator.js"
 import {AuthorId, Dispatch, Telegram} from "../../core/types.js"
 
@@ -46,25 +46,25 @@ export class EurekaSimulator
 	}
 
 	tailor(audienceAuthorId: AuthorId, telegram: Telegram<EurekaSchema<C>>): Telegram<EurekaSchema<C>> {
-		const relevantEntities = this.world.context.relevance.author(audienceAuthorId)
+		const check = (eid: EntityId) => this.world.context.relevance.check(audienceAuthorId, eid)
 		const [telegramAuthorId, dispatches] = telegram
 		const relevantDispatches: Dispatch<EurekaSchema<C>>[] = []
 		for (const [kind, x] of dispatches) {
 			switch (kind) {
 
 				case "state": {
-					relevantDispatches.push([kind, x.filter(([id]) => relevantEntities.has(id))])
+					relevantDispatches.push([kind, x.filter(([id]) => check(id))])
 				} break
 
 				case "delta": {
-					relevantDispatches.push([kind, x.filter(([id]) => relevantEntities.has(id))])
+					relevantDispatches.push([kind, x.filter(([id]) => check(id))])
 				} break
 
 				case "input": {
 					const [authorId, inputEntries] = x
 					relevantDispatches.push([
 						kind,
-						[authorId, inputEntries.filter(([id]) => relevantEntities.has(id))],
+						[authorId, inputEntries.filter(([id]) => check(id))],
 					])
 				} break
 			}

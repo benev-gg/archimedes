@@ -30,7 +30,6 @@ export class SessionHost<xSimulator extends Simulator> {
 
 		this.#cleanup = hub.onSpoke(spoke => {
 			const authorId = authority.idCounter.next()
-			console.log(`client connected: ${authorId}`)
 
 			const liaison = new Liaison<Telegram<any>>(authorId, spoke.fibers.sub.primary)
 			authority.liaisons.add(liaison)

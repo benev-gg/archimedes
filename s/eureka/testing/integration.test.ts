@@ -28,6 +28,7 @@ export default Science.suite({
 
 		expect(warrior.components.health).is(50)
 
+		// FAILS HERE, component not found
 		const clientWarrior = client.pastSimulator.world
 			.require<typeof warrior.components>(warrior.id)
 

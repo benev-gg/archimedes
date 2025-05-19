@@ -19,6 +19,11 @@ export class World<Context, C extends Components> {
 		return this.#entities.values()
 	}
 
+	/** iterate all entity ids */
+	ids() {
+		return this.#entities.keys()
+	}
+
 	/** get an entity by id (return null if not found) */
 	get<C2 extends Partial<C2>>(id: number) {
 		return (this.#entities.get(id) ?? null) as Entity<C2> | null

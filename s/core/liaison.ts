@@ -27,10 +27,18 @@ export class Liaison<Data> {
 
 			public fiber: Fiber<Parcel<Mail<Data>>[]>,
 		) {
+
 		this.pingponger = new Pingponger(p => {
 			const parcel = this.parceller.wrap(p)
 			fiber.unreliable.send([parcel])
 		})
+
+		const handleIncoming = (parcels: Parcel<Mail<Data>>[]) => parcels.forEach(
+			parcel => this.inbox.give(parcel)
+		)
+
+		this.fiber.reliable.recv.on(handleIncoming)
+		this.fiber.unreliable.recv.on(handleIncoming)
 	}
 
 	queue(data: Data) {
