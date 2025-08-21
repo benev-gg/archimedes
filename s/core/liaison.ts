@@ -1,11 +1,11 @@
 
 import {Ping, Pingponger, Pong} from "@e280/renraku"
 import {AuthorId} from "./types.js"
-import {Fiber} from "./parts/fiber.js"
+import {Fiber} from "./fiber.js"
 import {Bucket} from "../tools/bucket.js"
-import {Parcel} from "./parts/parcels/types.js"
-import {ParcelInbox} from "./parts/parcels/inbox.js"
-import {Parceller} from "./parts/parcels/parceller.js"
+import {Parcel} from "./parcels/types.js"
+import {ParcelInbox} from "./parcels/inbox.js"
+import {Parceller} from "./parcels/parceller.js"
 
 export type Datagram<Data> = ["data", Data]
 

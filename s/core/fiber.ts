@@ -2,9 +2,9 @@
 import {StdCable} from "sparrow-rtc"
 import {encode, decode} from "@msgpack/msgpack"
 
-import {pub} from "../../tools/pub.js"
-import {disposers} from "../../tools/disposers.js"
-import {onChannelMessage} from "../utils/on-channel-message.js"
+import {pub} from "../tools/pub.js"
+import {disposers} from "../tools/disposers.js"
+import {onChannelMessage} from "./utils/on-channel-message.js"
 
 /** an arbitrary data channel */
 export class Bicomm<I, O = I> {

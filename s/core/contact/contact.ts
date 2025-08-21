@@ -3,8 +3,8 @@ import {pub} from "@e280/stz"
 import {StdCable} from "sparrow-rtc"
 import {ContactInput} from "./types.js"
 import {Codec, codecs} from "./codecs.js"
-import {disposers} from "../../../tools/disposers.js"
-import {onChannelMessage} from "../../utils/on-channel-message.js"
+import {disposers} from "../../tools/disposers.js"
+import {onChannelMessage} from "../utils/on-channel-message.js"
 
 export class Contact<I = any, O = I> {
 	static codecs = codecs

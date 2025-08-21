@@ -2,7 +2,7 @@
 import {Science, test, expect} from "@e280/science"
 import {ParcelInbox} from "./inbox.js"
 import {Parceller} from "./parceller.js"
-import {loop} from "../../../tools/loop.js"
+import {loop} from "../../tools/loop.js"
 
 export default Science.suite({
 

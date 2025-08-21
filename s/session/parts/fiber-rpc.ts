@@ -1,5 +1,5 @@
 
-import {Fiber} from "../../core/parts/fiber.js"
+import {Fiber} from "../../core/fiber.js"
 import {Conduit, Fns, JsonRpc, Messenger, MessengerRpc, Remote} from "@e280/renraku"
 
 export class FiberConduit extends Conduit {

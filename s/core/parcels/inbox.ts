@@ -1,7 +1,7 @@
 
 import {Nanny} from "./utils/nanny.js"
 import {Parcel, ParcelId} from "./types.js"
-import {Averager} from "../../../tools/averager.js"
+import {Averager} from "../../tools/averager.js"
 
 /** inbox delays messages with a buffer time, and actively corrects for network packet jitter */
 export class ParcelInbox<P> {
