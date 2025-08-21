@@ -9,15 +9,17 @@ import {Contact} from "./contact.js"
 import {onChannelMessage} from "../utils/on-channel-message.js"
 
 /**
-* Bob sends whatever alice sends. (alice.send->bob.send)
+* bob sends whatever alice sends. (alice.send->bob.send)
 *
-* Bob is forwarding alice's outgoing mail.
+* bob is forwarding alice's outgoing mail.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] --------> [send]
+* ```
+* alice             bob
+* -----             ---
+* [send] --------> [send]
 *
-*     [recv]           [recv]
+* [recv]           [recv]
+* ```
 */
 export function send<O>(alice: Contact<any, O>, ...bobs: Contact<any, O>[]) {
 	return alice.send.on((output, reliable) => {
@@ -27,15 +29,17 @@ export function send<O>(alice: Contact<any, O>, ...bobs: Contact<any, O>[]) {
 }
 
 /**
-* Bob receives whatever alice receives. (alice.recv->bob.recv)
+* bob receives whatever alice receives. (alice.recv->bob.recv)
 *
-* Bob is CC'd on alice's incoming mail.
+* bob is cc'd on alice's incoming mail.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send]           [send]
+* ```
+* alice             bob
+* -----             ---
+* [send]           [send]
 *
-*     [recv] --------> [recv]
+* [recv] --------> [recv]
+* ```
 */
 export function recv<I>(alice: Contact<I, any>, ...bobs: Contact<I, any>[]) {
 	return alice.recv.on((input, reliable) => {
@@ -45,15 +49,17 @@ export function recv<I>(alice: Contact<I, any>, ...bobs: Contact<I, any>[]) {
 }
 
 /**
-* Bob sends and receives what alice sends and receives. (alice.send->bob.send + alice.recv->bob.recv)
+* bob sends and receives what alice sends and receives. (alice.send->bob.send + alice.recv->bob.recv)
 *
-* Bob is alice's trusted mail confidant. He forwards her outgoing mail, and he's even CC'd on her incoming mail.
+* bob is alice's trusted mail confidant. he forwards her outgoing mail, and he's even cc'd on her incoming mail.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] --------> [send]
+* ```
+* alice             bob
+* -----             ---
+* [send] --------> [send]
 *
-*     [recv] --------> [recv]
+* [recv] --------> [recv]
+* ```
 */
 export function mirror<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<I, O>[]) {
 	return coalesce(
@@ -63,15 +69,17 @@ export function mirror<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<I, O>[])
 }
 
 /**
-* Bob sends what alice sends, alice receives what bob receives. (alice.send->bob.send + bob.recv->alice.recv)
+* bob sends what alice sends, alice receives what bob receives. (alice.send->bob.send + bob.recv->alice.recv)
 *
-* Bob is alice's local post office. He forwards her incoming and outgoing mail.
+* bob is alice's local post office. he forwards her incoming and outgoing mail.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] --------> [send]
+* ```
+* alice             bob
+* -----             ---
+* [send] --------> [send]
 *
-*     [recv] <-------- [recv]
+* [recv] <-------- [recv]
+* ```
 */
 export function relay<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<I, O>[]) {
 	return coalesce(
@@ -81,15 +89,17 @@ export function relay<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<I, O>[]) 
 }
 
 /**
-* Bob receives whatever alice sends. (alice.send->bob.recv)
+* bob receives whatever alice sends. (alice.send->bob.recv)
 *
-* Bob is the recipient of alice's love letters.
+* bob is the recipient of alice's love letters.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] ---\      [send]
-*                \
-*     [recv]      \--> [recv]
+* ```
+* alice             bob
+* -----             ---
+* [send] ---\      [send]
+*            \
+* [recv]      \--> [recv]
+* ```
 */
 export function delivery<O>(alice: Contact<any, O>, ...bobs: Contact<O, any>[]) {
 	return alice.send.on((data, reliable) => {
@@ -99,15 +109,17 @@ export function delivery<O>(alice: Contact<any, O>, ...bobs: Contact<O, any>[]) 
 }
 
 /**
-* Bob sends whatever alice receives. (alice.recv->bob.send)
+* bob sends whatever alice receives. (alice.recv->bob.send)
 *
-* Bob is a federal agent illegally snooping on alice's incoming mail, and sending copies back to headquarters without a warrant.
+* bob is a federal agent illegally snooping on alice's incoming mail, and sending copies back to headquarters without a warrant.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send]      /--> [send]
-*                /
-*     [recv] ---/      [recv]
+* ```
+* alice             bob
+* -----             ---
+* [send]      /--> [send]
+*            /
+* [recv] ---/      [recv]
+* ```
 */
 export function spy<I>(alice: Contact<I, any>, ...bobs: Contact<any, I>[]) {
 	return alice.recv.on((data, reliable) => {
@@ -117,15 +129,17 @@ export function spy<I>(alice: Contact<I, any>, ...bobs: Contact<any, I>[]) {
 }
 
 /**
-* Alice and bob both receive what the other sends.
+* alice and bob both receive what the other sends.
 *
-* Bob and alice are in love, and are sending each other letters.
+* bob and alice are in love, and are sending each other letters.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] ---\ /--- [send]
-*                X
-*     [recv] <--/ \--> [recv]
+* ```
+* alice             bob
+* -----             ---
+* [send] ---\ /--- [send]
+*            x
+* [recv] <--/ \--> [recv]
+* ```
 */
 export function exchange<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<O, I>[]) {
 	return coalesce(
@@ -135,15 +149,17 @@ export function exchange<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<O, I>[
 }
 
 /**
-* Alice and bob both send what the other receives.
+* alice and bob both send what the other receives.
 *
-* Bob and alice are having a divorce, and they are both snooping on each other's mail, and sending copies to their lawyers.
+* bob and alice are having a divorce, and they are both snooping on each other's mail, and sending copies to their lawyers.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] <--\ /--> [send]
-*                X
-*     [recv] ---/ \--- [recv]
+* ```
+* alice             bob
+* -----             ---
+* [send] <--\ /--> [send]
+*            x
+* [recv] ---/ \--- [recv]
+* ```
 */
 export function spyExchange<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<O, I>[]) {
 	return coalesce(
@@ -153,13 +169,15 @@ export function spyExchange<I, O = I>(alice: Contact<I, O>, ...bobs: Contact<O, 
 }
 
 /**
-* Bob becomes a relay for alice, but bob sends and receives bytes.
+* bob becomes a relay for alice, but bob sends and receives bytes.
 *
-*     ALICE             BOB
-*     -----             ---
-*     [send] --------> [send(bytes)]
+* ```
+* alice             bob
+* -----             ---
+* [send] --------> [send(bytes)]
 *
-*     [recv] <-------- [recv(bytes)]
+* [recv] <-------- [recv(bytes)]
+* ```
 */
 export function relayBinary(alice: Contact, bob: Contact<Uint8Array>, codec: Codec = json) {
 	return coalesce(
@@ -169,13 +187,15 @@ export function relayBinary(alice: Contact, bob: Contact<Uint8Array>, codec: Cod
 }
 
 /**
-* Cable becomes a relay for alice.
+* cable becomes a relay for alice.
 *
-*     ALICE            CABLE
-*     -----            -----
-*     [send] --------> [send]
+* ```
+* alice            cable
+* -----            -----
+* [send] --------> [send]
 *
-*     [recv] <-------- [recv]
+* [recv] <-------- [recv]
+* ```
 */
 export function relayCable(alice: Contact, cable: StdCable, codec: Codec = json) {
 	const bob = new Contact<Uint8Array>()

@@ -8,7 +8,7 @@ export type ContactInput<C extends Contact> = (
 		: never
 )
 
-/** infer a contact's input data type */
+/** infer a contact's output data type */
 export type ContactOutput<C extends Contact> = (
 	C extends Contact<any, infer O>
 		? O

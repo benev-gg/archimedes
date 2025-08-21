@@ -10,34 +10,34 @@ export class Contact<I = any, O = I> {
 	send = pub<[output: O, reliable: boolean]>()
 	recv = pub<[input: I, reliable: boolean]>()
 
-	/** Clear all send and recv listeners */
+	/** clear all send and recv listeners */
 	dispose() {
 		this.send.clear()
 		this.recv.clear()
 	}
 
-	/** Create a new contact that is an exchange partner (see wiring.exchange) */
+	/** create a new contact that is an exchange partner (see wiring.exchange) */
 	exchange() {
 		const bob = new Contact<O, I>()
 		const detach = exchange(this, bob)
 		return [bob, detach] as [typeof bob, typeof detach]
 	}
 
-	/** Create a new contact that is a mirror (see wiring.mirror) */
+	/** create a new contact that is a mirror (see wiring.mirror) */
 	mirror() {
 		const bob = new Contact<I, O>()
 		const detach = mirror(this, bob)
 		return [bob, detach] as [typeof bob, typeof detach]
 	}
 
-	/** Create a new contact that is a relay (see wiring.relay) */
+	/** create a new contact that is a relay (see wiring.relay) */
 	relay() {
 		const bob = new Contact<I, O>()
 		const detach = mirror(this, bob)
 		return [bob, detach] as [typeof bob, typeof detach]
 	}
 
-	/** Attach an rtc cable to this contact as a relay */
+	/** attach an rtc cable to this contact as a relay */
 	relayCable(cable: StdCable, codec: Codec = json) {
 		return relayCable(this, cable, codec)
 	}

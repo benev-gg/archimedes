@@ -2,11 +2,12 @@
 import {Science} from "@e280/science"
 import eureka from "./eureka/testing/eureka.test.js"
 import parcels from "./core/parcels/parcels.test.js"
+import contact from "./core/contact/contact.test.js"
 import integration from "./eureka/testing/integration.test.js"
 
 await Science.run({
 	eureka,
 	integration,
-	archimedes: {parcels},
+	archimedes: {parcels, contact},
 })
 
