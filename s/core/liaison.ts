@@ -1,11 +1,11 @@
 
+import {Ping, Pingponger, Pong} from "@e280/renraku"
 import {AuthorId} from "./types.js"
 import {Fiber} from "./parts/fiber.js"
 import {Bucket} from "../tools/bucket.js"
 import {Parcel} from "./parts/parcels/types.js"
 import {ParcelInbox} from "./parts/parcels/inbox.js"
 import {Parceller} from "./parts/parcels/parceller.js"
-import {Ping, Pingponger, Pong} from "./parts/pingponger.js"
 
 export type Datagram<Data> = ["data", Data]
 
@@ -28,9 +28,12 @@ export class Liaison<Data> {
 			public fiber: Fiber<Parcel<Mail<Data>>[]>,
 		) {
 
-		this.pingponger = new Pingponger(p => {
-			const parcel = this.parceller.wrap(p)
-			fiber.unreliable.send([parcel])
+		this.pingponger = new Pingponger({
+			timeout: 60_000,
+			send: p => {
+				const parcel = this.parceller.wrap(p)
+				fiber.unreliable.send([parcel])
+			},
 		})
 
 		const handleIncoming = (parcels: Parcel<Mail<Data>>[]) => parcels.forEach(
@@ -58,7 +61,7 @@ export class Liaison<Data> {
 			switch (message[0]) {
 				case "ping":
 				case "pong":
-					this.pingponger.receive(message)
+					this.pingponger.recv(message)
 					break
 				default:
 					datas.push(message[1])
