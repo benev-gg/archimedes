@@ -3,7 +3,6 @@ import {Science, test, expect} from "@e280/science"
 import {setupHealthSituation} from "./situations/health.js"
 
 export default Science.suite({
-
 	"systems can execute on the right entities": test(async() => {
 		const {world} = setupHealthSituation()
 		const warrior = world.create({health: 100, bleeding: 1})

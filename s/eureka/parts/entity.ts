@@ -16,7 +16,6 @@ export class Entity<C extends Components = any> {
 				return true
 			},
 		})
-		return entity.#components
 	}
 
 	#components!: C
