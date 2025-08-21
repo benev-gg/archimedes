@@ -116,8 +116,8 @@ export class Contact<I = any, O = I> {
 		) {
 		return disposers(
 			alice.send.on((output, reliable) => {
-				if (reliable) cable.reliable.send(codec.encode(output))
-				else cable.unreliable.send(codec.encode(output))
+				if (reliable) cable.reliable.send(new Uint8Array(codec.encode(output)))
+				else cable.unreliable.send(new Uint8Array(codec.encode(output)))
 			}),
 			onChannelMessage(cable.reliable, input => alice.recv(codec.decode(input), true)),
 			onChannelMessage(cable.unreliable, input => alice.recv(codec.decode(input), false)),

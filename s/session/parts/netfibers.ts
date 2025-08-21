@@ -1,5 +1,5 @@
 
-import {JsonRpc} from "renraku"
+import {JsonRpc} from "@e280/renraku"
 import {Fiber} from "../../core/parts/fiber.js"
 
 export class Netfibers {

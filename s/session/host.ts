@@ -1,6 +1,5 @@
 
 import {MapG} from "@e280/stz"
-import {endpoint} from "renraku"
 
 import {Hub} from "./parts/hub.js"
 import {Seat} from "./parts/seat.js"
@@ -37,7 +36,7 @@ export class SessionHost<xSimulator extends Simulator> {
 
 			new FiberRpc<MetaApi["host"]>(
 				spoke.fibers.sub.meta,
-				endpoint(makeMetaHostApi({authority, liaison})),
+				makeMetaHostApi({authority, liaison}),
 			).remote as MetaApi["client"]
 
 			const seat = new Seat(spoke, liaison)

@@ -1,12 +1,12 @@
 
-import {fns} from "renraku"
+import {asFns, asMessengerRpc} from "@e280/renraku"
 import {Liaison} from "../../core/liaison.js"
 import {Authority} from "../../core/authority.js"
 
 export const makeMetaHostApi = (options: {
 		authority: Authority<any>,
 		liaison: Liaison<any>
-	}) => fns({
+	}) => asMessengerRpc(async _meta => asFns({
 
 	async hello() {
 		return {
@@ -14,5 +14,5 @@ export const makeMetaHostApi = (options: {
 			clientAuthorId: options.liaison.authorId,
 		}
 	},
-})
+}))
 

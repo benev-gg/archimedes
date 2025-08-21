@@ -1,5 +1,5 @@
 
-import {fns} from "renraku"
+import {asFns, asMessengerRpc} from "@e280/renraku"
 
-export const makeMetaClientApi = () => fns({})
+export const makeMetaClientApi = () => asMessengerRpc(async _meta => asFns({}))
 

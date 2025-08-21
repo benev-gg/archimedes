@@ -1,6 +1,4 @@
 
-import {endpoint} from "renraku"
-
 import {Seat} from "./parts/seat.js"
 import {Spoke} from "./parts/spoke.js"
 import {MetaApi} from "./meta/types.js"
@@ -21,7 +19,7 @@ export class SessionClient<xSimulator extends Simulator> {
 
 		const meta = new FiberRpc<MetaApi["host"]>(
 			options.spoke.fibers.sub.meta,
-			endpoint(makeMetaClientApi()),
+			makeMetaClientApi(),
 		).remote as MetaApi["host"]
 
 		const {hostAuthorId, clientAuthorId} = await meta.hello()

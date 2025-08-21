@@ -34,8 +34,8 @@ export class Fiber<I = any, O = I> {
 
 	/** this fiber becomes a proxy of the cable */
 	attachCable(cable: StdCable) {
-		this.reliable.send.on(output => cable.reliable.send(encode(output)))
-		this.unreliable.send.on(output => cable.unreliable.send(encode(output)))
+		this.reliable.send.on(output => cable.reliable.send(new Uint8Array(encode(output))))
+		this.unreliable.send.on(output => cable.unreliable.send(new Uint8Array(encode(output))))
 		return disposers(
 			onChannelMessage(cable.reliable, input => this.reliable.recv(decode(input) as I)),
 			onChannelMessage(cable.unreliable, input => this.unreliable.recv(decode(input) as I)),

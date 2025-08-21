@@ -1,6 +1,7 @@
 
+import {asMessengerRpc, Fns} from "@e280/renraku"
+
 import {Spoke} from "./spoke.js"
-import {endpoint, Fns} from "renraku"
 import {FiberRpc} from "./fiber-rpc.js"
 import {Liaison} from "../../core/liaison.js"
 
@@ -28,7 +29,7 @@ export class Seat {
 	}
 
 	userlandApi<RemoteFns extends Fns>(seat: Seat, hostFns: RemoteFns) {
-		return new FiberRpc<RemoteFns>(seat.userland, endpoint(hostFns)).remote
+		return new FiberRpc<RemoteFns>(seat.userland, asMessengerRpc(async _meta => ({fns: hostFns}))).remote
 	}
 }
 
