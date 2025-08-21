@@ -7,7 +7,7 @@ import {Components, EntityId, EntityData, UnknownComponents} from "./types.js"
 
 export class World<Context, C extends Components> {
 	counter = new IdCounter()
-	onEntity = sub<[EntityId, Entity<UnknownComponents<C>> | null]>()
+	on = sub<[EntityId, Entity<UnknownComponents<C>> | null]>()
 
 	#entities = new MapG<EntityId, Entity<Partial<C>>>()
 	#changed = new Set<EntityId>()
@@ -52,7 +52,7 @@ export class World<Context, C extends Components> {
 				system.cache(id, entity)
 
 			// recognize that a change happened
-			this.onEntity.pub(id, entity)
+			this.on.pub(id, entity)
 			return entity
 		}
 		else {
@@ -64,7 +64,7 @@ export class World<Context, C extends Components> {
 				system.cache(id, null)
 
 			// recognize that a change happened
-			this.onEntity.pub(id, null)
+			this.on.pub(id, null)
 			return null
 		}
 	}
@@ -119,7 +119,7 @@ export class World<Context, C extends Components> {
 
 		// dispatch all pent up changes
 		for (const id of this.#changed)
-			this.onEntity.pub(id, this.get(id))
+			this.on.pub(id, this.get(id))
 
 		// clear changes
 		this.#changed.clear()
@@ -131,7 +131,7 @@ export class World<Context, C extends Components> {
 			systems: System[],
 		) {
 		const downstream = new World<Context, C>(context, systems)
-		const detach = this.onEntity((id, entity) => {
+		const detach = this.on((id, entity) => {
 			downstream.write(id, deep.clone(entity?.components ?? null))
 		})
 		return [downstream, detach]

@@ -15,7 +15,7 @@ export class EurekaSimulator
 
 	constructor(public world: World<xContext, C>) {
 		super([...world.data()])
-		world.onEntity((id, entity) => void this.#deltas.push([id, entity?.components ?? null]))
+		world.on((id, entity) => void this.#deltas.push([id, entity?.components ?? null]))
 	}
 
 	simulate(telegram: Telegram<EurekaSchema<C>>): EurekaSchema<C>["delta"] {
