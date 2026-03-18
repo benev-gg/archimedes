@@ -1,7 +1,7 @@
 {
 	"name": "@benev/archimedes",
 	"version": "0.0.0-0",
-	"description": "rollforward web game networking",
+	"description": "game ecs with auto networking",
 	"license": "MIT",
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"type": "module",
@@ -11,13 +11,10 @@
 		"s"
 	],
 	"scripts": {
-		"build": "run-s _clean _tsc",
-		"start": "octo 'node --watch x/tests.test.js' 'tsc -w'",
-		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +",
+		"build": "octo-s 'rm -rf x' 'mkdir x' 'tsc'",
+		"dev": "octo 'node --watch x/tests.test.js' 'tsc -w'",
 		"test": "node x/tests.test.js",
-		"test-inspect": "node inspect x/tests.test.js",
-		"_clean": "rm -rf x",
-		"_tsc": "tsc"
+		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
 		"@e280/renraku": "^0.5.6",
@@ -26,6 +23,7 @@
 		"sparrow-rtc": "^0.2.15"
 	},
 	"devDependencies": {
+		"@e280/octo": "^0.1.0-12",
 		"@e280/science": "^0.1.8",
 		"npm-run-all": "^4.1.5",
 		"typescript": "^5.9.3"
