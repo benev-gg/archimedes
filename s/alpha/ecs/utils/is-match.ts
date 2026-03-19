@@ -1,7 +1,7 @@
 
 import {Components} from "../types.js"
 
-export function isMatch<C extends Components>(set: Set<keyof C>, components: Partial<C>) {
+export function isMatch(set: Set<any>, components: Components) {
 	return [...set].every(key => key in components)
 }
 

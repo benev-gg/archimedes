@@ -32,41 +32,38 @@ export default suite({
 
 	"lifecycles": test(async() => {
 		const world = new World<{mana: number, regen: number}>()
-		let countCreated = 0
-		let countUpdated = 0
-		let countDeleted = 0
-		const system = lifecycle(["mana", "regen"], (id, components) => {
-			countCreated++
+		const counts = {
+			enters: 0,
+			ticks: 0,
+			exits: 0,
+			expect: (enters: number, ticks: number, exits: number) => {
+				expect(counts.enters).is(enters)
+				expect(counts.ticks).is(ticks)
+				expect(counts.exits).is(exits)
+			},
+		}
+		const system = world.lifecycle(["mana", "regen"], () => {
+			counts.enters++
 			return {
-				updated: (id, components) => void countUpdated++,
-				deleted: (id, components) => void countDeleted++,
+				tick: () => void counts.ticks++,
+				exit: () => void counts.exits++,
 			}
 		})
-
-		expect(countCreated).is(0)
-		expect(countUpdated).is(0)
-		expect(countDeleted).is(0)
+		counts.expect(0, 0, 0)
 
 		const wizard = create({mana: 0, regen: 1})
 		const [wizardId] = wizard
 		world.apply(wizard)
 		world.execute([system])
-		expect(countCreated).is(1)
-		expect(countUpdated).is(0)
-		expect(countDeleted).is(0)
+		counts.expect(1, 1, 0)
 
 		world.apply(update(wizardId, {mana: 0, regen: 2}))
 		world.execute([system])
-		expect(countCreated).is(1)
-		expect(countUpdated).is(1)
-		expect(countDeleted).is(0)
+		counts.expect(1, 2, 0)
 
 		world.apply(del(wizardId))
 		world.execute([system])
-		expect(countCreated).is(1)
-		expect(countUpdated).is(1)
-		expect(countDeleted).is(1)
-
+		counts.expect(1, 2, 1)
 		expect(world.entities.size).is(0)
 	}),
 })
