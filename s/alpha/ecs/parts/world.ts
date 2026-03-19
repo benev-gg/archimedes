@@ -47,6 +47,7 @@ export class World<C extends Components> {
 			this.entities.delete(id)
 			this.#optimizer.eliminate(id)
 		}
+		return id
 	}
 
 	execute(systems: System[]) {

@@ -3,6 +3,7 @@ import {GMap} from "@e280/stz"
 import {suite, test, expect} from "@e280/science"
 import {World} from "./parts/world.js"
 import {create, del, update} from "./parts/changers.js"
+import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
 
 export default suite({
 	"create an entity": test(async() => {
@@ -14,8 +15,7 @@ export default suite({
 
 	"wizard regens mana": test(async() => {
 		const world = new World<{mana: number, regen: number}>()
-		const wizard = create({mana: 0, regen: 1})
-		world.apply(wizard)
+		const wizardId = world.apply(create({mana: 0, regen: 1}))
 		const system = function*() {
 			for (const [id, c] of world.select("mana", "regen")) {
 				if (c.regen !== 0) {
@@ -25,23 +25,13 @@ export default suite({
 			}
 		}
 		const changes = world.execute([system])
-		const [wizardId] = wizard
 		expect(changes.length).is(1)
 		expect(GMap.require(world.entities, wizardId).mana).is(1)
 	}),
 
 	"lifecycles": test(async() => {
 		const world = new World<{mana: number, regen: number}>()
-		const counts = {
-			enters: 0,
-			ticks: 0,
-			exits: 0,
-			expect: (enters: number, ticks: number, exits: number) => {
-				expect(counts.enters).is(enters)
-				expect(counts.ticks).is(ticks)
-				expect(counts.exits).is(exits)
-			},
-		}
+		const counts = setupLifecycleCounts()
 		const system = world.lifecycle(["mana", "regen"], () => {
 			counts.enters++
 			return {
@@ -51,9 +41,7 @@ export default suite({
 		})
 		counts.expect(0, 0, 0)
 
-		const wizard = create({mana: 0, regen: 1})
-		const [wizardId] = wizard
-		world.apply(wizard)
+		const wizardId = world.apply(create({mana: 0, regen: 1}))
 		world.execute([system])
 		counts.expect(1, 1, 0)
 
