@@ -1,50 +1,39 @@
 
-import {makeId} from "../utils/id.js"
-import {makeOptimizer} from "./optimizer.js"
-import {Change, Components, Entities, Id, Select, System, World} from "../types.js"
+import {Optimizer} from "../utils/optimizer.js"
+import {Change, Components, Entities, Id, Select, System} from "../types.js"
 
-export function makeWorld<C extends Components>(entities: Entities<C> = new Map()): World<C> {
-	const optimizer = makeOptimizer<C>(entities)
+export class World<C extends Components> {
+	#optimizer
 
-	function *select<K extends keyof C>(...required: K[]) {
-		for (const entity of optimizer.obtain(required)) {
+	constructor(public entities: Entities<C> = new Map()) {
+		this.#optimizer = new Optimizer<C>(entities)
+	}
+
+	select = function*<K extends keyof C>(this: World<C>, ...required: K[]) {
+		for (const entity of this.#optimizer.obtain(required)) {
 			const [,components] = entity
 			if (required.every(r => r in components))
 				yield entity as [id: Id, components: Select<C, K>]
 		}
-	}
+	}.bind(this)
 
-	function apply([id, components]: Change) {
+	apply = ([id, components]: Change) => {
 		if (components) {
-			entities.set(id, components as Partial<C>)
-			optimizer.update(id, components as Partial<C>)
+			this.entities.set(id, components as Partial<C>)
+			this.#optimizer.update(id, components as Partial<C>)
 		}
 		else {
-			entities.delete(id)
-			optimizer.eliminate(id)
+			this.entities.delete(id)
+			this.#optimizer.eliminate(id)
 		}
 	}
 
-	function execute(systems: System[]) {
+	execute = (systems: System[]) => {
 		return systems.flatMap(system => {
 			const changes = [...system()]
-			for (const change of changes) apply(change)
+			for (const change of changes) this.apply(change)
 			return changes
 		})
 	}
-
-	function create(components: Partial<C>): Change {
-		return [makeId(), components]
-	}
-
-	function update(id: Id, components: Partial<C>): Change {
-		return [id, components]
-	}
-
-	function del(id: Id): Change {
-		return [id]
-	}
-
-	return {entities, select, apply, execute, create, update, del}
 }
 
