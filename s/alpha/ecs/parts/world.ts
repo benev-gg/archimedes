@@ -10,6 +10,10 @@ export class World<C extends Components> {
 		this.#optimizer = new Optimizer<C>(entities)
 	}
 
+	require<C2 extends Partial<C> = Partial<C>>(id: Id) {
+		return GMap.require(this.entities, id) as C2 & Partial<C>
+	}
+
 	*select<K extends keyof C>(...required: K[]) {
 		for (const entity of this.#optimizer.obtain(required)) {
 			const [,components] = entity

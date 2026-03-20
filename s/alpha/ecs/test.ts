@@ -1,38 +1,79 @@
 
-import {GMap} from "@e280/stz"
 import {suite, test, expect} from "@e280/science"
-import {World} from "./parts/world.js"
 import {create, del, update} from "./parts/changers.js"
+import {setupExampleWorld} from "./test/setup-example-world.js"
 import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
 
 export default suite({
 	"create an entity": test(async() => {
-		const world = new World<{mana: number, regen: number}>()
+		const {world} = setupExampleWorld()
 		expect(world.entities.size).is(0)
-		world.apply(create({mana: 0, regen: 1}))
+		world.apply(create({health: 100}))
 		expect(world.entities.size).is(1)
 	}),
 
+	"delete an entity": test(async() => {
+		const {world} = setupExampleWorld()
+		const id = world.apply(create({health: 100}))
+		expect(world.entities.size).is(1)
+		world.apply(del(id))
+		expect(world.entities.size).is(0)
+	}),
+
+	"select an entity": test(async() => {
+		const {world} = setupExampleWorld()
+		world.apply(create({health: 100}))
+		expect([...world.select("health")].length).is(1)
+	}),
+
+	"select two entities": test(async() => {
+		const {world} = setupExampleWorld()
+		world.apply(create({health: 100}))
+		world.apply(create({health: 100}))
+		expect([...world.select("health")].length).is(2)
+	}),
+
+	"select with no component keys selects all": test(async() => {
+		const {world} = setupExampleWorld()
+		world.apply(create({health: 100}))
+		world.apply(create({health: 100}))
+		expect([...world.select()].length).is(2)
+	}),
+
+	"select doesn't include non-match": test(async() => {
+		const {world} = setupExampleWorld()
+		world.apply(create({health: 100}))
+		expect([...world.select("mana")].length).is(0)
+	}),
+
+	"select includes entities with extra components": test(async() => {
+		const {world} = setupExampleWorld()
+		world.apply(create({health: 100, mana: 100}))
+		expect([...world.select("health")].length).is(1)
+	}),
+
 	"wizard regens mana": test(async() => {
-		const world = new World<{mana: number, regen: number}>()
-		const wizardId = world.apply(create({mana: 0, regen: 1}))
-		const system = function*() {
-			for (const [id, c] of world.select("mana", "regen")) {
-				if (c.regen !== 0) {
-					const mana = c.mana + c.regen
-					yield update(id, {...c, mana})
-				}
-			}
-		}
-		const changes = world.execute([system])
+		const {world, systems} = setupExampleWorld()
+		const wizardId = world.apply(create({health: 100, mana: 50, manaRegen: 1}))
+		const changes = world.execute(systems)
 		expect(changes.length).is(1)
-		expect(GMap.require(world.entities, wizardId).mana).is(1)
+		expect(world.require(wizardId).mana).is(51)
+	}),
+
+	"death by bleeding": test(async() => {
+		const {world, systems} = setupExampleWorld()
+		const wizardId = world.apply(create({health: 2, bleed: 1}))
+		expect(world.require(wizardId).health).is(2)
+		world.execute(systems)
+		expect(world.require(wizardId).health).is(1)
+		world.execute(systems)
+		expect(world.entities.has(wizardId)).is(false)
 	}),
 
 	"lifecycles": test(async() => {
-		const world = new World<{mana: number, regen: number}>()
+		const {world} = setupExampleWorld()
 		const counts = setupLifecycleCounts()
-		const system = world.lifecycle(["mana", "regen"], () => {
+		const system = world.lifecycle(["health"], () => {
 			counts.enters++
 			return {
 				tick: () => void counts.ticks++,
@@ -41,11 +82,11 @@ export default suite({
 		})
 		counts.expect(0, 0, 0)
 
-		const wizardId = world.apply(create({mana: 0, regen: 1}))
+		const wizardId = world.apply(create({health: 100, mana: 50}))
 		world.execute([system])
 		counts.expect(1, 1, 0)
 
-		world.apply(update(wizardId, {mana: 0, regen: 2}))
+		world.apply(update(wizardId, {health: 100, mana: 100}))
 		world.execute([system])
 		counts.expect(1, 2, 0)
 
