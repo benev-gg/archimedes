@@ -2,11 +2,11 @@
 import {makeId} from "./make-id.js"
 import {Change, Components, Id} from "../types.js"
 
-export function create(components: Partial<Components>): Change {
+export function create<C extends Components>(components: Partial<C>): Change {
 	return [makeId(), components]
 }
 
-export function update(id: Id, components: Partial<Components>): Change {
+export function update<C extends Components>(id: Id, components: Partial<C>): Change {
 	return [id, components]
 }
 

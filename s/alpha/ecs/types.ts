@@ -1,6 +1,6 @@
 
 export type Entities<C extends Components> = Map<Id, C>
-export type Components = {[key: string]: unknown}
+export type Components = Record<string, unknown>
 export type System = () => Generator<Change>
 
 export type Id = string
