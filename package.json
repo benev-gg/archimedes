@@ -1,9 +1,8 @@
 {
 	"name": "@benev/archimedes",
-	"version": "0.0.0-0",
+	"version": "0.1.0-0",
 	"description": "game ecs with auto networking",
 	"license": "MIT",
-	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"type": "module",
 	"main": "x/index.js",
 	"files": [
@@ -12,22 +11,23 @@
 	],
 	"scripts": {
 		"build": "octo-s 'rm -rf x' 'mkdir x' 'tsc'",
-		"dev": "octo 'node --watch x/tests.test.js' 'tsc -w'",
-		"test": "node x/tests.test.js",
+		"dev": "octo 'node --watch x/test.js' 'tsc -w'",
+		"test": "node x/test.js",
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
-		"@e280/renraku": "^0.5.6",
-		"@e280/stz": "^0.2.24",
+		"@e280/renraku": "^0.5.7",
+		"@e280/stz": "^0.2.27",
 		"@msgpack/msgpack": "^3.1.3",
 		"sparrow-rtc": "^0.2.15"
 	},
 	"devDependencies": {
-		"@e280/octo": "^0.1.0-12",
-		"@e280/science": "^0.1.8",
+		"@e280/octo": "^0.1.0",
+		"@e280/science": "^0.1.9",
 		"npm-run-all": "^4.1.5",
-		"typescript": "^5.9.3"
+		"typescript": "^6.0.2"
 	},
+	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"keywords": [
 		"networking",
 		"rollforward",
