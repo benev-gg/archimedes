@@ -35,6 +35,14 @@ export default suite({
 		expect([...world.select("health")].length).is(1)
 	}),
 
+	"select an entity after shape change": test(async() => {
+		const {world} = setupExampleWorld()
+		const id = world.apply(create({health: 100, mana: 100}))
+		expect([...world.select("health", "mana")].length).is(1)
+		world.apply(update(id, {health: 99, mana: null}))
+		expect([...world.select("health", "mana")].length).is(0)
+	}),
+
 	"select two entities": test(async() => {
 		const {world} = setupExampleWorld()
 		world.apply(create({health: 100}))

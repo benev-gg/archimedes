@@ -7,8 +7,11 @@ export type Id = string
 export type AsComponents<C extends Components> = C
 export type Select<C extends Components, K extends keyof C> = Pick<C, K> & Partial<C>
 
+export enum Kind {Assign, Update}
 export type Delta<C extends Components> = Partial<{[K in keyof C]: C[K] | null}>
-export type Change = [id: Id, components?: Delta<Components>]
+export type Assign = [id: Id, kind: Kind, components?: Partial<Components>]
+export type Update = [id: Id, kind: Kind, delta: Delta<Components>]
+export type Change = Assign | Update
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
 	tick: (id: Id, components: Select<C, K>) => void

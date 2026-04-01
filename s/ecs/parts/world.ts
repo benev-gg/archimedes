@@ -1,6 +1,7 @@
 
 import {GMap} from "@e280/stz"
 import {Optimizer} from "../utils/optimizer.js"
+import {applyChangeToEntities as applyChange} from "../utils/apply-change.js"
 import {Change, Components, Entities, Id, LifecycleCallbacks, LifecycleEnter, Select, System} from "../types.js"
 
 export class World<C extends Components> {
@@ -42,19 +43,11 @@ export class World<C extends Components> {
 		}
 	}
 
-	apply([id, components]: Change) {
-		if (components) {
-			const existing = GMap.guarantee(this.entities, id, () => ({})) as any
-			for (const [key, value] of Object.entries(components)) {
-				if (value === null || value === undefined) delete existing[key]
-				else existing[key] = value
-			}
-			this.#optimizer.update(id, existing as Partial<C>)
-		}
-		else {
-			this.entities.delete(id)
-			this.#optimizer.eliminate(id)
-		}
+	apply(change: Change) {
+		const [id] = change
+		const components = applyChange<C>(this.entities, change)
+		if (components) this.#optimizer.update(id, components)
+		else this.#optimizer.eliminate(id)
 		return id
 	}
 
