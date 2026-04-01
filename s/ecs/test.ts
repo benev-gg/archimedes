@@ -20,6 +20,15 @@ export default suite({
 		expect(world.entities.size).is(0)
 	}),
 
+	"partial updates": test(async() => {
+		const {world} = setupExampleWorld()
+		const id = world.apply(create({health: 100, mana: 100}))
+		expect(world.require(id).health).is(100)
+		world.apply(update(id, {health: 99}))
+		expect(world.require(id).health).is(99)
+		expect(world.require(id).mana).is(100)
+	}),
+
 	"select an entity": test(async() => {
 		const {world} = setupExampleWorld()
 		world.apply(create({health: 100}))

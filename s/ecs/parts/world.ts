@@ -44,8 +44,12 @@ export class World<C extends Components> {
 
 	apply([id, components]: Change) {
 		if (components) {
-			this.entities.set(id, components as Partial<C>)
-			this.#optimizer.update(id, components as Partial<C>)
+			const existing = GMap.guarantee(this.entities, id, () => ({})) as any
+			for (const [key, value] of Object.entries(components)) {
+				if (value === null || value === undefined) delete existing[key]
+				else existing[key] = value
+			}
+			this.#optimizer.update(id, existing as Partial<C>)
 		}
 		else {
 			this.entities.delete(id)
