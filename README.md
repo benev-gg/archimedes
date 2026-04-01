@@ -1,19 +1,19 @@
 
-![](https://i.imgur.com/JNCvW1J.png)
+![](https://i.imgur.com/DYcrs49.png)
 
 # 🏛️ archimedes netlogic engine
 
-> [***"do not disturb my circles!"***](https://en.wikipedia.org/wiki/noli_turbare_circulos_meos!)
+> [***"do not disturb my circles!"***](https://en.wikipedia.org/wiki/noli_turbare_circulos_meos!)  
 > &nbsp; &nbsp; — *archimedes, c. 212 bc*
 
-## rollforward netcode for web games
+### rollforward netcode for web games
 
-🔮 **automatic networking**  
-you just code your game naively as though it's singleplayer, archimedes handles the multiplayer.
+🔮 **code like it's singleplayer**  
+write naive game logic — and let archimedes handle the multiplayer
 
 🌎 **whole-world rollforward**  
-clientside prediction applies to the whole simulation. all effects of player inputs feel instant.
+player inputs feel instant — everything is clientside predicted
 
-🧩 **ecs architecture**  
-program your simulation with entities, components, and systems.
+🧩 **ecs at the core**  
+lean primitives — entities, components, systems
 
