@@ -1,11 +1,11 @@
 
 import {GMap, is} from "@e280/stz"
-import {Assign, Change, Components, Entities, Kind, Update} from "../parts/types.js"
+import {Assign, Change, Components, Entities, Kind, Patch} from "../parts/types.js"
 
 export function applyChange<C extends Components>(entities: Entities<any>, change: Change) {
 	switch (change[1]) {
 		case Kind.Assign: return assign<C>(entities, <Assign>change)
-		case Kind.Update: return update<C>(entities, <Update>change)
+		case Kind.Patch: return update<C>(entities, <Patch>change)
 		default: throw new Error(`unknown change kind "${change[1]}"`)
 	}
 }
@@ -21,7 +21,7 @@ function assign<C extends Components>(entities: Entities<Partial<C>>, [id, _kind
 	}
 }
 
-function update<C extends Components>(entities: Entities<Partial<C>>, [id, _kind, fresh]: Update) {
+function update<C extends Components>(entities: Entities<Partial<C>>, [id, _kind, fresh]: Patch) {
 	const components = GMap.guarantee(entities, id, () => ({})) as any
 	for (const [key, value] of Object.entries(fresh)) {
 		if (!is.happy(value)) delete components[key]
