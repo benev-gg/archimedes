@@ -10,7 +10,7 @@
 		"s"
 	],
 	"scripts": {
-		"build": "octo-s 'rm -rf x' 'mkdir x' 'tsc'",
+		"build": "rm -rf x && mkdir x && tsc",
 		"dev": "octo 'node --watch x/test.js' 'tsc -w'",
 		"test": "node x/test.js",
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
