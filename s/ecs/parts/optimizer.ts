@@ -1,7 +1,7 @@
 
 import {GMap} from "@e280/stz"
-import {isMatch} from "./is-match.js"
-import {Components, Entities, Id, Select} from "../parts/types.js"
+import {isMatch} from "../utils/is-match.js"
+import {Components, Entities, Id, Select} from "./types.js"
 
 export class Optimizer<C extends Components> {
 	#index = new GMap<Set<keyof C>, Entities<Partial<C>>>()
