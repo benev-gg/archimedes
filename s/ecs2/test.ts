@@ -1,8 +1,10 @@
 
 import {suite, test, expect} from "@e280/science"
 import {change} from "./parts/change.js"
+import {lifecycle} from "./parts/lifecycle.js"
 import {applyChange} from "./parts/apply-change.js"
 import {setupExample} from "./test/setup-example.js"
+import {executeSystems} from "./parts/execute-systems.js"
 import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
 
 export default suite({
@@ -14,84 +16,94 @@ export default suite({
 	}),
 
 	"delete an entity": test(async() => {
-		const {world} = setupExample()
-		const id = world.apply(create({health: 100}))
-		expect(world.entities.size).is(1)
-		world.apply(del(id))
-		expect(world.entities.size).is(0)
+		const {entities} = setupExample()
+		const creating = change.create({health: 100})
+		const id = creating[1]
+		applyChange(entities, creating)
+		expect(entities.size).is(1)
+		applyChange(entities, change.delete(id))
+		expect(entities.size).is(0)
 	}),
 
 	"partial updates": test(async() => {
-		const {world} = setupExampleWorld()
-		const id = world.apply(create({health: 100, mana: 100}))
-		expect(world.require(id).health).is(100)
-		world.apply(update(id, {health: 99}))
-		expect(world.require(id).health).is(99)
-		expect(world.require(id).mana).is(100)
+		const {entities} = setupExample()
+		const creating = change.create({health: 100, mana: 100})
+		const id = creating[1]
+		applyChange(entities, creating)
+		expect(entities.require(id).health).is(100)
+		applyChange(entities, change.patch(id, {health: 99}))
+		expect(entities.require(id).health).is(99)
+		expect(entities.require(id).mana).is(100)
 	}),
 
 	"select an entity": test(async() => {
-		const {world} = setupExampleWorld()
-		world.apply(create({health: 100}))
-		expect([...world.select("health")].length).is(1)
+		const {entities} = setupExample()
+		applyChange(entities, change.create({health: 100}))
+		expect([...entities.select("health")].length).is(1)
 	}),
 
 	"select an entity after shape change": test(async() => {
-		const {world} = setupExampleWorld()
-		const id = world.apply(create({health: 100, mana: 100}))
-		expect([...world.select("health", "mana")].length).is(1)
-		world.apply(update(id, {health: 99, mana: null}))
-		expect([...world.select("health", "mana")].length).is(0)
+		const {entities} = setupExample()
+		const creating = change.create({health: 100, mana: 100})
+		const id = creating[1]
+		applyChange(entities, creating)
+		expect([...entities.select("health", "mana")].length).is(1)
+		applyChange(entities, change.patch(id, {health: 99, mana: null}))
+		expect([...entities.select("health", "mana")].length).is(0)
 	}),
 
 	"select two entities": test(async() => {
-		const {world} = setupExampleWorld()
-		world.apply(create({health: 100}))
-		world.apply(create({health: 100}))
-		expect([...world.select("health")].length).is(2)
+		const {entities} = setupExample()
+		applyChange(entities, change.create({health: 100}))
+		applyChange(entities, change.create({health: 100}))
+		expect([...entities.select("health")].length).is(2)
 	}),
 
 	"select with no component keys selects all": test(async() => {
-		const {world} = setupExampleWorld()
-		world.apply(create({health: 100}))
-		world.apply(create({health: 100}))
-		expect([...world.select()].length).is(2)
+		const {entities} = setupExample()
+		applyChange(entities, change.create({health: 100}))
+		applyChange(entities, change.create({health: 100}))
+		expect([...entities.select()].length).is(2)
 	}),
 
 	"select doesn't include non-match": test(async() => {
-		const {world} = setupExampleWorld()
-		world.apply(create({health: 100}))
-		expect([...world.select("mana")].length).is(0)
+		const {entities} = setupExample()
+		applyChange(entities, change.create({health: 100}))
+		expect([...entities.select("mana")].length).is(0)
 	}),
 
 	"select includes entities with extra components": test(async() => {
-		const {world} = setupExampleWorld()
-		world.apply(create({health: 100, mana: 100}))
-		expect([...world.select("health")].length).is(1)
+		const {entities} = setupExample()
+		applyChange(entities, change.create({health: 100, mana: 100}))
+		expect([...entities.select("health")].length).is(1)
 	}),
 
 	"wizard regens mana": test(async() => {
-		const {world, systems} = setupExampleWorld()
-		const wizardId = world.apply(create({health: 100, mana: 50, manaRegen: 1}))
-		const changes = world.execute(systems)
+		const {entities, systems} = setupExample()
+		const creating = change.create({health: 100, mana: 50, manaRegen: 1})
+		const wizardId = creating[1]
+		applyChange(entities, creating)
+		const changes = executeSystems(entities, systems)
 		expect(changes.length).is(1)
-		expect(world.require(wizardId).mana).is(51)
+		expect(entities.require(wizardId).mana).is(51)
 	}),
 
 	"death by bleeding": test(async() => {
-		const {world, systems} = setupExampleWorld()
-		const wizardId = world.apply(create({health: 2, bleed: 1}))
-		expect(world.require(wizardId).health).is(2)
-		world.execute(systems)
-		expect(world.require(wizardId).health).is(1)
-		world.execute(systems)
-		expect(world.entities.has(wizardId)).is(false)
+		const {entities, systems} = setupExample()
+		const creating = change.create({health: 2, bleed: 1})
+		const wizardId = creating[1]
+		applyChange(entities, creating)
+		expect(entities.require(wizardId).health).is(2)
+		executeSystems(entities, systems)
+		expect(entities.require(wizardId).health).is(1)
+		executeSystems(entities, systems)
+		expect(entities.has(wizardId)).is(false)
 	}),
 
 	"lifecycles": test(async() => {
-		const {world} = setupExampleWorld()
+		const {entities} = setupExample()
 		const counts = setupLifecycleCounts()
-		const system = world.lifecycle(["health"], () => {
+		const system = lifecycle(entities.readonly(), ["health"], () => {
 			counts.enters++
 			return {
 				tick: () => void counts.ticks++,
@@ -100,18 +112,20 @@ export default suite({
 		})
 		counts.expect(0, 0, 0)
 
-		const wizardId = world.apply(create({health: 100, mana: 50}))
-		world.execute([system])
+		const creating = change.create({health: 100, mana: 50})
+		const wizardId = creating[1]
+		applyChange(entities, creating)
+		executeSystems(entities, [system])
 		counts.expect(1, 1, 0)
 
-		world.apply(update(wizardId, {health: 100, mana: 100}))
-		world.execute([system])
+		applyChange(entities, change.patch(wizardId, {health: 100, mana: 100}))
+		executeSystems(entities, [system])
 		counts.expect(1, 2, 0)
 
-		world.apply(del(wizardId))
-		world.execute([system])
+		applyChange(entities, change.delete(wizardId))
+		executeSystems(entities, [system])
 		counts.expect(1, 2, 1)
-		expect(world.entities.size).is(0)
+		expect(entities.size).is(0)
 	}),
 })
 
