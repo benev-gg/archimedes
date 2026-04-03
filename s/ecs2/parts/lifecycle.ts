@@ -1,0 +1,30 @@
+
+import {GMap} from "@e280/stz"
+import {Entities} from "./entities.js"
+import {EntitiesReadonly} from "./entities-readonly.js"
+import {Components, Id, LifecycleCallbacks, LifecycleEnter} from "./types.js"
+
+export function lifecycle<C extends Components, K extends keyof C>(
+		entities: Entities<C> | EntitiesReadonly<C>,
+		componentKeys: K[],
+		enter: LifecycleEnter<C, K>
+	) {
+	const alive = new GMap<Id, LifecycleCallbacks<C, K>>()
+	const sel = () => entities.select(...componentKeys)
+
+	return function*() {
+		const current = new Map(sel())
+
+		for (const [id, callbacks] of alive) {
+			if (current.has(id)) continue
+			alive.delete(id)
+			callbacks.exit(id)
+		}
+
+		for (const [id, components] of current) {
+			const callbacks = alive.guarantee(id, () => enter(id, components))
+			callbacks.tick(id, components)
+		}
+	}
+}
+
