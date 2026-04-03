@@ -1,8 +1,8 @@
 
 import {GMap, is} from "@e280/stz"
-import {Assign, Change, Components, Entities, Kind, Update} from "../types.js"
+import {Assign, Change, Components, Entities, Kind, Update} from "../parts/types.js"
 
-export function applyChangeToEntities<C extends Components>(entities: Entities<any>, change: Change) {
+export function applyChange<C extends Components>(entities: Entities<any>, change: Change) {
 	switch (change[1]) {
 		case Kind.Assign: return assign<C>(entities, <Assign>change)
 		case Kind.Update: return update<C>(entities, <Update>change)

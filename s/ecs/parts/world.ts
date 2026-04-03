@@ -1,8 +1,8 @@
 
 import {GMap} from "@e280/stz"
 import {Optimizer} from "../utils/optimizer.js"
-import {applyChangeToEntities as applyChange} from "../utils/apply-change.js"
-import {Change, Components, Entities, Id, LifecycleCallbacks, LifecycleEnter, Select, System} from "../types.js"
+import {applyChange as applyChange} from "../utils/apply-change.js"
+import {Change, Components, Entities, Id, LifecycleCallbacks, LifecycleEnter, Select, System} from "./types.js"
 
 export class World<C extends Components> {
 	#optimizer

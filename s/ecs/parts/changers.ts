@@ -1,6 +1,6 @@
 
 import {makeId} from "./make-id.js"
-import {Assign, Components, Delta, Id, Kind, Update} from "../types.js"
+import {Assign, Components, Delta, Id, Kind, Update} from "./types.js"
 
 export function create<C extends Components>(components: Partial<C>): Assign {
 	return [makeId(), Kind.Assign, components]
