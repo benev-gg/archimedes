@@ -33,16 +33,16 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
     ```
 1. ***create entities map.*** fancy caching for speedy-fast lookups.
     ```ts
-    export const entitiesWritable = new Entities<MyComponents>()
-
-    // only let systems touch the readonly variant!
-    export const entities = entitiesWritable.readonly()
+    export const entities = new Entities<MyComponents>()
     ```
 1. ***define systems.*** select entities by components. yields changes.
     ```ts
+    // readonly variant so systems behave
+    const ents = entities.readonly()
+
     const systems = asSystems<MyComponents>(
       function* bleeding() {
-        for (const [id, components] of entities.select("health", "bleed")) {
+        for (const [id, components] of ents.select("health", "bleed")) {
           if (components.bleed >= 0) {
             const health = components.health - components.bleed
             const bleed = components.bleed - 1
@@ -52,7 +52,7 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
       },
 
       function* death() {
-        for (const [id, components] of entities.select("health")) {
+        for (const [id, components] of ents.select("health")) {
           if (components.health <= 0)
             yield change.delete(id)
         }
@@ -62,14 +62,14 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
 1. ***create your first entity.***
     ```ts
     const wizardId = makeId()
-    entitiesWritable.set(wizardId, {health: 100, bleed: 2})
+    entities.set(wizardId, {health: 100, bleed: 2})
 
     console.log(entities.get(wizardId)?.health)
       // 100
     ```
 1. ***execute systems to simulate each tick.***
     ```ts
-    executeSystems(entitiesWritable, systems)
+    executeSystems(entities, systems)
 
     console.log(entities.get(wizardId)?.health)
       // 98
