@@ -1,6 +1,6 @@
 
 import {makeId} from "./make-id.js"
-import {Components, ChangeSet, ChangeMerge, Id, ChangeKind, ChangeOmit} from "./types.js"
+import {Components, ChangeSet, ChangeMerge, Id, ChangeKind, ChangeDrop} from "./types.js"
 
 export const change = {
 	create: (components: Partial<Components>): ChangeSet<Components> =>
@@ -15,7 +15,7 @@ export const change = {
 	merge: (id: Id, patch: Partial<Components>): ChangeMerge<Components> =>
 		[ChangeKind.Merge, id, patch],
 
-	omit: <C extends Components>(id: Id, ...keys: (keyof C)[]): ChangeOmit<C> =>
-		[ChangeKind.Omit, id, keys],
+	drop: <C extends Components>(id: Id, ...keys: (keyof C)[]): ChangeDrop<C> =>
+		[ChangeKind.Drop, id, keys],
 }
 

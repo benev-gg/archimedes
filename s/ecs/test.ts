@@ -38,11 +38,11 @@ export default suite({
 		expect([...entities.select("health")].length).is(1)
 	}),
 
-	"omit components from entity": test(async() => {
+	"drop components from entity": test(async() => {
 		const {entities} = setupExample()
 		const id = applyChange(entities, change.create({health: 100, mana: 100}))
 		expect([...entities.select("health", "mana")].length).is(1)
-		applyChange(entities, change.omit(id, "mana"))
+		applyChange(entities, change.drop(id, "mana"))
 		expect("mana" in entities.require(id)).is(false)
 		expect([...entities.select("health", "mana")].length).is(0)
 	}),

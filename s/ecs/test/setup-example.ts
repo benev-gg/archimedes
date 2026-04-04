@@ -32,7 +32,7 @@ export function setupExample() {
 					yield change.merge(id, {health, bleed})
 				}
 				if (c.bleed <= 0)
-					yield change.omit(id, "bleed")
+					yield change.drop(id, "bleed")
 			}
 		},
 
