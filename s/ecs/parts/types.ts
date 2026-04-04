@@ -4,6 +4,8 @@ export type Components = Record<string, unknown>
 export type AsComponents<C extends Components> = C
 export type Select<C extends Components, K extends keyof C> = Pick<C, K> & Partial<C>
 export type System<C extends Components> = () => Generator<Change<C>>
+
+export const asSystem = <C extends Components>(system: System<C>) => system
 export const asSystems = <C extends Components>(...systems: System<C>[]) => systems
 
 export enum ChangeKind {Set, Merge, Drop}
