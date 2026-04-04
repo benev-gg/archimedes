@@ -23,7 +23,7 @@ export default suite({
 		expect(entities.size).is(0)
 	}),
 
-	"partial updates": test(async() => {
+	"merge components into entity": test(async() => {
 		const {entities} = setupExample()
 		const id = applyChange(entities, change.create({health: 100, mana: 100}))
 		expect(entities.require(id).health).is(100)
@@ -38,11 +38,12 @@ export default suite({
 		expect([...entities.select("health")].length).is(1)
 	}),
 
-	"select an entity after shape change": test(async() => {
+	"omit components from entity": test(async() => {
 		const {entities} = setupExample()
 		const id = applyChange(entities, change.create({health: 100, mana: 100}))
 		expect([...entities.select("health", "mana")].length).is(1)
 		applyChange(entities, change.omit(id, "mana"))
+		expect("mana" in entities.require(id)).is(false)
 		expect([...entities.select("health", "mana")].length).is(0)
 	}),
 
