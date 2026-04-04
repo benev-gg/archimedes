@@ -1,5 +1,6 @@
 
 import {change} from "../parts/change.js"
+import {asSystems} from "../parts/types.js"
 import {Entities} from "../parts/entities.js"
 
 export function setupExample() {
@@ -13,12 +14,12 @@ export function setupExample() {
 	const writableEntities = new Entities<MyComponents>()
 	const entities = writableEntities.readonly()
 
-	const systems = [
+	const systems = asSystems<MyComponents>(
 		function* manaRegen() {
 			for (const [id, c] of entities.select("mana", "manaRegen")) {
 				if (c.manaRegen !== 0) {
 					const mana = c.mana + c.manaRegen
-					yield change.patch(id, {mana})
+					yield change.merge(id, {mana})
 				}
 			}
 		},
@@ -27,8 +28,11 @@ export function setupExample() {
 			for (const [id, c] of entities.select("health", "bleed")) {
 				if (c.bleed !== 0) {
 					const health = c.health - c.bleed
-					yield change.patch(id, {health})
+					const bleed = c.bleed - 1
+					yield change.merge(id, {health, bleed})
 				}
+				if (c.bleed <= 0)
+					yield change.omit(id, "bleed")
 			}
 		},
 
@@ -38,7 +42,7 @@ export function setupExample() {
 					yield change.delete(id)
 			}
 		},
-	]
+	)
 
 	return {entities: writableEntities, systems}
 }

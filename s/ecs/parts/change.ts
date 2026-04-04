@@ -1,18 +1,21 @@
 
-import {Components, ChangeAssign, ChangePatch, ChangeDelta, Id, ChangeKind} from "./types.js"
 import {makeId} from "./make-id.js"
+import {Components, ChangeSet, ChangeMerge, Id, ChangeKind, ChangeOmit} from "./types.js"
 
 export const change = {
-	create: <C extends Components>(components: Partial<C>): ChangeAssign =>
-		[ChangeKind.Assign, makeId(), components],
+	create: (components: Partial<Components>): ChangeSet<Components> =>
+		[ChangeKind.Set, makeId(), components],
 
-	assign: <C extends Components>(id: Id, components: Partial<C> | undefined): ChangeAssign =>
-		[ChangeKind.Assign, id, components],
+	set: (id: Id, components: Partial<Components> | undefined): ChangeSet<Components> =>
+		[ChangeKind.Set, id, components],
 
-	delete: (id: Id): ChangeAssign =>
-		[ChangeKind.Assign, id],
+	delete: (id: Id): ChangeSet<Components> =>
+		[ChangeKind.Set, id],
 
-	patch: <C extends Components>(id: Id, delta: ChangeDelta<C>): ChangePatch =>
-		[ChangeKind.Patch, id, delta],
+	merge: (id: Id, patch: Partial<Components>): ChangeMerge<Components> =>
+		[ChangeKind.Merge, id, patch],
+
+	omit: <C extends Components>(id: Id, ...keys: (keyof C)[]): ChangeOmit<C> =>
+		[ChangeKind.Omit, id, keys],
 }
 

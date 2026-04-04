@@ -1,33 +1,33 @@
 
-import {is} from "@e280/stz"
 import {Entities} from "./entities.js"
-import {ChangeAssign, Change, Components, ChangeKind, ChangePatch} from "./types.js"
+import {ChangeSet, Change, Components, ChangeKind, ChangeMerge, ChangeOmit} from "./types.js"
 
-export function applyChange<C extends Components>(entities: Entities<C>, change: Change) {
+export function applyChange<C extends Components>(entities: Entities<C>, change: Change<C>) {
 	switch (change[0]) {
-		case ChangeKind.Assign: return assign<C>(entities, <ChangeAssign>change)
-		case ChangeKind.Patch: return update<C>(entities, <ChangePatch>change)
+		case ChangeKind.Set: return applySet<C>(entities, <ChangeSet<C>>change)
+		case ChangeKind.Merge: return applyMerge<C>(entities, <ChangeMerge<C>>change)
+		case ChangeKind.Omit: return applyOmit<C>(entities, <ChangeOmit<C>>change)
 		default: throw new Error(`unknown change kind "${change[0]}"`)
 	}
 }
 
-function assign<C extends Components>(entities: Entities<C>, [, id, components]: ChangeAssign) {
-	if (components) {
-		entities.set(id, components as Partial<C>)
-		return components as Partial<C>
-	}
-	else {
-		entities.delete(id)
-		return undefined
-	}
+function applySet<C extends Components>(entities: Entities<C>, [, id, components]: ChangeSet<C>) {
+	if (components) entities.set(id, components as Partial<C>)
+	else entities.delete(id)
+	return id
 }
 
-function update<C extends Components>(entities: Entities<Partial<C>>, [, id, fresh]: ChangePatch) {
-	const components = entities.guarantee(id, () => ({})) as any
-	for (const [key, value] of Object.entries(fresh)) {
-		if (!is.happy(value)) delete components[key]
-		else components[key] = value
-	}
-	return components as Partial<C>
+function applyMerge<C extends Components>(entities: Entities<C>, [, id, patch]: ChangeMerge<C>) {
+	const components = entities.guarantee(id, () => ({}))
+	Object.assign(components, patch)
+	entities.set(id, components)
+	return id
+}
+
+function applyOmit<C extends Components>(entities: Entities<C>, [, id, keys]: ChangeOmit<C>) {
+	const components = entities.guarantee(id, () => ({}))
+	for (const key of keys) delete components[key]
+	entities.set(id, components)
+	return id
 }
 

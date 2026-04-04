@@ -17,9 +17,7 @@ export default suite({
 
 	"delete an entity": test(async() => {
 		const {entities} = setupExample()
-		const creating = change.create({health: 100})
-		const id = creating[1]
-		applyChange(entities, creating)
+		const id = applyChange(entities, change.create({health: 100}))
 		expect(entities.size).is(1)
 		applyChange(entities, change.delete(id))
 		expect(entities.size).is(0)
@@ -27,11 +25,9 @@ export default suite({
 
 	"partial updates": test(async() => {
 		const {entities} = setupExample()
-		const creating = change.create({health: 100, mana: 100})
-		const id = creating[1]
-		applyChange(entities, creating)
+		const id = applyChange(entities, change.create({health: 100, mana: 100}))
 		expect(entities.require(id).health).is(100)
-		applyChange(entities, change.patch(id, {health: 99}))
+		applyChange(entities, change.merge(id, {health: 99}))
 		expect(entities.require(id).health).is(99)
 		expect(entities.require(id).mana).is(100)
 	}),
@@ -44,11 +40,9 @@ export default suite({
 
 	"select an entity after shape change": test(async() => {
 		const {entities} = setupExample()
-		const creating = change.create({health: 100, mana: 100})
-		const id = creating[1]
-		applyChange(entities, creating)
+		const id = applyChange(entities, change.create({health: 100, mana: 100}))
 		expect([...entities.select("health", "mana")].length).is(1)
-		applyChange(entities, change.patch(id, {health: 99, mana: null}))
+		applyChange(entities, change.omit(id, "mana"))
 		expect([...entities.select("health", "mana")].length).is(0)
 	}),
 
@@ -90,10 +84,10 @@ export default suite({
 
 	"death by bleeding": test(async() => {
 		const {entities, systems} = setupExample()
-		const creating = change.create({health: 2, bleed: 1})
+		const creating = change.create({health: 3, bleed: 2})
 		const wizardId = creating[1]
 		applyChange(entities, creating)
-		expect(entities.require(wizardId).health).is(2)
+		expect(entities.require(wizardId).health).is(3)
 		executeSystems(entities, systems)
 		expect(entities.require(wizardId).health).is(1)
 		executeSystems(entities, systems)
@@ -118,7 +112,7 @@ export default suite({
 		executeSystems(entities, [system])
 		counts.expect(1, 1, 0)
 
-		applyChange(entities, change.patch(wizardId, {health: 100, mana: 100}))
+		applyChange(entities, change.merge(wizardId, {health: 100, mana: 100}))
 		executeSystems(entities, [system])
 		counts.expect(1, 2, 0)
 

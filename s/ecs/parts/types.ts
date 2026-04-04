@@ -3,13 +3,14 @@ export type Id = string
 export type Components = Record<string, unknown>
 export type AsComponents<C extends Components> = C
 export type Select<C extends Components, K extends keyof C> = Pick<C, K> & Partial<C>
-export type System = () => Generator<Change>
+export type System<C extends Components> = () => Generator<Change<C>>
+export const asSystems = <C extends Components>(...systems: System<C>[]) => systems
 
-export enum ChangeKind {Assign, Patch}
-export type ChangeDelta<C extends Components> = Partial<{[K in keyof C]: C[K] | null}>
-export type ChangeAssign = [kind: ChangeKind, id: Id, components?: Partial<Components>]
-export type ChangePatch = [kind: ChangeKind, id: Id, delta: ChangeDelta<Components>]
-export type Change = ChangeAssign | ChangePatch
+export enum ChangeKind {Set, Merge, Omit}
+export type ChangeSet<C extends Components> = [kind: ChangeKind.Set, id: Id, components?: Partial<C>]
+export type ChangeMerge<C extends Components> = [kind: ChangeKind.Merge, id: Id, patch: Partial<C>]
+export type ChangeOmit<C extends Components> = [kind: ChangeKind.Omit, id: Id, keys: (keyof C)[]]
+export type Change<C extends Components> = ChangeSet<C> | ChangeMerge<C> | ChangeOmit<C>
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
 	tick: (id: Id, components: Select<C, K>) => void
