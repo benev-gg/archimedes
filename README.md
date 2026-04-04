@@ -31,7 +31,7 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
       bleed: number
     }
     ```
-1. ***create entities map.*** fancy caching for speedy-fast lookups.
+1. ***create entities map.*** indexed for speedy-fast lookups.
     ```ts
     export const entities = new Entities<MyComponents>()
     ```
@@ -43,10 +43,9 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
     const systems = asSystems<MyComponents>(
       function* bleeding() {
         for (const [id, components] of ents.select("health", "bleed")) {
-          if (components.bleed >= 0) {
+          if (components.bleed > 0) {
             const health = components.health - components.bleed
-            const bleed = components.bleed - 1
-            yield change.merge(id, {health, bleed})
+            yield change.merge(id, {health})
           }
         }
       },
