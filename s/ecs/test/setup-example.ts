@@ -16,29 +16,29 @@ export function setupExample() {
 
 	const systems = asSystems<MyComponents>(
 		function* manaRegen() {
-			for (const [id, c] of entities.select("mana", "manaRegen")) {
-				if (c.manaRegen !== 0) {
-					const mana = c.mana + c.manaRegen
+			for (const [id, components] of entities.select("mana", "manaRegen")) {
+				if (components.manaRegen !== 0) {
+					const mana = components.mana + components.manaRegen
 					yield change.merge(id, {mana})
 				}
 			}
 		},
 
 		function* bleeding() {
-			for (const [id, c] of entities.select("health", "bleed")) {
-				if (c.bleed !== 0) {
-					const health = c.health - c.bleed
-					const bleed = c.bleed - 1
+			for (const [id, components] of entities.select("health", "bleed")) {
+				if (components.bleed >= 0) {
+					const health = components.health - components.bleed
+					const bleed = components.bleed - 1
 					yield change.merge(id, {health, bleed})
 				}
-				if (c.bleed <= 0)
+				if (components.bleed <= 0)
 					yield change.drop(id, "bleed")
 			}
 		},
 
 		function* death() {
-			for (const [id, c] of entities.select("health")) {
-				if (c.health <= 0)
+			for (const [id, components] of entities.select("health")) {
+				if (components.health <= 0)
 					yield change.delete(id)
 			}
 		},
