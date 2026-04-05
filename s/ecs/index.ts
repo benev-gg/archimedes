@@ -1,5 +1,5 @@
 
-export * from "./parts/apply-change.js"
+export * from "./parts/apply-delta.js"
 export * from "./parts/change.js"
 export * from "./parts/entities.js"
 export * from "./parts/execute-systems.js"

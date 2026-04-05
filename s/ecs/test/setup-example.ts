@@ -1,7 +1,8 @@
 
-import {change} from "../parts/change.js"
+import {Change} from "../parts/change.js"
 import {asSystems} from "../parts/types.js"
 import {Entities} from "../parts/entities.js"
+import {applyDelta} from "../parts/apply-delta.js"
 
 export function setupExample() {
 	type MyComponents = {
@@ -12,37 +13,38 @@ export function setupExample() {
 	}
 
 	const systems = asSystems<MyComponents>(
-		function manaRegen(entities, commit) {
+		function manaRegen(entities, change) {
 			for (const [id, components] of entities.select("mana", "manaRegen")) {
 				if (components.manaRegen !== 0) {
 					const mana = components.mana + components.manaRegen
-					commit(change.merge(id, {mana}))
+					change.merge(id, {mana})
 				}
 			}
 		},
 
-		function bleeding(entities, commit) {
+		function bleeding(entities, change) {
 			for (const [id, components] of entities.select("health", "bleed")) {
 				if (components.bleed >= 0) {
 					const health = components.health - components.bleed
 					const bleed = components.bleed - 1
-					commit(change.merge(id, {health, bleed}))
+					change.merge(id, {health, bleed})
 				}
 				if (components.bleed <= 0)
-					commit(change.drop(id, "bleed"))
+					change.drop(id, "bleed")
 			}
 		},
 
-		function death(entities, commit) {
+		function death(entities, change) {
 			for (const [id, components] of entities.select("health")) {
 				if (components.health <= 0)
-					commit(change.delete(id))
+					change.delete(id)
 			}
 		},
 	)
 
 	const entities = new Entities<MyComponents>()
+	const change = new Change<MyComponents>(delta => applyDelta(entities, delta))
 
-	return {systems, entities}
+	return {systems, entities, change}
 }
 

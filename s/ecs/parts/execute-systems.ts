@@ -1,21 +1,21 @@
 
+import {Change} from "./change.js"
 import {Entities} from "./entities.js"
-import {applyChange} from "./apply-change.js"
-import {Change, Components, System} from "./types.js"
+import {applyDelta} from "./apply-delta.js"
+import {Delta, Components, System} from "./types.js"
 
 export function executeSystems<C extends Components>(entities: Entities<C>, systems: System<C>[]) {
-	const allChanges: Change<C>[] = []
+	const entitiesReadonly = entities.readonly()
+	const deltas: Delta<C>[] = []
 
-	function commit(...localChanges: Change<C>[]) {
-		for (const change of localChanges) {
-			applyChange(entities, change)
-			allChanges.push(change)
-		}
-	}
+	const change = new Change<C>(delta => {
+		applyDelta(entities, delta)
+		deltas.push(delta)
+	})
 
 	for (const system of systems)
-		system(entities.readonly(), commit)
+		system(entitiesReadonly, change)
 
-	return allChanges
+	return deltas
 }
 
