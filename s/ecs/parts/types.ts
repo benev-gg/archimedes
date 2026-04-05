@@ -1,4 +1,6 @@
 
+import {EntitiesReadonly} from "./entities.js"
+
 export type Id = string
 export type Components = Record<string, unknown>
 export type AsComponents<C extends Components> = C
@@ -12,7 +14,7 @@ export type Change<C extends Components> = ChangeSet<C> | ChangeMerge<C> | Chang
 
 export type Commit<C extends Components> = (...changes: Change<C>[]) => void
 
-export type System<C extends Components> = (commit: Commit<C>) => void
+export type System<C extends Components> = (entities: EntitiesReadonly<C>, commit: Commit<C>) => void
 export const asSystem = <C extends Components>(system: System<C>) => system
 export const asSystems = <C extends Components>(...systems: System<C>[]) => systems
 

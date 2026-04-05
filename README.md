@@ -37,12 +37,9 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
     ```
 1. ***define systems.*** select entities by components. commit changes.
     ```ts
-    // readonly variant so systems behave
-    const ents = entities.readonly()
-
     const systems = asSystems<MyComponents>(
-      function bleeding(commit) {
-        for (const [id, components] of ents.select("health", "bleed")) {
+      function bleeding(entities, commit) {
+        for (const [id, components] of entities.select("health", "bleed")) {
           if (components.bleed > 0) {
             const health = components.health - components.bleed
             commit(change.merge(id, {health}))
@@ -50,8 +47,8 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
         }
       },
 
-      function death(commit) {
-        for (const [id, components] of ents.select("health")) {
+      function death(entities, commit) {
+        for (const [id, components] of entities.select("health")) {
           if (components.health <= 0)
             commit(change.delete(id))
         }

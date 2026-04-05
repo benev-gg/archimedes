@@ -11,11 +11,8 @@ export function setupExample() {
 		manaRegen: number
 	}
 
-	const writableEntities = new Entities<MyComponents>()
-	const entities = writableEntities.readonly()
-
 	const systems = asSystems<MyComponents>(
-		function manaRegen(commit) {
+		function manaRegen(entities, commit) {
 			for (const [id, components] of entities.select("mana", "manaRegen")) {
 				if (components.manaRegen !== 0) {
 					const mana = components.mana + components.manaRegen
@@ -24,7 +21,7 @@ export function setupExample() {
 			}
 		},
 
-		function bleeding(commit) {
+		function bleeding(entities, commit) {
 			for (const [id, components] of entities.select("health", "bleed")) {
 				if (components.bleed >= 0) {
 					const health = components.health - components.bleed
@@ -36,7 +33,7 @@ export function setupExample() {
 			}
 		},
 
-		function death(commit) {
+		function death(entities, commit) {
 			for (const [id, components] of entities.select("health")) {
 				if (components.health <= 0)
 					commit(change.delete(id))
@@ -44,5 +41,8 @@ export function setupExample() {
 		},
 	)
 
-	return {entities: writableEntities, systems}
+	const entities = new Entities<MyComponents>()
+
+	return {systems, entities}
 }
+

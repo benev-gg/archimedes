@@ -118,7 +118,7 @@ export default suite({
 	"lifecycles": test(async() => {
 		const {entities} = setupExample()
 		const counts = setupLifecycleCounts()
-		const system = lifecycle(entities.readonly(), ["health"], () => {
+		const system = lifecycle(["health"], () => {
 			counts.enters++
 			return {
 				tick: () => void counts.ticks++,
@@ -145,7 +145,7 @@ export default suite({
 
 	"lifecycle can commit": test(async() => {
 		const {entities} = setupExample()
-		const system = lifecycle(entities.readonly(), ["health"], (_id, _components, commit) => {
+		const system = lifecycle(["health"], (_id, _components, commit) => {
 			commit(change.create({mana: 50}))
 			return {
 				tick: () => {},

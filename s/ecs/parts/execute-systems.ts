@@ -14,7 +14,7 @@ export function executeSystems<C extends Components>(entities: Entities<C>, syst
 	}
 
 	for (const system of systems)
-		system(commit)
+		system(entities.readonly(), commit)
 
 	return allChanges
 }
