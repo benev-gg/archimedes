@@ -21,7 +21,7 @@ npm install @benev/archimedes
 ## 🧩 ecs — entities, components, systems
 
 ```ts
-import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
+import {Entities, asSystems, makeId, executeSystems} from "@benev/archimedes"
 ```
 
 1. ***define components.*** json-friendly data that entities could have.
@@ -35,27 +35,27 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
     ```ts
     export const entities = new Entities<MyComponents>()
     ```
-1. ***define systems.*** select entities by components. commit changes.
+1. ***define systems.*** select entities by components. formal changes.
     ```ts
     const systems = asSystems<MyComponents>(
-      function bleeding(entities, commit) {
+      function bleeding(entities, change) {
         for (const [id, components] of entities.select("health", "bleed")) {
           if (components.bleed > 0) {
             const health = components.health - components.bleed
-            commit(change.merge(id, {health}))
+            change.merge(id, {health})
           }
         }
       },
 
-      function death(entities, commit) {
+      function death(entities, change) {
         for (const [id, components] of entities.select("health")) {
           if (components.health <= 0)
-            commit(change.delete(id))
+            change.delete(id)
         }
       },
     )
     ```
-1. ***create your first entity.***
+1. ***manually insert your first entity.***
     ```ts
     const wizardId = makeId()
     entities.set(wizardId, {health: 100, bleed: 2})
@@ -86,5 +86,4 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
 ## 🌎 net — connect and run multiplayer games
 
 *coming soon*
-
 
