@@ -122,5 +122,19 @@ export default suite({
 		counts.expect(1, 2, 1)
 		expect(entities.size).is(0)
 	}),
+
+	"lifecycle can commit": test(async() => {
+		const {entities} = setupExample()
+		const system = lifecycle(entities.readonly(), ["health"], (_id, _components, commit) => {
+			commit(change.create({mana: 50}))
+			return {
+				tick: () => {},
+				exit: () => {},
+			}
+		})
+		applyChange(entities, change.create({health: 100}))
+		executeSystems(entities, [system])
+		expect([...entities.select("mana")].length).is(1)
+	}),
 })
 

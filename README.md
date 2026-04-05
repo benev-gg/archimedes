@@ -35,25 +35,25 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
     ```ts
     export const entities = new Entities<MyComponents>()
     ```
-1. ***define systems.*** select entities by components. yields changes.
+1. ***define systems.*** select entities by components. commit changes.
     ```ts
     // readonly variant so systems behave
     const ents = entities.readonly()
 
     const systems = asSystems<MyComponents>(
-      function* bleeding() {
+      function bleeding(commit) {
         for (const [id, components] of ents.select("health", "bleed")) {
           if (components.bleed > 0) {
             const health = components.health - components.bleed
-            yield change.merge(id, {health})
+            commit(change.merge(id, {health}))
           }
         }
       },
 
-      function* death() {
+      function death(commit) {
         for (const [id, components] of ents.select("health")) {
           if (components.health <= 0)
-            yield change.delete(id)
+            commit(change.delete(id))
         }
       },
     )
@@ -89,6 +89,5 @@ import {Entities, asSystems, change, executeSystems} from "@benev/archimedes"
 ## 🌎 net — connect and run multiplayer games
 
 *coming soon*
-
 
 

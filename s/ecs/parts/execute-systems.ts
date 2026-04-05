@@ -4,15 +4,18 @@ import {applyChange} from "./apply-change.js"
 import {Change, Components, System} from "./types.js"
 
 export function executeSystems<C extends Components>(entities: Entities<C>, systems: System<C>[]) {
-	const changes: Change<C>[] = []
+	const allChanges: Change<C>[] = []
 
-	for (const system of systems) {
-		for (const change of system()) {
+	function commit(...localChanges: Change<C>[]) {
+		for (const change of localChanges) {
 			applyChange(entities, change)
-			changes.push(change)
+			allChanges.push(change)
 		}
 	}
 
-	return changes
+	for (const system of systems)
+		system(commit)
+
+	return allChanges
 }
 

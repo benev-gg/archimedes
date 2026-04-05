@@ -1,7 +1,7 @@
 
 import {GMap} from "@e280/stz"
 import {EntitiesReadonly} from "./entities.js"
-import {Components, Id, LifecycleCallbacks, LifecycleEnter} from "./types.js"
+import {Commit, Components, Id, LifecycleCallbacks, LifecycleEnter, System} from "./types.js"
 
 export function lifecycle<C extends Components, K extends keyof C>(
 		entities: EntitiesReadonly<C>,
@@ -12,7 +12,7 @@ export function lifecycle<C extends Components, K extends keyof C>(
 	const alive = new GMap<Id, LifecycleCallbacks<C, K>>()
 	const sel = () => entities.select(...componentKeys)
 
-	return function*() {
+	return <System<C>>function(commit: Commit<C>) {
 		const current = new Map(sel())
 
 		for (const [id, callbacks] of alive) {
@@ -22,7 +22,7 @@ export function lifecycle<C extends Components, K extends keyof C>(
 		}
 
 		for (const [id, components] of current) {
-			const callbacks = alive.guarantee(id, () => enter(id, components))
+			const callbacks = alive.guarantee(id, () => enter(id, components, commit))
 			callbacks.tick(id, components)
 		}
 	}
