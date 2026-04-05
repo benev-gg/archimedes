@@ -156,5 +156,22 @@ export default suite({
 		executeSystems(entities, [system])
 		expect([...entities.select("mana")].length).is(1)
 	}),
+
+	"lifecycle self-deletion immediate cleanup": test(async() => {
+		const {entities} = setupExample()
+		let ranExit = 0
+		const system = lifecycle(["health"], (id, _components, commit) => {
+			return {
+				tick: () => commit(change.delete(id)),
+				exit: () => { ranExit++ },
+			}
+		})
+		applyChange(entities, change.create({health: 100}))
+		expect([...entities.select("health")].length).is(1)
+		expect(ranExit).is(0)
+		executeSystems(entities, [system])
+		expect(ranExit).is(1)
+		expect([...entities.select("health")].length).is(0)
+	}),
 })
 
