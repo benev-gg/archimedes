@@ -32,6 +32,26 @@ export default suite({
 		expect(entities.require(id).mana).is(100)
 	}),
 
+	"ignore merge after delete": test(async() => {
+		const {entities} = setupExample()
+		const id = applyChange(entities, change.create({health: 100, mana: 100}))
+		expect(entities.get(id)).ok()
+		applyChange(entities, change.delete(id))
+		expect(entities.get(id)).not.ok()
+		applyChange(entities, change.merge(id, {health: 99}))
+		expect(entities.get(id)).not.ok()
+	}),
+
+	"ignore drop after delete": test(async() => {
+		const {entities} = setupExample()
+		const id = applyChange(entities, change.create({health: 100, mana: 100}))
+		expect(entities.get(id)).ok()
+		applyChange(entities, change.delete(id))
+		expect(entities.get(id)).not.ok()
+		applyChange(entities, change.drop(id, "health"))
+		expect(entities.get(id)).not.ok()
+	}),
+
 	"select an entity": test(async() => {
 		const {entities} = setupExample()
 		applyChange(entities, change.create({health: 100}))

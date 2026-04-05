@@ -18,16 +18,19 @@ function applySet<C extends Components>(entities: Entities<C>, [, id, components
 }
 
 function applyMerge<C extends Components>(entities: Entities<C>, [, id, patch]: ChangeMerge<C>) {
-	const components = entities.guarantee(id, () => ({}))
+	const components = entities.get(id)
+	if (!components)
+		return id
 	Object.assign(components, patch)
 	entities.set(id, components)
 	return id
 }
 
 function applyDrop<C extends Components>(entities: Entities<C>, [, id, keys]: ChangeDrop<C>) {
-	const components = entities.guarantee(id, () => ({}))
+	const components = entities.get(id)
+	if (!components)
+		return id
 	for (const key of keys) delete components[key]
 	entities.set(id, components)
 	return id
 }
-
