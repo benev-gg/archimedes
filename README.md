@@ -67,7 +67,7 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
     console.log(entities.get(wizardId)?.health)
       // 100
     ```
-1. ***simulate the world by making and running execute***
+1. ***create an execute fn.*** run one tick at a time.
     ```ts
     const execute = makeExecute(entities, systems)
 
