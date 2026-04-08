@@ -137,7 +137,7 @@ export default suite({
 
 	"lifecycle can commit": test(async() => {
 		const {entities, change} = setupExample()
-		const system = lifecycle(["health"], (_id, _components, change) => {
+		const system = lifecycle(["health"], ({change}) => {
 			change.create({mana: 50})
 			return {
 				tick: () => {},
@@ -152,7 +152,7 @@ export default suite({
 	"lifecycle self-deletion immediate cleanup": test(async() => {
 		const {entities, change} = setupExample()
 		let ranExit = 0
-		const system = lifecycle(["health"], (id, _components, change) => {
+		const system = lifecycle(["health"], ({id}) => {
 			return {
 				tick: () => change.delete(id),
 				exit: () => { ranExit++ },

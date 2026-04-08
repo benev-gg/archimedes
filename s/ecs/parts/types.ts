@@ -22,7 +22,14 @@ export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
 	exit: (id: Id) => void
 }
 
+export type LifecycleProps<C extends Components, K extends keyof C> = {
+	entities: EntitiesReadonly<C>
+	change: Change<C>
+	id: Id
+	components: Select<C, K>
+}
+
 export type LifecycleEnter<C extends Components, K extends keyof C> = (
-	(id: Id, components: Select<C, K>, change: Change<C>) => LifecycleCallbacks<C, K>
+	(props: LifecycleProps<C, K>) => LifecycleCallbacks<C, K>
 )
 

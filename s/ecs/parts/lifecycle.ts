@@ -9,11 +9,11 @@ export function lifecycle<C extends Components, K extends keyof C>(
 
 	const alive = new GMap<Id, LifecycleCallbacks<C, K>>()
 
-	return (entities, commit) => {
+	return (entities, change) => {
 
 		// add fresh entities
 		for (const [id, components] of entities.select(...componentKeys)) {
-			const callbacks = alive.guarantee(id, () => enter(id, components, commit))
+			const callbacks = alive.guarantee(id, () => enter({entities, change, id, components}))
 			callbacks.tick(id, components)
 		}
 
