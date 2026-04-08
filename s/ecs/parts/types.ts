@@ -1,6 +1,5 @@
 
 import {Change} from "./change.js"
-import {EntitiesReadonly} from "./entities.js"
 
 export type Id = string
 export type Components = Record<string, unknown>
@@ -13,7 +12,7 @@ export type DeltaMerge<C extends Components> = [kind: DeltaKind.Merge, id: Id, p
 export type DeltaDrop<C extends Components> = [kind: DeltaKind.Drop, id: Id, keys: (keyof C)[]]
 export type Delta<C extends Components> = DeltaSet<C> | DeltaMerge<C> | DeltaDrop<C>
 
-export type Systems<C extends Components> = (entities: EntitiesReadonly<C>, change: Change<C>) => (() => void)[]
+export type Systems<C extends Components> = (change: Change<C>) => (() => void)[]
 export const asSystems = <C extends Components>(systems: Systems<C>) => systems
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {

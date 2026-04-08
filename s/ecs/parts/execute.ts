@@ -9,7 +9,6 @@ export function makeExecute<C extends Components>(
 		systems: Systems<C>,
 	) {
 
-	const entitiesReadonly = entities.readonly()
 	let deltas: Delta<C>[] = []
 
 	const change = new Change<C>(delta => {
@@ -17,7 +16,7 @@ export function makeExecute<C extends Components>(
 		deltas.push(delta)
 	})
 
-	const fns = systems(entitiesReadonly, change)
+	const fns = systems(change)
 
 	return () => {
 		for (const fn of fns)

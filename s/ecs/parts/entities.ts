@@ -41,7 +41,7 @@ export class Entities<C extends Components> extends GMap<Id, Partial<C>> {
 			yield* this.#makeCache(componentKeys)
 	}
 
-	readonly() {
+	get readonly() {
 		return this as EntitiesReadonly<C>
 	}
 

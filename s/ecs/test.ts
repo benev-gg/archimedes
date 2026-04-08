@@ -1,10 +1,10 @@
 
 import {suite, test, expect} from "@e280/science"
+import {asSystems} from "./parts/types.js"
 import {lifecycle} from "./parts/lifecycle.js"
+import {makeExecute} from "./parts/execute.js"
 import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
 import {ExampleComponents, setupExample} from "./test/setup-example.js"
-import { asSystems } from "./parts/types.js"
-import { makeExecute } from "./parts/execute.js"
 
 export default suite({
 	"create an entity": test(async() => {
@@ -113,8 +113,8 @@ export default suite({
 	"lifecycles": test(async() => {
 		const {entities, change} = setupExample()
 		const counts = setupLifecycleCounts()
-		const systems = asSystems<ExampleComponents>(entities => [
-			lifecycle(entities, ["health"], () => {
+		const systems = asSystems<ExampleComponents>(() => [
+			lifecycle(entities.readonly, ["health"], () => {
 				counts.enters++
 				return {
 					tick: () => void counts.ticks++,
@@ -141,8 +141,8 @@ export default suite({
 
 	"lifecycle can commit changes": test(async() => {
 		const {entities, change} = setupExample()
-		const systems = asSystems<ExampleComponents>((entities, change) => [
-			lifecycle(entities, ["health"], () => {
+		const systems = asSystems<ExampleComponents>(change => [
+			lifecycle(entities.readonly, ["health"], () => {
 				change.create({mana: 50})
 				return {
 					tick: () => {},
@@ -159,8 +159,8 @@ export default suite({
 	"lifecycle self-deletion immediate cleanup": test(async() => {
 		const {entities, change} = setupExample()
 		let ranExit = 0
-		const systems = asSystems<ExampleComponents>((entities, change) => [
-			lifecycle(entities, ["health"], (id) => {
+		const systems = asSystems<ExampleComponents>(change => [
+			lifecycle(entities.readonly, ["health"], (id) => {
 				return {
 					tick: () => change.delete(id),
 					exit: () => { ranExit++ },

@@ -21,7 +21,7 @@ npm install @benev/archimedes
 ## 🧩 ecs — entities, components, systems
 
 ```ts
-import {Entities, asSystems, makeId, makeExecute} from "@benev/archimedes"
+import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
 ```
 
 1. ***define components.*** json-friendly data that entities could have.
@@ -35,11 +35,15 @@ import {Entities, asSystems, makeId, makeExecute} from "@benev/archimedes"
     ```ts
     export const entities = new Entities<MyComponents>()
     ```
-1. ***define systems.*** select entities by components. entities param is readonly. changes are formalized.
+1. ***readonly entities.*** recommended to use this in your systems.
     ```ts
-    const systems = asSystems<MyComponents>((entities, change) => [
+    export const entitiesReadonly = entities.readonly
+    ```
+1. ***define systems.*** select entities by components. changes are formalized.
+    ```ts
+    const systems = (change: Change<MyComponents>) => [
       function bleeding() {
-        for (const [id, components] of entities.select("health", "bleed")) {
+        for (const [id, components] of entitiesReadonly.select("health", "bleed")) {
           if (components.bleed > 0) {
             const health = components.health - components.bleed
             change.merge(id, {health})
@@ -48,12 +52,12 @@ import {Entities, asSystems, makeId, makeExecute} from "@benev/archimedes"
       },
 
       function death() {
-        for (const [id, components] of entities.select("health")) {
+        for (const [id, components] of entitiesReadonly.select("health")) {
           if (components.health <= 0)
             change.delete(id)
         }
       },
-    ])
+    ]
     ```
 1. ***manually insert your first entity.***
     ```ts
