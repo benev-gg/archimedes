@@ -13,23 +13,15 @@ export type DeltaMerge<C extends Components> = [kind: DeltaKind.Merge, id: Id, p
 export type DeltaDrop<C extends Components> = [kind: DeltaKind.Drop, id: Id, keys: (keyof C)[]]
 export type Delta<C extends Components> = DeltaSet<C> | DeltaMerge<C> | DeltaDrop<C>
 
-export type System<C extends Components> = (entities: EntitiesReadonly<C>, change: Change<C>) => void
-export const asSystem = <C extends Components>(system: System<C>) => system
-export const asSystems = <C extends Components>(...systems: System<C>[]) => systems
+export type Systems<C extends Components> = (entities: EntitiesReadonly<C>, change: Change<C>) => (() => void)[]
+export const asSystems = <C extends Components>(systems: Systems<C>) => systems
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
 	tick: (id: Id, components: Select<C, K>) => void
 	exit: (id: Id) => void
 }
 
-export type LifecycleProps<C extends Components, K extends keyof C> = {
-	entities: EntitiesReadonly<C>
-	change: Change<C>
-	id: Id
-	components: Select<C, K>
-}
-
 export type LifecycleEnter<C extends Components, K extends keyof C> = (
-	(props: LifecycleProps<C, K>) => LifecycleCallbacks<C, K>
+	(id: Id, components: Select<C, K>) => LifecycleCallbacks<C, K>
 )
 

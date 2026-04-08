@@ -1,9 +1,10 @@
 
 import {suite, test, expect} from "@e280/science"
 import {lifecycle} from "./parts/lifecycle.js"
-import {setupExample} from "./test/setup-example.js"
-import {executeSystems} from "./parts/execute-systems.js"
 import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
+import {ExampleComponents, setupExample} from "./test/setup-example.js"
+import { asSystems } from "./parts/types.js"
+import { makeExecute } from "./parts/execute.js"
 
 export default suite({
 	"create an entity": test(async() => {
@@ -92,76 +93,85 @@ export default suite({
 	}),
 
 	"wizard regens mana": test(async() => {
-		const {entities, change, systems} = setupExample()
+		const {entities, change, execute} = setupExample()
 		const wizardId = change.create({health: 100, mana: 50, manaRegen: 1})
-		const changes = executeSystems(entities, systems)
+		const changes = execute()
 		expect(changes.length).is(1)
 		expect(entities.require(wizardId).mana).is(51)
 	}),
 
 	"death by bleeding": test(async() => {
-		const {entities, change, systems} = setupExample()
+		const {entities, change, execute} = setupExample()
 		const wizardId = change.create({health: 3, bleed: 2})
 		expect(entities.require(wizardId).health).is(3)
-		executeSystems(entities, systems)
+		execute()
 		expect(entities.require(wizardId).health).is(1)
-		executeSystems(entities, systems)
+		execute()
 		expect(entities.has(wizardId)).is(false)
 	}),
 
 	"lifecycles": test(async() => {
 		const {entities, change} = setupExample()
 		const counts = setupLifecycleCounts()
-		const system = lifecycle(["health"], () => {
-			counts.enters++
-			return {
-				tick: () => void counts.ticks++,
-				exit: () => void counts.exits++,
-			}
-		})
-		counts.expect(0, 0, 0)
+		const systems = asSystems<ExampleComponents>(entities => [
+			lifecycle(entities, ["health"], () => {
+				counts.enters++
+				return {
+					tick: () => void counts.ticks++,
+					exit: () => void counts.exits++,
+				}
+			}),
+		])
+		const execute = makeExecute(entities, systems)
+		counts.expect({enters: 0, ticks: 0, exits: 0})
 
 		const wizardId = change.create({health: 100, mana: 50})
-		executeSystems(entities, [system])
-		counts.expect(1, 1, 0)
+		execute()
+		counts.expect({enters: 1, ticks: 1, exits: 0})
 
 		change.merge(wizardId, {health: 100, mana: 100})
-		executeSystems(entities, [system])
-		counts.expect(1, 2, 0)
+		execute()
+		counts.expect({enters: 1, ticks: 2, exits: 0})
 
 		change.delete(wizardId)
-		executeSystems(entities, [system])
-		counts.expect(1, 2, 1)
+		execute()
+		counts.expect({enters: 1, ticks: 2, exits: 1})
 		expect(entities.size).is(0)
 	}),
 
-	"lifecycle can commit": test(async() => {
+	"lifecycle can commit changes": test(async() => {
 		const {entities, change} = setupExample()
-		const system = lifecycle(["health"], ({change}) => {
-			change.create({mana: 50})
-			return {
-				tick: () => {},
-				exit: () => {},
-			}
-		})
+		const systems = asSystems<ExampleComponents>((entities, change) => [
+			lifecycle(entities, ["health"], () => {
+				change.create({mana: 50})
+				return {
+					tick: () => {},
+					exit: () => {},
+				}
+			}),
+		])
+		const execute = makeExecute(entities, systems)
 		change.create({health: 100})
-		executeSystems(entities, [system])
+		execute()
 		expect([...entities.select("mana")].length).is(1)
 	}),
 
 	"lifecycle self-deletion immediate cleanup": test(async() => {
 		const {entities, change} = setupExample()
 		let ranExit = 0
-		const system = lifecycle(["health"], ({id}) => {
-			return {
-				tick: () => change.delete(id),
-				exit: () => { ranExit++ },
-			}
-		})
+		const systems = asSystems<ExampleComponents>((entities, change) => [
+			lifecycle(entities, ["health"], (id) => {
+				return {
+					tick: () => change.delete(id),
+					exit: () => { ranExit++ },
+				}
+			}),
+		])
+		const execute = makeExecute(entities, systems)
 		change.create({health: 100})
 		expect([...entities.select("health")].length).is(1)
 		expect(ranExit).is(0)
-		executeSystems(entities, [system])
+		execute()
 		expect(ranExit).is(1)
 		expect([...entities.select("health")].length).is(0)
 	}),
