@@ -16,7 +16,7 @@ export function lifecycle<C extends Components, K extends keyof C>(
 		// add fresh entities
 		for (const [id, components] of entities.select(...componentKeys)) {
 			const callbacks = alive.guarantee(id, () => enter(id, components))
-			callbacks.tick(id, components)
+			callbacks.tick(components)
 		}
 
 		// delete stale entities
@@ -24,7 +24,7 @@ export function lifecycle<C extends Components, K extends keyof C>(
 		for (const [id, callbacks] of alive) {
 			if (currentIds.has(id)) continue
 			alive.delete(id)
-			callbacks.exit(id)
+			callbacks.exit()
 		}
 	}
 }

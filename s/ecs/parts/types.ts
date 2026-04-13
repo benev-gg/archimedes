@@ -16,8 +16,8 @@ export type Systems<C extends Components> = (change: Change<C>) => (() => void)[
 export const asSystems = <C extends Components>(systems: Systems<C>) => systems
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
-	tick: (id: Id, components: Select<C, K>) => void
-	exit: (id: Id) => void
+	tick: (components: Select<C, K>) => void
+	exit: () => void
 }
 
 export type LifecycleEnter<C extends Components, K extends keyof C> = (
