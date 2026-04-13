@@ -1,6 +1,6 @@
 {
 	"name": "@benev/archimedes",
-	"version": "0.1.0-6",
+	"version": "0.1.0-7",
 	"description": "game ecs with auto networking",
 	"license": "MIT",
 	"type": "module",
