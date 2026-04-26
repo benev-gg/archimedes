@@ -25,10 +25,10 @@ export default suite({
 	"merge components into entity": test(async() => {
 		const {entities, change} = setupExample()
 		const id = change.create({health: 100, mana: 100})
-		expect(entities.require(id).health).is(100)
+		expect(entities.need(id).health).is(100)
 		change.merge(id, {health: 99})
-		expect(entities.require(id).health).is(99)
-		expect(entities.require(id).mana).is(100)
+		expect(entities.need(id).health).is(99)
+		expect(entities.need(id).mana).is(100)
 	}),
 
 	"ignore merge after delete": test(async() => {
@@ -62,7 +62,7 @@ export default suite({
 		const id = change.create({health: 100, mana: 100})
 		expect([...entities.select("health", "mana")].length).is(1)
 		change.drop(id, "mana")
-		expect("mana" in entities.require(id)).is(false)
+		expect("mana" in entities.need(id)).is(false)
 		expect([...entities.select("health", "mana")].length).is(0)
 	}),
 
@@ -97,15 +97,15 @@ export default suite({
 		const wizardId = change.create({health: 100, mana: 50, manaRegen: 1})
 		const changes = execute()
 		expect(changes.length).is(1)
-		expect(entities.require(wizardId).mana).is(51)
+		expect(entities.need(wizardId).mana).is(51)
 	}),
 
 	"death by bleeding": test(async() => {
 		const {entities, change, execute} = setupExample()
 		const wizardId = change.create({health: 3, bleed: 2})
-		expect(entities.require(wizardId).health).is(3)
+		expect(entities.need(wizardId).health).is(3)
 		execute()
-		expect(entities.require(wizardId).health).is(1)
+		expect(entities.need(wizardId).health).is(1)
 		execute()
 		expect(entities.has(wizardId)).is(false)
 	}),

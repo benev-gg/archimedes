@@ -48,7 +48,7 @@ export class Entities<C extends Components> extends GMap<Id, Partial<C>> {
 	#getCache<K extends keyof C>(componentKeys: K[]) {
 		for (const set of this.#index.keys()) {
 			if (setHasSameValuesAsArray(set, componentKeys))
-				return this.#index.require(set) as GMap<Id, Select<C, K>>
+				return this.#index.need(set) as GMap<Id, Select<C, K>>
 		}
 	}
 
