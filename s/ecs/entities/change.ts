@@ -1,6 +1,6 @@
 
 import {makeId} from "./make-id.js"
-import {Components, Id, DeltaKind, Delta} from "./types.js"
+import {Components, Id, DeltaKind, Delta} from "../types.js"
 
 export class Change<C extends Components> {
 	constructor(private commit: (delta: Delta<C>) => void) {}

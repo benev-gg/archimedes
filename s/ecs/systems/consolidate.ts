@@ -1,5 +1,10 @@
 
-import {System, Systems} from "./types.js"
+import {System, Systems} from "../types.js"
+
+export function consolidate<Context>(context: Context, blueprint: Systems<Context>) {
+	const fns = flatten(blueprint).map(fn => fn(context))
+	return () => fns.forEach(fn => fn())
+}
 
 function flatten<Context>(blueprint: Systems<Context>) {
 	const systems: System<Context>[] = []
@@ -10,10 +15,5 @@ function flatten<Context>(blueprint: Systems<Context>) {
 	}(blueprint)
 
 	return systems
-}
-
-export function consolidate<Context>(context: Context, blueprint: Systems<Context>) {
-	const fns = flatten(blueprint).map(fn => fn(context))
-	return () => fns.forEach(fn => fn())
 }
 

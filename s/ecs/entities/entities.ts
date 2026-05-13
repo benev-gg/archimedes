@@ -1,6 +1,6 @@
 
 import {need} from "@e280/stz"
-import {Components, Id, Select} from "./types.js"
+import {Components, Id, Select} from "../types.js"
 
 export class Entities<C extends Components> extends Map<Id, Partial<C>> {
 	#index = new Map<Set<keyof C>, Map<Id, Partial<C>>>()

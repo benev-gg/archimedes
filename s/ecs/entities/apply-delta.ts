@@ -1,6 +1,6 @@
 
 import {Entities} from "./entities.js"
-import {DeltaSet, Delta, Components, DeltaKind, DeltaMerge, DeltaDrop} from "./types.js"
+import {DeltaSet, Delta, Components, DeltaKind, DeltaMerge, DeltaDrop} from "../types.js"
 
 export function applyDelta<C extends Components>(entities: Entities<C>, delta: Delta<C>) {
 	switch (delta[0]) {

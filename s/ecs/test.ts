@@ -1,7 +1,7 @@
 
 import {need} from "@e280/stz"
 import {suite, test, expect} from "@e280/science"
-import {lifecycle} from "./parts/lifecycle.js"
+import {lifecycle} from "./systems/lifecycle.js"
 import {setupExample} from "./test/setup-example.js"
 import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
 

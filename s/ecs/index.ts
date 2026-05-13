@@ -1,9 +1,11 @@
 
-export * from "./parts/apply-delta.js"
-export * from "./parts/change.js"
-export * from "./parts/entities.js"
-export * from "./parts/lifecycle.js"
-export * from "./parts/make-id.js"
-export * from "./parts/systems.js"
-export * from "./parts/types.js"
+export * from "./entities/apply-delta.js"
+export * from "./entities/change.js"
+export * from "./entities/entities.js"
+export * from "./entities/make-id.js"
+
+export * from "./systems/lifecycle.js"
+export * from "./systems/consolidate.js"
+
+export * from "./types.js"
 

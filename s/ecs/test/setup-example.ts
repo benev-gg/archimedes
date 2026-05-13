@@ -1,9 +1,9 @@
 
-import {Change} from "../parts/change.js"
-import {consolidate} from "../parts/systems.js"
-import {Delta, Systems} from "../parts/types.js"
-import {applyDelta} from "../parts/apply-delta.js"
-import {Entities, EntitiesReadonly} from "../parts/entities.js"
+import {Change} from "../entities/change.js"
+import {consolidate} from "../systems/systems.js"
+import {Delta, Systems} from "../types.js"
+import {applyDelta} from "../entities/apply-delta.js"
+import {Entities, EntitiesReadonly} from "../entities/entities.js"
 
 export type ExampleComponents = {
 	health: number
