@@ -35,14 +35,15 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
     ```ts
     export const entities = new Entities<MyComponents>()
     ```
-1. ***readonly entities.*** recommended to use this in your systems.
+1. ***setup systems with context.***
     ```ts
-    export const entitiesReadonly = entities.readonly
-    ```
-1. ***define systems.*** select entities by components. changes are formalized.
-    ```ts
-    const systems = (change: Change<MyComponents>) => [
-      function bleeding() {
+    const context = {
+      entities: entities.readonly,
+      change: new Change<MyComponents>(delta => applyDeltas(entities, delta)),
+    }
+
+    export const simulate = consolidateSystems(context, {
+      bleeding: ({entities, change}) => () => {
         for (const [id, components] of entitiesReadonly.select("health", "bleed")) {
           if (components.bleed > 0) {
             const health = components.health - components.bleed
@@ -51,13 +52,13 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
         }
       },
 
-      function death() {
+      death: ({entities, change}) => () => {
         for (const [id, components] of entitiesReadonly.select("health")) {
           if (components.health <= 0)
             change.delete(id)
         }
       },
-    ]
+    })
     ```
 1. ***manually insert your first entity.***
     ```ts
@@ -69,10 +70,8 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
     ```
 1. ***create an execute fn.*** run one tick at a time.
     ```ts
-    const execute = makeExecute(entities, systems)
-
     // simulate one tick
-    execute()
+    simulate()
 
     console.log(entities.get(wizardId)?.health)
       // 98

@@ -1,9 +1,9 @@
 
 import {Change} from "../parts/change.js"
-import {asSystems} from "../parts/types.js"
-import {Entities} from "../parts/entities.js"
-import {makeExecute} from "../parts/execute.js"
 import {applyDelta} from "../parts/apply-delta.js"
+import {consolidateSystems} from "../parts/systems.js"
+import {Delta, SystemsBlueprint} from "../parts/types.js"
+import {Entities, EntitiesReadonly} from "../parts/entities.js"
 
 export type ExampleComponents = {
 	health: number
@@ -12,13 +12,26 @@ export type ExampleComponents = {
 	manaRegen: number
 }
 
-export function setupExample() {
-	const entities = new Entities<ExampleComponents>()
-	const rentities = entities.readonly
+export type ExampleContext = {
+	entities: EntitiesReadonly<ExampleComponents>
+	change: Change<ExampleComponents>
+}
 
-	const systems = asSystems<ExampleComponents>(change => [
-		function manaRegen() {
-			for (const [id, components] of rentities.select("mana", "manaRegen")) {
+export function setupExample(
+		options: {moreSystems?: SystemsBlueprint<ExampleContext>} = {}
+	) {
+
+	const entities = new Entities<ExampleComponents>()
+	let deltas: Delta<ExampleComponents>[] = []
+	const change = new Change<ExampleComponents>(delta => {
+		deltas.push(delta)
+		applyDelta(entities, delta)
+	})
+	const context: ExampleContext = {entities: entities.readonly, change}
+
+	const systems = consolidateSystems<ExampleContext>(context, {
+		mana_regen: ({entities, change}) => () => {
+			for (const [id, components] of entities.select("mana", "manaRegen")) {
 				if (components.manaRegen !== 0) {
 					const mana = components.mana + components.manaRegen
 					change.merge(id, {mana})
@@ -26,8 +39,8 @@ export function setupExample() {
 			}
 		},
 
-		function bleeding() {
-			for (const [id, components] of rentities.select("health", "bleed")) {
+		bleeding: ({entities, change}) => () => {
+			for (const [id, components] of entities.select("health", "bleed")) {
 				if (components.bleed >= 0) {
 					const health = components.health - components.bleed
 					const bleed = components.bleed - 1
@@ -38,16 +51,21 @@ export function setupExample() {
 			}
 		},
 
-		function death() {
-			for (const [id, components] of rentities.select("health")) {
+		death: ({entities, change}) => () => {
+			for (const [id, components] of entities.select("health")) {
 				if (components.health <= 0)
 					change.delete(id)
 			}
 		},
-	])
 
-	const change = new Change<ExampleComponents>(delta => applyDelta(entities, delta))
-	const execute = makeExecute(entities, systems)
+		...(options.moreSystems ?? {}),
+	})
+
+	const execute = () => {
+		deltas = []
+		systems()
+		return deltas
+	}
 
 	return {systems, entities, change, execute}
 }

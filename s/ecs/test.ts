@@ -1,11 +1,9 @@
 
 import {need} from "@e280/stz"
 import {suite, test, expect} from "@e280/science"
-import {asSystems} from "./parts/types.js"
 import {lifecycle} from "./parts/lifecycle.js"
-import {makeExecute} from "./parts/execute.js"
+import {setupExample} from "./test/setup-example.js"
 import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
-import {ExampleComponents, setupExample} from "./test/setup-example.js"
 
 export default suite({
 	"create an entity": test(async() => {
@@ -112,18 +110,18 @@ export default suite({
 	}),
 
 	"lifecycles": test(async() => {
-		const {entities, change} = setupExample()
+		const {entities, change, execute} = setupExample({
+			moreSystems: {
+				check: ({entities}) => lifecycle(entities, ["health"], () => {
+					counts.enters++
+					return {
+						tick: () => void counts.ticks++,
+						exit: () => void counts.exits++,
+					}
+				}),
+			},
+		})
 		const counts = setupLifecycleCounts()
-		const systems = asSystems<ExampleComponents>(() => [
-			lifecycle(entities.readonly, ["health"], () => {
-				counts.enters++
-				return {
-					tick: () => void counts.ticks++,
-					exit: () => void counts.exits++,
-				}
-			}),
-		])
-		const execute = makeExecute(entities, systems)
 		counts.expect({enters: 0, ticks: 0, exits: 0})
 
 		const wizardId = change.create({health: 100, mana: 50})
@@ -141,34 +139,34 @@ export default suite({
 	}),
 
 	"lifecycle can commit changes": test(async() => {
-		const {entities, change} = setupExample()
-		const systems = asSystems<ExampleComponents>(change => [
-			lifecycle(entities.readonly, ["health"], () => {
-				change.create({mana: 50})
-				return {
-					tick: () => {},
-					exit: () => {},
-				}
-			}),
-		])
-		const execute = makeExecute(entities, systems)
+		const {entities, change, execute} = setupExample({
+			moreSystems: {
+				check: ({entities, change}) => lifecycle(entities, ["health"], () => {
+					change.create({mana: 50})
+					return {
+						tick: () => {},
+						exit: () => {},
+					}
+				}),
+			},
+		})
 		change.create({health: 100})
 		execute()
 		expect([...entities.select("mana")].length).is(1)
 	}),
 
 	"lifecycle self-deletion immediate cleanup": test(async() => {
-		const {entities, change} = setupExample()
+		const {entities, change, execute} = setupExample({
+			moreSystems: {
+				check: ({entities, change}) => lifecycle(entities, ["health"], (id) => {
+					return {
+						tick: () => change.delete(id),
+						exit: () => { ranExit++ },
+					}
+				}),
+			},
+		})
 		let ranExit = 0
-		const systems = asSystems<ExampleComponents>(change => [
-			lifecycle(entities.readonly, ["health"], (id) => {
-				return {
-					tick: () => change.delete(id),
-					exit: () => { ranExit++ },
-				}
-			}),
-		])
-		const execute = makeExecute(entities, systems)
 		change.create({health: 100})
 		expect([...entities.select("health")].length).is(1)
 		expect(ranExit).is(0)
