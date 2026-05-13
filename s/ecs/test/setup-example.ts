@@ -1,7 +1,7 @@
 
-import {Change} from "../entities/change.js"
-import {consolidate} from "../systems/systems.js"
 import {Delta, Systems} from "../types.js"
+import {Change} from "../entities/change.js"
+import {consolidate} from "../systems/consolidate.js"
 import {applyDelta} from "../entities/apply-delta.js"
 import {Entities, EntitiesReadonly} from "../entities/entities.js"
 
