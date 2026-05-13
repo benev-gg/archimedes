@@ -33,12 +33,18 @@ export class Entities<C extends Components> extends Map<Id, Partial<C>> {
 			entities.clear()
 	}
 
-	*select<K extends keyof C>(...componentKeys: K[]): Iterable<[Id, Select<C, K>]> {
+	select<K extends keyof C>(...componentKeys: K[]): [Id, Select<C, K>][] {
 		const cached = this.#getCache(componentKeys)
-		if (cached)
-			yield* cached
-		else
-			yield* this.#makeCache(componentKeys)
+		return (cached)
+			? [...cached.entries()]
+			: [...this.#makeCache(componentKeys)]
+	}
+
+	hasComponents(id: Id, keys: (keyof C)[]) {
+		const components = this.get(id)
+		return (components)
+			? componentsSatisfyKeys(components, keys)
+			: false
 	}
 
 	get readonly() {
@@ -70,6 +76,7 @@ export class Entities<C extends Components> extends Map<Id, Partial<C>> {
 
 export type EntitiesReadonly<C extends Components> = Pick<Entities<Readonly<C>>, (
 	| "has"
+	| "hasComponents"
 	| "get"
 	| "keys"
 	| "values"

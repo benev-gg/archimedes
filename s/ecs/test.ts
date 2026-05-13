@@ -53,42 +53,42 @@ export default suite({
 	"select an entity": test(async() => {
 		const {entities, change} = setupExample()
 		change.create({health: 100})
-		expect([...entities.select("health")].length).is(1)
+		expect(entities.select("health").length).is(1)
 	}),
 
 	"drop components from entity": test(async() => {
 		const {entities, change} = setupExample()
 		const id = change.create({health: 100, mana: 100})
-		expect([...entities.select("health", "mana")].length).is(1)
+		expect(entities.select("health", "mana").length).is(1)
 		change.drop(id, "mana")
 		expect("mana" in need(entities, id)).is(false)
-		expect([...entities.select("health", "mana")].length).is(0)
+		expect(entities.select("health", "mana").length).is(0)
 	}),
 
 	"select two entities": test(async() => {
 		const {entities, change} = setupExample()
 		change.create({health: 100})
 		change.create({health: 100})
-		expect([...entities.select("health")].length).is(2)
+		expect(entities.select("health").length).is(2)
 	}),
 
 	"select with no component keys selects all": test(async() => {
 		const {entities, change} = setupExample()
 		change.create({health: 100})
 		change.create({health: 100})
-		expect([...entities.select()].length).is(2)
+		expect(entities.select().length).is(2)
 	}),
 
 	"select doesn't include non-match": test(async() => {
 		const {entities, change} = setupExample()
 		change.create({health: 100})
-		expect([...entities.select("mana")].length).is(0)
+		expect(entities.select("mana").length).is(0)
 	}),
 
 	"select includes entities with extra components": test(async() => {
 		const {entities, change} = setupExample()
 		change.create({health: 100, mana: 100})
-		expect([...entities.select("health")].length).is(1)
+		expect(entities.select("health").length).is(1)
 	}),
 
 	"wizard regens mana": test(async() => {
@@ -152,7 +152,7 @@ export default suite({
 		})
 		change.create({health: 100})
 		execute()
-		expect([...entities.select("mana")].length).is(1)
+		expect(entities.select("mana").length).is(1)
 	}),
 
 	"lifecycle self-deletion immediate cleanup": test(async() => {
@@ -168,11 +168,11 @@ export default suite({
 		})
 		let ranExit = 0
 		change.create({health: 100})
-		expect([...entities.select("health")].length).is(1)
+		expect(entities.select("health").length).is(1)
 		expect(ranExit).is(0)
 		execute()
 		expect(ranExit).is(1)
-		expect([...entities.select("health")].length).is(0)
+		expect(entities.select("health").length).is(0)
 	}),
 })
 

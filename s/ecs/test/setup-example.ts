@@ -1,8 +1,8 @@
 
 import {Change} from "../parts/change.js"
+import {consolidate} from "../parts/systems.js"
+import {Delta, Systems} from "../parts/types.js"
 import {applyDelta} from "../parts/apply-delta.js"
-import {consolidateSystems} from "../parts/systems.js"
-import {Delta, SystemsBlueprint} from "../parts/types.js"
 import {Entities, EntitiesReadonly} from "../parts/entities.js"
 
 export type ExampleComponents = {
@@ -18,7 +18,7 @@ export type ExampleContext = {
 }
 
 export function setupExample(
-		options: {moreSystems?: SystemsBlueprint<ExampleContext>} = {}
+		options: {moreSystems?: Systems<ExampleContext>} = {}
 	) {
 
 	const entities = new Entities<ExampleComponents>()
@@ -27,9 +27,10 @@ export function setupExample(
 		deltas.push(delta)
 		applyDelta(entities, delta)
 	})
+
 	const context: ExampleContext = {entities: entities.readonly, change}
 
-	const systems = consolidateSystems<ExampleContext>(context, {
+	const simulate = consolidate(context, {
 		mana_regen: ({entities, change}) => () => {
 			for (const [id, components] of entities.select("mana", "manaRegen")) {
 				if (components.manaRegen !== 0) {
@@ -63,10 +64,10 @@ export function setupExample(
 
 	const execute = () => {
 		deltas = []
-		systems()
+		simulate()
 		return deltas
 	}
 
-	return {systems, entities, change, execute}
+	return {entities, change, execute}
 }
 

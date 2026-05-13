@@ -12,17 +12,18 @@ export function lifecycle<C extends Components, K extends keyof C>(
 	const alive = new Map<Id, LifecycleCallbacks<C, K>>()
 
 	return () => {
-
 		// add fresh entities
 		for (const [id, components] of entities.select(...componentKeys)) {
 			const callbacks = guarantee(alive, id, () => enter(id, components))
 			callbacks.tick(components)
 		}
 
+		// check who's really alive now
+		const aliveNow = new Set(entities.select(...componentKeys).map(([id]) => id))
+
 		// delete stale entities
-		const currentIds = new Set([...entities.select(...componentKeys)].map(([id]) => id))
 		for (const [id, callbacks] of alive) {
-			if (currentIds.has(id)) continue
+			if (aliveNow.has(id)) continue
 			alive.delete(id)
 			callbacks.exit()
 		}

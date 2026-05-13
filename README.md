@@ -21,7 +21,7 @@ npm install @benev/archimedes
 ## 🧩 ecs — entities, components, systems
 
 ```ts
-import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
+import {Entities, Change, makeId, consolidate} from "@benev/archimedes"
 ```
 
 1. ***define components.*** json-friendly data that entities could have.
@@ -35,16 +35,16 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
     ```ts
     export const entities = new Entities<MyComponents>()
     ```
-1. ***setup systems with context.***
+1. ***consolidate system fns,*** with context.
     ```ts
     const context = {
       entities: entities.readonly,
       change: new Change<MyComponents>(delta => applyDeltas(entities, delta)),
     }
 
-    export const simulate = consolidateSystems(context, {
+    export const simulate = consolidate(context, {
       bleeding: ({entities, change}) => () => {
-        for (const [id, components] of entitiesReadonly.select("health", "bleed")) {
+        for (const [id, components] of entities.select("health", "bleed")) {
           if (components.bleed > 0) {
             const health = components.health - components.bleed
             change.merge(id, {health})
@@ -53,7 +53,7 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
       },
 
       death: ({entities, change}) => () => {
-        for (const [id, components] of entitiesReadonly.select("health")) {
+        for (const [id, components] of entities.select("health")) {
           if (components.health <= 0)
             change.delete(id)
         }
@@ -68,7 +68,7 @@ import {Entities, Change, makeId, makeExecute} from "@benev/archimedes"
     console.log(entities.get(wizardId)?.health)
       // 100
     ```
-1. ***create an execute fn.*** run one tick at a time.
+1. ***run your simulation,*** one tick at a time.
     ```ts
     // simulate one tick
     simulate()

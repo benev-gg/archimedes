@@ -5,9 +5,9 @@ export type AsComponents<C extends Components> = C
 export type Select<C extends Components, K extends keyof C> = Pick<C, K> & Partial<C>
 
 export type System<Context> = (context: Context) => () => void
-export type SystemsBlueprint<Context> = System<Context> | {[key: string]: SystemsBlueprint<Context>}
+export type Systems<Context> = System<Context> | {[key: string]: Systems<Context>}
 export const asSystem = <Context>(fn: System<Context>) => fn
-export const asSystemsBlueprint = <Context>(blueprint: SystemsBlueprint<Context>) => blueprint
+export const asSystems = <Context>(blueprint: Systems<Context>) => blueprint
 
 export enum DeltaKind {Set, Merge, Drop}
 export type DeltaSet<C extends Components> = [kind: DeltaKind.Set, id: Id, components?: Partial<C>]
