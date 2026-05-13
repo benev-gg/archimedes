@@ -1,9 +1,9 @@
 
-import {GMap} from "@e280/stz"
+import {need} from "@e280/stz"
 import {Components, Id, Select} from "./types.js"
 
-export class Entities<C extends Components> extends GMap<Id, Partial<C>> {
-	#index = new GMap<Set<keyof C>, GMap<Id, Partial<C>>>()
+export class Entities<C extends Components> extends Map<Id, Partial<C>> {
+	#index = new Map<Set<keyof C>, Map<Id, Partial<C>>>()
 
 	set(id: Id, components: Partial<C>) {
 		super.set(id, components)
@@ -48,13 +48,13 @@ export class Entities<C extends Components> extends GMap<Id, Partial<C>> {
 	#getCache<K extends keyof C>(componentKeys: K[]) {
 		for (const set of this.#index.keys()) {
 			if (setHasSameValuesAsArray(set, componentKeys))
-				return this.#index.need(set) as GMap<Id, Select<C, K>>
+				return need(this.#index, set) as Map<Id, Select<C, K>>
 		}
 	}
 
 	*#makeCache<K extends keyof C>(componentKeys: K[]) {
 		const set = new Set(componentKeys)
-		const entities = new GMap<Id, Partial<C>>()
+		const entities = new Map<Id, Partial<C>>()
 		this.#index.set(set, entities)
 
 		for (const entity of this) {
@@ -71,7 +71,6 @@ export class Entities<C extends Components> extends GMap<Id, Partial<C>> {
 export type EntitiesReadonly<C extends Components> = Pick<Entities<Readonly<C>>, (
 	| "has"
 	| "get"
-	| "require"
 	| "keys"
 	| "values"
 	| "entries"
