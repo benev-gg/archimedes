@@ -40,11 +40,11 @@ export class Entities<C extends Components> extends Map<Id, Partial<C>> {
 			: [...this.#makeCache(componentKeys)]
 	}
 
-	hasComponents(id: Id, keys: (keyof C)[]) {
+	getWith<K extends keyof C>(id: Id, ...componentKeys: K[]) {
 		const components = this.get(id)
-		return (components)
-			? componentsSatisfyKeys(components, keys)
-			: false
+		return (components && componentsSatisfyKeys(components, componentKeys))
+			? components as Select<C, K>
+			: undefined
 	}
 
 	get readonly() {
@@ -76,7 +76,7 @@ export class Entities<C extends Components> extends Map<Id, Partial<C>> {
 
 export type EntitiesReadonly<C extends Components> = Pick<Entities<Readonly<C>>, (
 	| "has"
-	| "hasComponents"
+	| "getWith"
 	| "get"
 	| "keys"
 	| "values"
