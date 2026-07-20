@@ -17,14 +17,14 @@
 	},
 	"dependencies": {
 		"@e280/renraku": "^0.5.8",
-		"@e280/stz": "^0.3.1",
+		"@e280/stz": "^0.3.6",
 		"@msgpack/msgpack": "^3.1.3",
 		"sparrow-rtc": "^0.2.15"
 	},
 	"devDependencies": {
-		"@e280/octo": "^0.1.2",
+		"@e280/octo": "^0.1.3",
 		"@e280/science": "^0.1.11",
-		"typescript": "^6.0.3"
+		"typescript": "^7.0.2"
 	},
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"keywords": [
