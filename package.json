@@ -1,6 +1,6 @@
 {
 	"name": "@benev/archimedes",
-	"version": "0.1.0-7",
+	"version": "0.1.0-8",
 	"description": "🏛️ game ecs and netcode",
 	"license": "MIT",
 	"type": "module",
