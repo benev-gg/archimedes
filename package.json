@@ -1,7 +1,7 @@
 {
 	"name": "@benev/archimedes",
 	"version": "0.1.0-7",
-	"description": "game ecs with auto networking",
+	"description": "🏛️ game ecs and netcode",
 	"license": "MIT",
 	"type": "module",
 	"main": "x/index.js",
@@ -34,10 +34,10 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/benevolent-games/archimedes.git"
+		"url": "git+https://github.com/benev-gg/archimedes.git"
 	},
 	"bugs": {
-		"url": "https://github.com/benevolent-games/archimedes/issues"
+		"url": "https://github.com/benev-gg/archimedes/issues"
 	},
-	"homepage": "https://github.com/benevolent-games/archimedes#readme"
+	"homepage": "https://github.com/benev-gg/archimedes#readme"
 }
