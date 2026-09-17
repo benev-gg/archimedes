@@ -3,6 +3,7 @@ export type Id = string
 export type Components = Record<string, unknown>
 export type AsComponents<C extends Components> = C
 export type Select<C extends Components, K extends keyof C> = Pick<C, K> & Partial<C>
+export type Entity<C extends Components> = [id: Id, components: Partial<C>]
 
 export type System<Context> = (context: Context) => () => void
 export type Systems<Context> = System<Context> | {[key: string]: Systems<Context>}
