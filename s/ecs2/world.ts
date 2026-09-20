@@ -1,21 +1,39 @@
 
 import {got, guarantee} from "@e280/stz"
-import {Components, Schema, Scheme} from "./schema/types.js"
-
-export type EntityId = number
-export type DataOffset = number
-
-export type Block = {
-	name: string,
-	scheme: Scheme<any>,
-	buffer: Uint8Array,
-	next: number,
-	free: Set<number>,
-}
+import {fancySchemes, FancySchemes} from "./fancy-schemes.js"
+import {Components, Schema} from "./schema/types.js"
+import {Block, DataOffset, EntityId, Stores} from "./types.js"
 
 export class World<S extends Schema> {
+	readonly schema
+	#stores: Stores = {json: new Map(), blob: new Map()}
+
+	constructor(fn: (schemes: FancySchemes) => S) {
+		this.schema = fn(fancySchemes(this.#stores))
+	}
+}
+
+export type WorldSchema<W extends World<any>> = W extends World<infer S>
+	? S
+	: never
+
+export class Entities<S extends Schema> {
+	select() {}
+
+	// get size() {}
+	set() {}
+	get() {}
+	has() {}
+	clear() {}
+	keys() {}
+	values() {}
+	entries() {}
+	;[Symbol.iterator]() {}
+}
+
+export class BlockEntities<S extends Schema> {
 	#blocks = new Map<string, Block>()
-	#entities = new Map<EntityId, Map<Block, DataOffset>>
+	#addressBook = new Map<EntityId, Map<Block, DataOffset>>
 
 	constructor(public readonly max: number, public readonly schema: S) {
 		for (const [name, scheme] of Object.entries(schema)) {
@@ -30,7 +48,7 @@ export class World<S extends Schema> {
 	}
 
 	add(entityId: EntityId, values: Partial<Components<S>>) {
-		const addresses = guarantee(this.#entities, entityId, () => new Map<Block, DataOffset>())
+		const addresses = guarantee(this.#addressBook, entityId, () => new Map<Block, DataOffset>())
 		for (const [name, value] of Object.entries(values)) {
 			const block = got(this.#blocks.get(name))
 			const offset = this.#allocate(block)
@@ -40,7 +58,7 @@ export class World<S extends Schema> {
 	}
 
 	get<C extends Partial<Components<S>>>(entityId: EntityId) {
-		const addresses = [...got(this.#entities.get(entityId))]
+		const addresses = [...got(this.#addressBook.get(entityId))]
 		const entries = addresses.map(
 			([block, offset]) => [block.name, this.#get(block, offset)]
 		)
@@ -48,12 +66,14 @@ export class World<S extends Schema> {
 	}
 
 	delete(entityId: EntityId) {
-		const addresses = got(this.#entities.get(entityId))
+		const addresses = got(this.#addressBook.get(entityId))
 
-		for (const [block, offset] of addresses)
+		for (const [block, offset] of addresses) {
+			block.scheme.dispose?.(this.#bytes(block, offset))
 			this.#free(block, offset)
+		}
 
-		this.#entities.delete(entityId)
+		this.#addressBook.delete(entityId)
 	}
 
 	#bytes(block: Block, offset: DataOffset) {
@@ -64,7 +84,7 @@ export class World<S extends Schema> {
 	}
 
 	#set(block: Block, offset: DataOffset, value: unknown) {
-		block.scheme.write(this.#bytes(block, offset))(value)
+		block.scheme.write(this.#bytes(block, offset), value)
 	}
 
 	#get(block: Block, offset: DataOffset) {

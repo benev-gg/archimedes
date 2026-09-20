@@ -20,7 +20,7 @@ export function tuple<const S extends readonly Scheme<any>[]>(
 	return {
 		size,
 
-		write: bytes => values => {
+		write: (bytes, values) => {
 			for (let i = 0; i < schemes.length; i++) {
 				const scheme = schemes[i]!
 				const offset = offsets[i]!
@@ -30,25 +30,19 @@ export function tuple<const S extends readonly Scheme<any>[]>(
 					offset + scheme.size,
 				)
 
-				scheme.write(values[i])(slice)
+				scheme.write(values[i], slice)
 			}
 		},
 
-		read: bytes => {
-			const readers = schemes.map((scheme, i) => {
-				const offset = offsets[i]!
-
-				return scheme.read(
-					bytes.subarray(
-						offset,
-						offset + scheme.size,
-					),
-				)
-			})
-
-			return () =>
-				readers.map(read => read()) as TupleValues<S>
-		},
+		read: bytes => schemes.map((scheme, i) => {
+			const offset = offsets[i]!
+			return scheme.read(
+				bytes.subarray(
+					offset,
+					offset + scheme.size,
+				),
+			)
+		}) as TupleValues<S>,
 	}
 }
 

@@ -1,8 +1,9 @@
 
 export type Scheme<X> = {
 	size: number
-	write: (bytes: Uint8Array) => (value: X) => void
-	read: (bytes: Uint8Array) => () => X
+	write: (bytes: Uint8Array, value: X) => void
+	read: (bytes: Uint8Array) => X
+	dispose?: (bytes: Uint8Array) => void
 }
 
 export type Schema = Record<string, Scheme<any>>
