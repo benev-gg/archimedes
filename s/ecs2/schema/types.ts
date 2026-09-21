@@ -1,18 +1,18 @@
 
-export type Scheme<X> = {
+export type Schema<Value> = {
 	size: number
-	write: (bytes: Uint8Array, value: X) => void
-	read: (bytes: Uint8Array) => X
-	dispose?: (bytes: Uint8Array) => void
+	write: (bytes: Uint8Array, value: Value) => void
+	read: (bytes: Uint8Array) => Value
+	delete: (bytes: Uint8Array) => void
 }
 
-export type Schema = Record<string, Scheme<any>>
-export type Value<S> = S extends Scheme<infer V> ? V : never
+export type Schematic = Record<string, Schema<any>>
 
-export const asScheme = <X>(s: Scheme<X>) => s
-export const asSchema = <S extends Schema>(s: S) => s
+export const asSchema = <X>(s: Schema<X>) => s
+export const asSchematic = <S extends Schematic>(s: S) => s
 
-export type Components<S extends Schema> = {
-	[K in keyof S]: Value<S[K]>
+export type SchemaValue<S> = S extends Schema<infer V> ? V : never
+export type SchematicValues<S extends Schematic> = {
+	[K in keyof S]: SchemaValue<S[K]>
 }
 

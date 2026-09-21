@@ -1,23 +1,44 @@
 
 import {got, guarantee} from "@e280/stz"
+import {SchematicValues, Schematic} from "./schema/types.js"
 import {fancySchemes, FancySchemes} from "./fancy-schemes.js"
-import {Components, Schema} from "./schema/types.js"
 import {Block, DataOffset, EntityId, Stores} from "./types.js"
 
-export class World<S extends Schema> {
+export class World<S extends Schematic> {
 	readonly schema
+	readonly entities
 	#stores: Stores = {json: new Map(), blob: new Map()}
 
-	constructor(fn: (schemes: FancySchemes) => S) {
+	constructor(max: number, fn: (schemes: FancySchemes) => S) {
 		this.schema = fn(fancySchemes(this.#stores))
+		this.entities = new Entities(max, this.schema)
 	}
+
+	save() {
+		const json = new TextEncoder().encode(
+			JSON.stringify([...this.#stores.json.entries()])
+		)
+		const blob = new Uint8Array() // TODO
+		const entities = new Uint8Array() // compact storage of all blocks
+	}
+
+	static load() {}
 }
 
 export type WorldSchema<W extends World<any>> = W extends World<infer S>
 	? S
 	: never
 
-export class Entities<S extends Schema> {
+export class Entities<S extends Schematic> {
+	#storage
+
+	constructor(
+		public readonly max: number,
+		public readonly schema: S,
+	) {
+		this.#storage = new EntityStorage(max, schema)
+	}
+
 	select() {}
 
 	// get size() {}
@@ -31,7 +52,7 @@ export class Entities<S extends Schema> {
 	;[Symbol.iterator]() {}
 }
 
-export class BlockEntities<S extends Schema> {
+export class EntityStorage<S extends Schematic> {
 	#blocks = new Map<string, Block>()
 	#addressBook = new Map<EntityId, Map<Block, DataOffset>>
 
@@ -47,7 +68,7 @@ export class BlockEntities<S extends Schema> {
 		}
 	}
 
-	add(entityId: EntityId, values: Partial<Components<S>>) {
+	add(entityId: EntityId, values: Partial<SchematicValues<S>>) {
 		const addresses = guarantee(this.#addressBook, entityId, () => new Map<Block, DataOffset>())
 		for (const [name, value] of Object.entries(values)) {
 			const block = got(this.#blocks.get(name))
@@ -57,7 +78,7 @@ export class BlockEntities<S extends Schema> {
 		}
 	}
 
-	get<C extends Partial<Components<S>>>(entityId: EntityId) {
+	get<C extends Partial<SchematicValues<S>>>(entityId: EntityId) {
 		const addresses = [...got(this.#addressBook.get(entityId))]
 		const entries = addresses.map(
 			([block, offset]) => [block.name, this.#get(block, offset)]
@@ -74,6 +95,23 @@ export class BlockEntities<S extends Schema> {
 		}
 
 		this.#addressBook.delete(entityId)
+	}
+
+	*keys() {
+		yield* this.#addressBook.keys()
+	}
+
+	*values() {
+		for (const entityId of this.#addressBook.keys())
+			yield this.get(entityId)
+	}
+
+	*entries() {
+		for (const entityId of this.#addressBook.keys())
+			yield [entityId, this.get(entityId)] as [
+				id: EntityId,
+				components: Partial<SchematicValues<S>>,
+			]
 	}
 
 	#bytes(block: Block, offset: DataOffset) {

@@ -1,13 +1,13 @@
 
-import {Scheme, Value} from "./types.js"
+import {Schema, SchemaValue} from "./types.js"
 
-type TupleValues<S extends readonly Scheme<any>[]> = {
-	[K in keyof S]: Value<S[K]>
+type TupleValues<S extends readonly Schema<any>[]> = {
+	[K in keyof S]: SchemaValue<S[K]>
 }
 
-export function tuple<const S extends readonly Scheme<any>[]>(
+export function tuple<const S extends readonly Schema<any>[]>(
 		...schemes: S
-	): Scheme<TupleValues<S>> {
+	): Schema<TupleValues<S>> {
 
 	const offsets: number[] = []
 	let size = 0
@@ -17,32 +17,28 @@ export function tuple<const S extends readonly Scheme<any>[]>(
 		size += scheme.size
 	}
 
+	const slice = (bytes: Uint8Array, i: number) => {
+		const scheme = schemes[i]!
+		const offset = offsets[i]!
+		return bytes.subarray(offset, offset + scheme.size)
+	}
+
 	return {
 		size,
 
 		write: (bytes, values) => {
-			for (let i = 0; i < schemes.length; i++) {
-				const scheme = schemes[i]!
-				const offset = offsets[i]!
-
-				const slice = bytes.subarray(
-					offset,
-					offset + scheme.size,
-				)
-
-				scheme.write(values[i], slice)
-			}
+			for (let i = 0; i < schemes.length; i++)
+				schemes[i]!.write(slice(bytes, i), values[i])
 		},
 
-		read: bytes => schemes.map((scheme, i) => {
-			const offset = offsets[i]!
-			return scheme.read(
-				bytes.subarray(
-					offset,
-					offset + scheme.size,
-				),
-			)
-		}) as TupleValues<S>,
+		read: bytes => schemes.map(
+			(scheme, i) => scheme.read(slice(bytes, i))
+		) as TupleValues<S>,
+
+		delete: bytes => {
+			for (let i = 0; i < schemes.length; i++)
+				schemes[i]!.delete?.(slice(bytes, i))
+		},
 	}
 }
 
