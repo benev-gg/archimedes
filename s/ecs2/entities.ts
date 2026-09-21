@@ -1,7 +1,7 @@
 
 import {got, guarantee, need} from "@e280/stz"
-import {Blocks} from "./components/blocks/blocks.js"
-import {BlobStore, EntityId, JsonStore} from "./types.js"
+import {BlockMap} from "./components/blocks/block-map.js"
+import {BlobMap, EntityId, JsonMap} from "./types.js"
 import {BlockSlot} from "./components/blocks/block-slot.js"
 import {ComponentValues, Components} from "./components/types.js"
 import {fancyComponents, FancyComponents} from "./components/fancy.js"
@@ -9,23 +9,23 @@ import {fancyComponents, FancyComponents} from "./components/fancy.js"
 type Entmap<C extends Components> = Map<keyof C, BlockSlot>
 
 export class Entities<C extends Components> {
-	#fn
-	#json!: JsonStore
-	#blob!: BlobStore
-	#blocks!: Blocks<C>
+	components: C
+	#blocks: BlockMap<C>
+
 	#records = new Map<EntityId, Entmap<C>>()
+	#json: JsonMap = new Map()
+	#blob: BlobMap = new Map()
 
 	constructor(fn: (fancy: FancyComponents) => C) {
-		this.#fn = fn
-		this.clear()
+		this.components = fn(fancyComponents(this.#json, this.#blob))
+		this.#blocks = new BlockMap(this.components)
 	}
 
 	clear() {
-		this.#json = new Map()
-		this.#blob = new Map()
-		const components = this.#fn(fancyComponents(this.#json, this.#blob))
-		this.#blocks = new Blocks(components)
 		this.#records.clear()
+		this.#json.clear()
+		this.#blob.clear()
+		this.#blocks = new BlockMap(this.components)
 	}
 
 	set(id: EntityId, values: Partial<ComponentValues<C>>) {

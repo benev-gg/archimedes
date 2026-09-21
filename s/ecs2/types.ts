@@ -5,6 +5,6 @@ export type JsonId = number
 export type EntityId = number
 export type DataOffset = number
 
-export type JsonStore = Map<Id128, any>
-export type BlobStore = Map<Id128, Uint8Array>
+export type JsonMap = Map<Id128, any>
+export type BlobMap = Map<Id128, Uint8Array>
 
