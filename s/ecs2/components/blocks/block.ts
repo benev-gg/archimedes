@@ -8,9 +8,9 @@ export class Block {
 	#freeSlots = new Set<number>()
 
 	constructor(
-		public readonly name: string,
-		public readonly component: Component<any>,
-		public readonly slotsPerPage = 1024,
+		public name: string,
+		public component: Component<any>,
+		public slotsPerPage = 1024,
 	) {}
 
 	slot() {

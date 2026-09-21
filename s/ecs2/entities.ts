@@ -1,12 +1,13 @@
 
 import {got, guarantee, need} from "@e280/stz"
+import {BlobMap, EntityId, FancyFn, JsonMap} from "./types.js"
+import {fancyComponents} from "./components/fancy.js"
+import {deserializeEntities, serializeEntities} from "./utils/serialize.js"
 import {BlockMap} from "./components/blocks/block-map.js"
-import {BlobMap, EntityId, JsonMap} from "./types.js"
 import {BlockSlot} from "./components/blocks/block-slot.js"
 import {ComponentValues, Components} from "./components/types.js"
-import {fancyComponents, FancyComponents} from "./components/fancy.js"
 
-type Entmap<C extends Components> = Map<keyof C, BlockSlot>
+export type Entmap<C extends Components> = Map<keyof C, BlockSlot>
 
 export class Entities<C extends Components> {
 	components: C
@@ -16,7 +17,7 @@ export class Entities<C extends Components> {
 	#json: JsonMap = new Map()
 	#blob: BlobMap = new Map()
 
-	constructor(fn: (fancy: FancyComponents) => C) {
+	constructor(fn: FancyFn<C>) {
 		this.components = fn(fancyComponents(this.#json, this.#blob))
 		this.#blocks = new BlockMap(this.components)
 	}
@@ -92,6 +93,25 @@ export class Entities<C extends Components> {
 
 	*[Symbol.iterator]() {
 		yield* this.entries()
+	}
+
+	serialize() {
+		return serializeEntities(
+			this.components,
+			this.#records,
+			this.#json,
+			this.#blob,
+		)
+	}
+
+	deserialize(file: Uint8Array) {
+		this.clear()
+		deserializeEntities(
+			this.components,
+			this.#records,
+			this.#json,
+			this.#blob,
+		)
 	}
 
 	select<N extends keyof C>(...componentNames: N[]): [EntityId, Pick<ComponentValues<C>, N>][] {
