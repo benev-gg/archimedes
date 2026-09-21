@@ -1,57 +1,60 @@
 
 import {got, guarantee, need} from "@e280/stz"
-import {Component} from "./utils/component.js"
+import {StoredComponent} from "./utils/component.js"
 import {BlobStore, EntityId, JsonStore} from "./types.js"
 import {BlockStore, makeBlocks} from "./schema/blocks.js"
 import {SchematicValues, Schematic} from "./schema/types.js"
 import {fancySchemes, FancySchemes} from "./fancy-schemes.js"
 
 export class Entities<S extends Schematic> {
-	#blockStore: BlockStore<S>
-	#jsonStore: JsonStore
-	#blobStore: BlobStore
-	#books = new Map<EntityId, Map<keyof S, Component>>()
+	#fn
+	#jsonStore!: JsonStore
+	#blobStore!: BlobStore
+	#blockStore!: BlockStore<S>
+	#records = new Map<EntityId, Map<keyof S, StoredComponent>>()
 
-	constructor(
-			public readonly max: number,
-			private readonly fn: (schemes: FancySchemes) => S,
-		) {
+	constructor(fn: (schemes: FancySchemes) => S) {
+		this.#fn = fn
+		this.clear()
+	}
+
+	clear() {
 		this.#jsonStore = new Map()
 		this.#blobStore = new Map()
-		const schema = fn(fancySchemes(this.#jsonStore, this.#blobStore))
-		this.#blockStore = makeBlocks(max, schema)
+		this.#blockStore = makeBlocks(100_000, this.#fn(fancySchemes(this.#jsonStore, this.#blobStore)))
+		this.#records.clear()
 	}
 
 	set(id: EntityId, values: Partial<SchematicValues<S>>) {
-		const components = guarantee(this.#books, id, () => new Map<keyof S, Component>())
+		const record = guarantee(this.#records, id, () => new Map<keyof S, StoredComponent>())
 
 		// create or update fresh components
 		for (const [name, value] of Object.entries(values)) {
 			const block = need(this.#blockStore, name)
-			const component = guarantee(components, name, () => new Component(block))
+			const component = guarantee(record, name, () => new StoredComponent(block))
 			component.write(value)
 		}
 
 		// delete stale components
-		for (const name of components.keys()) {
+		for (const name of record.keys()) {
 			if (!Object.hasOwn(values, name)) {
-				const component = need(components, name)
+				const component = need(record, name)
 				component.dispose()
-				components.delete(name)
+				record.delete(name)
 			}
 		}
 	}
 
 	get size() {
-		return this.#books.size
+		return this.#records.size
 	}
 
 	has(id: EntityId) {
-		return this.#books.has(id)
+		return this.#records.has(id)
 	}
 
 	get(id: EntityId) {
-		const map = this.#books.get(id)
+		const map = this.#records.get(id)
 		if (!map) return undefined
 		const values = {} as any
 		for (const [name, component] of map)
@@ -65,28 +68,20 @@ export class Entities<S extends Schematic> {
 		for (const name of names)
 			if (!Object.hasOwn(values, name))
 				return undefined
-		return values as any as Pick<SchematicValues<S>, N>
-	}
-
-	clear() {
-		this.#jsonStore = new Map()
-		this.#blobStore = new Map()
-		this.#books = new Map<EntityId, Map<keyof S, Component>>()
-		const schema = this.fn(fancySchemes(this.#jsonStore, this.#blobStore))
-		this.#blockStore = makeBlocks(this.max, schema)
+		return values as any as Pick<SchematicValues<S>, N> & Partial<SchematicValues<S>>
 	}
 
 	*keys() {
-		yield* this.#books.keys()
+		yield* this.#records.keys()
 	}
 
 	*values() {
-		for (const id of this.#books.keys())
+		for (const id of this.#records.keys())
 			yield got(this.get(id))
 	}
 
 	*entries() {
-		for (const id of this.#books.keys())
+		for (const id of this.#records.keys())
 			yield [id, got(this.get(id))] as [EntityId, Partial<SchematicValues<S>>]
 	}
 

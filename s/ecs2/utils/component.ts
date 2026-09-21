@@ -1,7 +1,7 @@
 
 import {Block, blockAllocate, blockBytes, blockFree} from "../schema/blocks.js"
 
-export class Component {
+export class StoredComponent {
 	#block
 	#address
 	#bytes
@@ -21,8 +21,8 @@ export class Component {
 	}
 
 	dispose() {
-		blockFree(this.#address)
 		this.#block.scheme.delete?.(this.#bytes)
+		blockFree(this.#address)
 	}
 }
 
