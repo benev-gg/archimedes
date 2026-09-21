@@ -1,13 +1,13 @@
 
-import {Schema, SchemaValue} from "./types.js"
+import {Component, ComponentValue} from "./types.js"
 
-type TupleValues<S extends readonly Schema<any>[]> = {
-	[K in keyof S]: SchemaValue<S[K]>
+type TupleValues<S extends readonly Component<any>[]> = {
+	[K in keyof S]: ComponentValue<S[K]>
 }
 
-export function tuple<const S extends readonly Schema<any>[]>(
+export function tuple<const S extends readonly Component<any>[]>(
 		...schemes: S
-	): Schema<TupleValues<S>> {
+	): Component<TupleValues<S>> {
 
 	const offsets: number[] = []
 	let size = 0

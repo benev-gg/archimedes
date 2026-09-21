@@ -1,10 +1,10 @@
 
 import {hex, need} from "@e280/stz"
-import {asSchema} from "./types.js"
+import {asComponent} from "./types.js"
 import {id128, Id128} from "../utils/id128.js"
 
 export function makeStoreScheme<X>(store: Map<Id128, X>) {
-	return asSchema<X>({
+	return asComponent<X>({
 		size: 16,
 
 		write: (b, x) => {
