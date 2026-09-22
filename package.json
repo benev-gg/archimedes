@@ -16,6 +16,7 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
+		"@awasm/noble": "^0.1.4",
 		"@e280/stz": "^0.4.2"
 	},
 	"devDependencies": {

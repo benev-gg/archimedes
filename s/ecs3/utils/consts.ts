@@ -1,3 +1,3 @@
 
-export const littleEndian = false
+export const endian = false
 

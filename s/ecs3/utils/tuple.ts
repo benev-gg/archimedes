@@ -1,6 +1,6 @@
 
+import {endian} from "./consts.js"
 import {dataView} from "./data-view.js"
-import {littleEndian} from "./consts.js"
 import {asComponent, Component, ComponentValue, FixedComponent} from "../types.js"
 
 type TupleValues<C extends Component<any>[]> = {
@@ -71,7 +71,7 @@ export function tuple<const C extends Component<any>[]>(
 					const payload = component.encode(value)
 					const bytes = new Uint8Array(4 + payload.length)
 
-					dataView(bytes).setUint32(0, payload.length, littleEndian)
+					dataView(bytes).setUint32(0, payload.length, endian)
 					bytes.set(payload, 4)
 
 					parts.push(bytes)
@@ -106,7 +106,7 @@ export function tuple<const C extends Component<any>[]>(
 				}
 				else {
 					const length = dataView(bytes.subarray(offset, offset + 4))
-						.getUint32(0, littleEndian)
+						.getUint32(0, endian)
 
 					offset += 4
 
