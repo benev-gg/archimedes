@@ -1,6 +1,7 @@
 
 import {endian} from "./consts.js"
 import {dataView} from "./data-view.js"
+import {isFixedComponent} from "./is-component.js"
 import {asComponent, Component, ComponentValue, FixedComponent} from "../types.js"
 
 type TupleValues<C extends Component<any>[]> = {
@@ -8,9 +9,10 @@ type TupleValues<C extends Component<any>[]> = {
 }
 
 export function tuple<const C extends Component<any>[]>(
-	...components: C
-): Component<TupleValues<C>> {
-	const all_fixed = components.every(component => "size" in component)
+		...components: C
+	): Component<TupleValues<C>> {
+
+	const all_fixed = components.every(isFixedComponent)
 
 	if (all_fixed) {
 		const fixed = components as any as FixedComponent<any>[]

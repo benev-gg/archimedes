@@ -6,13 +6,13 @@ import {isFixedComponent} from "../utils/is-component.js"
 
 export function makeStore(
 		components: Components,
-		changed = (change: Change) => void change,
+		changed: (change: Change) => void = (change: Change) => void change,
 	): Store {
 
 	return {
 		namecoder: new Namecoder(components),
 		addresses: new Map(),
-		changed,
+		beforeChange: changed,
 
 		columns: Object.values(components).map(component => (
 			isFixedComponent(component)

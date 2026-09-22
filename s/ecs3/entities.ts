@@ -1,18 +1,20 @@
 
-import {got, need} from "@e280/stz"
+import {got, need, sub} from "@e280/stz"
+import {Change} from "./store/types.js"
 import {makeStore} from "./store/make.js"
 import {Components, ComponentValues, EntityId, Patch} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
 
 export class Entities<C extends Components> {
+	beforeChange = sub<[Change]>()
 	#store
 
 	constructor(public readonly components: C) {
-		this.#store = makeStore(components)
+		this.#store = makeStore(components, this.beforeChange.publish)
 	}
 
 	clear() {
-		this.#store = makeStore(this.components)
+		this.#store = makeStore(this.components, this.beforeChange.publish)
 	}
 
 	get(id: EntityId) {
@@ -34,15 +36,12 @@ export class Entities<C extends Components> {
 
 		const addresses = this.#store.addresses.get(id)!
 
-		// Remove components absent from the replacement value.
 		for (const code of [...addresses.keys()]) {
 			const name = this.#store.namecoder.name(code)
-
 			if (!Object.hasOwn(values, name))
 				storeDeleteValue(this.#store, id, code)
 		}
 
-		// Write all supplied components.
 		for (const [name, value] of Object.entries(values)) {
 			const code = this.#store.namecoder.code(name)
 			storeWriteValue(this.#store, id, code, value)

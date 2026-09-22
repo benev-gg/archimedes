@@ -8,7 +8,7 @@ export type Store = {
 	namecoder: Namecoder
 	columns: (BlockColumn | BlobColumn)[] // indexed by Code
 	addresses: Map<EntityId, Map<Code, Slot | null>>
-	changed: (change: Change) => void
+	beforeChange: (change: Change) => void
 }
 
 export type Column = BlockColumn | BlobColumn
