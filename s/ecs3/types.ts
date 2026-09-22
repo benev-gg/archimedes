@@ -1,6 +1,7 @@
 
-export type BlobId = string
-export type EntityId = string
+import {Id128} from "./utils/id128.js"
+
+export type EntityId = Id128
 export type ComponentCode = number
 
 export type FixedComponent<Value> = {
