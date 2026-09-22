@@ -1,4 +1,8 @@
 
+export type BlobId = string
+export type EntityId = string
+export type ComponentCode = number
+
 export type FixedComponent<Value> = {
 	size: number
 	write: (bytes: Uint8Array, value: Value) => void
