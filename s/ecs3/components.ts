@@ -70,7 +70,7 @@ export const bigi64 = asComponent<bigint>({
 	read: bytes => dataView(bytes).getBigInt64(0, endian),
 })
 
-export const blob = asComponent<Uint8Array>({
+export const bytes = asComponent<Uint8Array>({
 	encode: (value: Uint8Array) => value,
 	decode: bytes => bytes,
 })
@@ -78,7 +78,7 @@ export const blob = asComponent<Uint8Array>({
 export const json = (() => {
 	const textEncoder = new TextEncoder()
 	const textDecoder = new TextDecoder()
-	return asComponent<Json>({
+	return <X extends Json = Json>() => asComponent<X>({
 		encode: value => textEncoder.encode(JSON.stringify(value)),
 		decode: bytes => JSON.parse(textDecoder.decode(bytes)),
 	})

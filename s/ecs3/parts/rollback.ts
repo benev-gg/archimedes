@@ -18,7 +18,7 @@ export function startRollback(entities: Entities<any>) {
 				else entities.set(id, was)
 			}
 		},
-		discard: stopListening,
+		cancel: stopListening,
 	}
 }
 

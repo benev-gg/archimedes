@@ -2,13 +2,13 @@
 import {expect, suite, test} from "@e280/science"
 import {Entities} from "./entities.js"
 import {makeId} from "./parts/make-id.js"
-import {blob, json, u8, vec3} from "./components.js"
+import {bytes, json, u8, vec3} from "./components.js"
 
 const setup = () => new Entities({
 	health: u8,
 	position: vec3,
-	data: json,
-	payload: blob,
+	data: json(),
+	payload: bytes,
 })
 
 export default suite({
