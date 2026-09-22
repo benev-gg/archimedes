@@ -1,11 +1,11 @@
 
 import {got, guarantee, need} from "@e280/stz"
-import {BlobMap, EntityId, FancyFn, JsonMap} from "./types.js"
 import {fancyComponents} from "./components/fancy.js"
-import {deserializeEntities, serializeEntities} from "./utils/serialize.js"
 import {BlockMap} from "./components/blocks/block-map.js"
 import {BlockSlot} from "./components/blocks/block-slot.js"
+import {BlobMap, EntityId, FancyFn, JsonMap} from "./types.js"
 import {ComponentValues, Components} from "./components/types.js"
+import {deserializeEntities, serializeEntities} from "./utils/serialize.js"
 
 export type Entmap<C extends Components> = Map<keyof C, BlockSlot>
 
