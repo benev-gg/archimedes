@@ -2,7 +2,7 @@
 import {got, need} from "@e280/stz"
 import {makeStore} from "./store/make.js"
 import {Components, ComponentValues, EntityId, Patch} from "./types.js"
-import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/fns.js"
+import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
 
 export class Entities<C extends Components> {
 	#store

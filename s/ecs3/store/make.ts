@@ -1,8 +1,8 @@
 
-import {Components} from "../types.js"
-import {Change, Store} from "./types.js"
 import {Namecoder} from "../utils/namecoder.js"
-import {isFixedComponent, makeBlock} from "./fns.js"
+import {Block, Change, Store} from "./types.js"
+import {Components, FixedComponent} from "../types.js"
+import {isFixedComponent} from "../utils/is-component.js"
 
 export function makeStore(
 		components: Components,
@@ -20,5 +20,9 @@ export function makeStore(
 				: {component, blobs: new Map()}
 		)),
 	}
+}
+
+export function makeBlock(component: FixedComponent): Block {
+	return {stride: component.size, pages: [], nextSlot: 0, freeSlots: []}
 }
 

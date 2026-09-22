@@ -1,60 +1,9 @@
 
 import {need} from "@e280/stz"
-import {slotsPerPage} from "../utils/consts.js"
-import {Block, Column, Code, Slot, Store} from "./types.js"
-import {Component, EntityId, FixedComponent, VariableComponent} from "../types.js"
-
-export function isFixedComponent<Value>(component: Component<Value>): component is FixedComponent<Value> {
-	return "size" in component
-}
-
-export function isVariableComponent<Value>(component: Component<Value>): component is VariableComponent<Value> {
-	return !("size" in component)
-}
-
-export function makeBlock(component: FixedComponent): Block {
-	return {stride: component.size, pages: [], nextSlot: 0, freeSlots: []}
-}
-
-export function blockAllocate(block: Block): Slot {
-	const recycled = block.freeSlots.pop()
-	if (recycled !== undefined) return recycled
-	const slot = block.nextSlot++
-	const pageIndex = Math.floor(slot / slotsPerPage)
-	block.pages[pageIndex] ??=
-		new Uint8Array(slotsPerPage * block.stride)
-	return slot
-}
-
-export function blockFree(block: Block, slot: Slot) {
-	block.freeSlots.push(slot)
-}
-
-export function blockGetBytes(block: Block, slot: number) {
-	const pageIndex = Math.floor(slot / slotsPerPage)
-	const slotIndex = slot % slotsPerPage
-	const page = block.pages[pageIndex]
-	const offset = slotIndex * block.stride
-	return page.subarray(offset, offset + block.stride)
-}
-
-export function columnGetBytes(column: Column, id: EntityId, slot: Slot | null) {
-	if (slot === null) {
-		if (!("blobs" in column)) throw new Error("bad column type")
-		return need(column.blobs, id)
-	}
-	else {
-		if (!("block" in column)) throw new Error("bad column type")
-		return blockGetBytes(column.block, slot)
-	}
-}
-
-export function columnGetValue(column: Column, id: EntityId, slot: Slot | null) {
-	const bytes = columnGetBytes(column, id, slot)
-	return ("block" in column)
-		? column.component.read(bytes)
-		: column.component.decode(bytes)
-}
+import {EntityId} from "../types.js"
+import {Code, Store} from "./types.js"
+import {columnGetBytes, columnGetValue} from "./column.js"
+import {blockAllocate, blockFree, blockGetBytes} from "./block.js"
 
 export function storeGetBytes(store: Store, id: EntityId, code: Code) {
 	const addresses = need(store.addresses, id)
@@ -140,11 +89,7 @@ export function storeWriteValue(
 	}
 }
 
-export function storeDeleteValue(
-	store: Store,
-	id: EntityId,
-	code: Code,
-) {
+export function storeDeleteValue(store: Store, id: EntityId, code: Code) {
 	const addresses = store.addresses.get(id)
 	if (!addresses)
 		return false
