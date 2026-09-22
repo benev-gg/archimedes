@@ -1,29 +1,41 @@
 
-import {Component, ComponentCode, EntityId} from "../types.js"
+import {Namecoder} from "../utils/namecoder.js"
+import {EntityId, FixedComponent, VariableComponent} from "../types.js"
+
+export type Code = number
 
 export type Store = {
-	codes: Record<string, ComponentCode>
-	components: Component<any>[]
-	blocks: Block[]
-	blobs: Map<EntityId, Uint8Array>[]
-	records: Map<EntityId, Map<ComponentCode, Address>>
-	onDelta: OnDelta
+	namecoder: Namecoder
+	columns: (BlockColumn | BlobColumn)[] // indexed by Code
+	addresses: Map<EntityId, Map<Code, Slot | null>>
+	changed: (change: Change) => void
+}
+
+export type Column = BlockColumn | BlobColumn
+
+export type BlockColumn = {
+	component: FixedComponent
+	block: Block
+}
+
+export type BlobColumn = {
+	component: VariableComponent
+	blobs: Map<EntityId, Uint8Array>
 }
 
 export type Block = {
+	stride: number
 	pages: Uint8Array[]
-	nextSlot: number
-	freeSlots: number[]
+	nextSlot: Slot
+	freeSlots: Slot[]
 }
 
-export type Address =
-	| {slot: number}
-	| {blob: true}
+export type Slot = number
 
-export type Delta = (
-	| {kind: "write", entityId: EntityId, componentCode: ComponentCode, bytes: Uint8Array}
-	| {kind: "free", entityId: EntityId, componentCode: ComponentCode}
-)
+export enum ChangeKind {
+	Entity,
+	Component,
+}
 
-export type OnDelta = (delta: Delta) => void
+export type Change = [id: EntityId, code?: Code]
 

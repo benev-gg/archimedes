@@ -1,21 +1,20 @@
 
-import {Id128} from "./utils/id128.js"
+export type Id = string
+export type EntityId = Id
+export type EntityEntry<Values> = [id: EntityId, values: Values]
 
-export type EntityId = Id128
-export type ComponentCode = number
-
-export type FixedComponent<Value> = {
+export type FixedComponent<Value = any> = {
 	size: number
 	write: (bytes: Uint8Array, value: Value) => void
 	read: (bytes: Uint8Array) => Value
 }
 
-export type VariableComponent<Value> = {
+export type VariableComponent<Value = any> = {
 	encode: (value: Value) => Uint8Array
 	decode: (bytes: Uint8Array) => Value
 }
 
-export type Component<Value> =
+export type Component<Value = any> =
 	| FixedComponent<Value>
 	| VariableComponent<Value>
 
