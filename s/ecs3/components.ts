@@ -1,5 +1,5 @@
 
-import {tuple} from "./utils/tuple.js"
+import {tuple} from "./parts/tuple.js"
 import {endian} from "./utils/consts.js"
 import {asComponent, Json} from "./types.js"
 import {dataView} from "./utils/data-view.js"

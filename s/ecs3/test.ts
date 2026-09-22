@@ -1,7 +1,7 @@
 
 import {expect, suite, test} from "@e280/science"
 import {Entities} from "./entities.js"
-import {makeId} from "./utils/make-id.js"
+import {makeId} from "./parts/make-id.js"
 import {blob, json, u8, vec3} from "./components.js"
 
 const setup = () => new Entities({

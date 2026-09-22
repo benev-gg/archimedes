@@ -1,7 +1,7 @@
 
-import {endian} from "./consts.js"
-import {dataView} from "./data-view.js"
-import {isFixedComponent} from "./is-component.js"
+import {endian} from "../utils/consts.js"
+import {dataView} from "../utils/data-view.js"
+import {isFixedComponent} from "../utils/is-component.js"
 import {asComponent, Component, ComponentValue, FixedComponent} from "../types.js"
 
 type TupleValues<C extends Component<any>[]> = {

@@ -1,7 +1,7 @@
 
-export * from "./utils/make-id.js"
-export * from "./utils/rollback.js"
-export * from "./utils/tuple.js"
+export * from "./parts/make-id.js"
+export * from "./parts/rollback.js"
+export * from "./parts/tuple.js"
 
 export * from "./components.js"
 export * from "./entities.js"

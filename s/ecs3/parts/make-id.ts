@@ -1,6 +1,6 @@
 
 import {bytes, hex} from "@e280/stz"
-import {hash} from "./hash.js"
+import {hash} from "../utils/hash.js"
 import {Id} from "../types.js"
 
 export function makeId(...entropy: (string | number | Uint8Array)[]): Id {
