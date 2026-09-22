@@ -18,6 +18,10 @@ export class Entities<C extends Components> {
 		// TODO
 	}
 
+	patch(id: EntityId, patch: Patch<C>) {
+		// TODO
+	}
+
 	get size() {
 		return this.#store.records.size
 	}

@@ -34,6 +34,10 @@ export type ComponentValues<C extends Components> = {
 	[K in keyof C]: ComponentValue<C[K]>
 }
 
+export type Patch<C extends Components> = {
+	[K in keyof C]?: ComponentValues<C>[K] | undefined
+}
+
 export type Json =
 	| null
 	| boolean
