@@ -18,15 +18,9 @@ export type Component<Value> =
 	| FixedComponent<Value>
 	| VariableComponent<Value>
 
-export type DiscriminateComponent<V, C extends Component<V>> = (
-	C extends FixedComponent<V>
-		? FixedComponent<V>
-		: VariableComponent<V>
-)
-
 export type Components = {[key: string]: Component<any>}
 
-export const asComponent = <V, C extends Component<V> = Component<V>>(c: C) => <DiscriminateComponent<V, C>>c
+export const asComponent = <V>(c: Component<V>) => c
 export const asComponents = <C extends Components>(c: C) => c
 
 export type ComponentValue<C extends Component<any>> = (
