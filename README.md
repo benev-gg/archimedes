@@ -1,5 +1,5 @@
 
-![](https://i.imgur.com/DYcrs49.png)
+![](https://i.imgur.com/mKSNcTS.png)
 
 # 🌀 archimedes, architecture for web games
 
