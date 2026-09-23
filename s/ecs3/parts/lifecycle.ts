@@ -4,8 +4,8 @@ import {Entities} from "../entities.js"
 import {Components, EntityId, Selected} from "../types.js"
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
-	simulate: (values: Selected<C, K>) => void
-	deleted: () => void
+	tick: (values: Selected<C, K>) => void
+	exit: () => void
 }
 
 export type LifecycleSpawn<C extends Components, K extends keyof C> = (
@@ -15,7 +15,7 @@ export type LifecycleSpawn<C extends Components, K extends keyof C> = (
 export function lifecycle<C extends Components, K extends keyof C>(
 		entities: Entities<C>,
 		componentNames: K[],
-		spawn: LifecycleSpawn<C, K>
+		enter: LifecycleSpawn<C, K>
 	) {
 
 	const alive = new Map<EntityId, LifecycleCallbacks<C, K>>()
@@ -23,8 +23,8 @@ export function lifecycle<C extends Components, K extends keyof C>(
 	return () => {
 		// add fresh entities
 		for (const [id, values] of entities.select(...componentNames)) {
-			const callbacks = guarantee(alive, id, () => spawn(id, values))
-			callbacks.simulate(values)
+			const callbacks = guarantee(alive, id, () => enter(id, values))
+			callbacks.tick(values)
 		}
 
 		// check who's really alive now
@@ -34,7 +34,7 @@ export function lifecycle<C extends Components, K extends keyof C>(
 		for (const [id, callbacks] of alive) {
 			if (aliveNow.has(id)) continue
 			alive.delete(id)
-			callbacks.deleted()
+			callbacks.exit()
 		}
 	}
 }

@@ -12,7 +12,7 @@ npm install @benev/archimedes
 
 **archimedes is an ecs toolkit for making great web games.**  
 entities look and feel like normal js data, so your game logic stays simple.  
-but under the hood, archimedes is tightly packing most data into contiguous blocks of memory.  
+but under the hood, archimedes is tightly packing your data into contiguous blocks of memory.  
 *compact storage. efficient networking. strong typescript typings.*
 
 **rollback multiplayer.**  
@@ -26,6 +26,7 @@ for rendering, you might want something like [babylon lite](https://www.babylonj
 - 🎮 ***[#simple,](#simple)*** **game example**
 - 🧩 ***[#components,](#components)*** **properties your entities can have**
 - 👾 ***[#entities,](#entities)*** **things in your game**
+- ⚙️ ***[#systems,](#systems)*** **game logic**
 
 
 
@@ -120,7 +121,7 @@ import {Entities, makeId} from "@benev/archimedes"
       position: [1, 2, 3],
     })
     ```
-    - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and with enough entropy that you'll never generate the same one twice. however, if you supply makeId with parameters, the id will be a deterministic hash of those parameters. networked clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
+    - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and have enough entropy to avoid collisions. now the cool part: if you supply makeId with parameters, the id will be a deterministic hash of those parameters. rollback netcode clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
 1. **get an entity.**
     ```ts
     // get an entity's values
@@ -163,6 +164,13 @@ import {Entities, makeId} from "@benev/archimedes"
     ```ts
     entities.load(file)
     ```
+1. **version hash,** based on the component schema.
+    ```ts
+    entity.version
+      // "ecf61ff8d547e6b06c4af5188e6c6cc7"
+    ```
+    - any change to your component schema will change this hash automatically, thus breaking compatibility with old save files and networking.
+    - it's your responsibility to be careful about that and think about handling migrations.
 1. **rollback is easier than you think.**
     ```ts
     import {startRollback} from "@benev/archimedes"
@@ -179,6 +187,48 @@ import {Entities, makeId} from "@benev/archimedes"
       // now it's like none of that crap ever happened
     ```
     - you can also call `rollback.cancel()` to not rollback (and keep the crap).
+
+
+
+<br/><a id="systems"></a>
+
+## ⚙️ systems, game logic
+
+you can structure your game logic however you like.
+
+your game logic can just be a looping tick function that edits entities over time, using `entities.update` etc.
+
+for archimedes, "system" is a casual term for a game logic function, especially one that selects entities by the components it's concerned with. ecs philosophers like such systems.
+
+that being said here's one little helper we use a lot:
+- `lifecycle` helps you observe events regarding a set of components:
+    ```ts
+    import {lifecycle} from "@benev/archimedes"
+
+    function setupBleedLogging(entities: Entities<MyComponents>) {
+      return lifecycle(entities, ["health", "bleed"], (id, {health}) => {
+        console.log("bleed started", id, health)
+        return {
+          tick: ({health}) => console.log("bleed running", health),
+          exit: () => console.log("bleed stopped"),
+        }
+      })
+    }
+    ```
+    `lifecycle` returns a system fn.
+    ```ts
+    const entities = new Entities(myComponents)
+    const bleedLogging = setupBleedLogging(entities)
+
+    function simulate() {
+      bleeding()
+      deathWhenNoHealth()
+      bleedLogging() // <-- our special lifecycle
+    }
+
+    setInterval(simulate, 16.67)
+    ```
+    we use this a lot in our rendering systems.
 
 
 
