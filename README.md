@@ -134,8 +134,8 @@ import {Entities, makeId} from "@benev/archimedes"
     entities.update(id, {health: 99})
       // only update health value
     ```
-    - in updates, and `undefined` value means "delete this value"
-1. **entity.delete,** destroy an entity.
+    - in updates, an `undefined` value means "delete this value"
+1. **entities.delete,** destroy an entity.
     ```ts
     entities.delete(id)
     ```
@@ -165,14 +165,14 @@ import {Entities, makeId} from "@benev/archimedes"
     ```ts
     entities.load(file)
     ```
-1. **entity.version,** a hash of the component schema.
+1. **entities.version,** a hash of the component schema.
     ```ts
-    entity.version
+    entities.version
       // "ecf61ff8d547e6b06c4af5188e6c6cc7"
     ```
     - this version changes if your component schema changes at all.
-    - this can break compatibility with old saves and networking.
-    - it's up to you, to be careful about that, and plan for migrations.
+    - this will hard-break compatibility with old saves and networking.
+    - it's up to you to be careful about that, and plan for migrations.
 1. **entities.readonly,** i use this so much actually.
     ```ts
     setupMyRenderer(entities.readonly)
@@ -206,7 +206,7 @@ you can structure your game logic however you like.
 
 your game logic can just be a looping tick function that edits entities over time, using `entities.update` etc.
 
-for archimedes, "system" is a casual term for a game logic function, especially one that selects entities by the components it's concerned with. ecs philosophers like such systems.
+for archimedes, "system" is a casual term for a game logic function, especially one that selects entities by the components it cares about. ecs philosophers like such systems.
 
 that being said here's one little helper we use a lot:
 - `lifecycle` helps you observe events regarding a set of components:
