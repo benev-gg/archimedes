@@ -14,6 +14,7 @@ export class Entities<C extends Components> {
 	}
 
 	clear() {
+		for (const id of this.keys()) this.beforeChange.publish([id])
 		this.#store = makeStore(this.components, this.beforeChange.publish)
 	}
 
