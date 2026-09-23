@@ -2,19 +2,24 @@
 import {got, need, sub} from "@e280/stz"
 import {Change} from "./store/types.js"
 import {makeStore} from "./store/make.js"
+import {Selector} from "./utils/selector.js"
 import {Components, ComponentValues, EntityId, Patch} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
 
 export class Entities<C extends Components> {
 	beforeChange = sub<[Change]>()
 	#store
+	#selector = new Selector<C>(this)
 
 	constructor(public readonly components: C) {
 		this.#store = makeStore(components)
 	}
 
 	clear() {
-		for (const id of this.keys()) this.beforeChange.publish([id])
+		for (const id of this.keys()) {
+			this.beforeChange.publish([id])
+			this.#selector.entityGone(id)
+		}
 		this.#store = makeStore(this.components)
 	}
 
@@ -33,11 +38,13 @@ export class Entities<C extends Components> {
 
 	delete(id: EntityId) {
 		this.beforeChange.publish([id])
+		this.#selector.entityGone(id)
 		return storeDeleteEntity(this.#store, id)
 	}
 
 	set<V extends Partial<ComponentValues<C>>>(id: EntityId, values: V) {
 		this.beforeChange.publish([id])
+		this.#selector.entityChanged(id, values)
 
 		if (!this.#store.addresses.has(id))
 			storeCreateEntity(this.#store, id)
@@ -72,6 +79,7 @@ export class Entities<C extends Components> {
 				storeWriteValue(this.#store, id, code, value)
 		}
 
+		this.#selector.entityChanged(id, this.got(id))
 		return true
 	}
 
@@ -123,9 +131,8 @@ export class Entities<C extends Components> {
 		// storeLoad(this.#store, file)
 	}
 
-	select<N extends keyof C>(...componentNames: N[]): [EntityId, Pick<ComponentValues<C>, N>][] {
-		// TODO later
-		return []
+	select<N extends keyof C>(...componentNames: N[]) {
+		return this.#selector.select(...componentNames)
 	}
 }
 

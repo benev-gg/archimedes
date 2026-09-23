@@ -1,12 +1,12 @@
 
 import {expect, suite, test} from "@e280/science"
+import {tuple} from "./parts/tuple.js"
 import {Entities} from "./entities.js"
 import {makeId} from "./parts/make-id.js"
-import {bytes, json, u16, u8, vec3} from "./components.js"
-import { tuple } from "./parts/tuple.js"
+import {bytes, i8, json, u16, u8, vec3} from "./components.js"
 
 const setup = () => new Entities({
-	health: u8,
+	health: i8,
 	position: vec3,
 	data: json(),
 	payload: bytes(),
@@ -18,8 +18,8 @@ export default suite({
 			const entities = setup()
 			const id = makeId()
 			const unknown = makeId()
-			entities.set(id, {health: 128, position: [1, 2, 3]})
-			expect(entities.get(id)).deep({health: 128, position: [1, 2, 3]})
+			entities.set(id, {health: 100, position: [1, 2, 3]})
+			expect(entities.get(id)).deep({health: 100, position: [1, 2, 3]})
 			expect(entities.get(unknown)).is(undefined)
 		}),
 
@@ -45,7 +45,7 @@ export default suite({
 		"set replaces": test(async() => {
 			const entities = setup()
 			const id = makeId()
-			entities.set(id, {health: 128, position: [1, 2, 3]})
+			entities.set(id, {health: 100, position: [1, 2, 3]})
 			entities.set(id, {health: 64})
 			expect(entities.got(id)).deep({health: 64})
 		}),
@@ -97,6 +97,20 @@ export default suite({
 			entities.set(c, {health: 30})
 			expect(entities.got(b)).deep({health: 20})
 			expect(entities.got(c)).deep({health: 30})
+		}),
+
+		"select": test(async() => {
+			const entities = setup()
+			entities.set(makeId(), {
+				health: 100,
+			})
+			entities.set(makeId(), {
+				health: 100,
+				position: [1, 2, 3],
+			})
+			expect(entities.select("health").length).is(2)
+			expect(entities.select("position").length).is(1)
+			expect(entities.select("health", "position").length).is(1)
 		}),
 	}),
 

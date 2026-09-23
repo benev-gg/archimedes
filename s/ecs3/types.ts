@@ -35,6 +35,15 @@ export type ComponentValues<C extends Components> = {
 	[K in keyof C]: ComponentValue<C[K]>
 }
 
+export type Selected<C extends Components, N extends keyof C> = (
+	Pick<ComponentValues<C>, N>
+		& Partial<ComponentValues<C>>
+)
+
+export type SelectedEntry<C extends Components, N extends keyof C> = (
+	[id: EntityId, values: Selected<C, N>]
+)
+
 export type Patch<C extends Components> = {
 	[K in keyof C]?: ComponentValues<C>[K] | undefined
 }
