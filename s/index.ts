@@ -1,3 +1,3 @@
 
-export * from "./ecs3/index.js"
+export * from "./ecs/index.js"
 
