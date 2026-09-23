@@ -1,11 +1,16 @@
 
 import {Entities} from "../entities.js"
 import {Entity, EntityId} from "../types.js"
+import {OnBeforeChange} from "./before-change.js"
 
-export function startRollback(entities: Entities<any>) {
+export function startRollback(
+		entities: Entities<any>,
+		onBeforeChange: OnBeforeChange,
+	) {
+
 	const oldies = new Map<EntityId, Partial<Entity<any>> | undefined>()
 
-	const cancel = entities.beforeChange(([id]) => {
+	const cancel = onBeforeChange(id => {
 		if (!oldies.has(id))
 			oldies.set(id, entities.get(id))
 	})

@@ -32,5 +32,3 @@ export type Block = {
 
 export type Slot = number
 
-export type Change = [id: EntityId, code?: Code]
-

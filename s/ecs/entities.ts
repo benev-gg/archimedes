@@ -1,12 +1,12 @@
 
-import {got, need, sub} from "@e280/stz"
-import {Change} from "./store/types.js"
+import {got, need} from "@e280/stz"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
+import {startRollback} from "./utils/rollback.js"
 import {storeLoad, storeSave} from "./store/save.js"
 import {Components, Entity, EntityId, Patch, Selected} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
-import { startRollback } from "./utils/rollback.js"
+import { makeOnBeforeChange } from "./utils/before-change.js"
 
 export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
 	| "clear"
@@ -17,9 +17,9 @@ export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
 )>
 
 export class Entities<C extends Components> {
-	beforeChange = sub<[Change]>()
 	#store
 	#selector = new Selector<C>(this)
+	#onBeforeChange = makeOnBeforeChange()
 
 	constructor(public readonly components: C) {
 		this.#store = makeStore(components)
@@ -27,7 +27,7 @@ export class Entities<C extends Components> {
 
 	clear() {
 		for (const id of this.keys()) {
-			this.beforeChange.publish([id])
+			this.#onBeforeChange.publish(id)
 			this.#selector.entityGone(id)
 		}
 		this.#store = makeStore(this.components)
@@ -51,13 +51,13 @@ export class Entities<C extends Components> {
 	}
 
 	delete(id: EntityId) {
-		this.beforeChange.publish([id])
+		this.#onBeforeChange.publish(id)
 		this.#selector.entityGone(id)
 		return storeDeleteEntity(this.#store, id)
 	}
 
 	set<V extends Partial<Entity<C>>>(id: EntityId, values: V) {
-		this.beforeChange.publish([id])
+		this.#onBeforeChange.publish(id)
 		this.#selector.entityChanged(id, values)
 
 		if (!this.#store.addresses.has(id))
@@ -85,7 +85,7 @@ export class Entities<C extends Components> {
 
 		for (const [name, value] of Object.entries(patch)) {
 			const code = this.#store.namecoder.code(name)
-			this.beforeChange.publish([id, code])
+			this.#onBeforeChange.publish(id, code)
 
 			if (value === undefined)
 				storeDeleteValue(this.#store, id, code)
@@ -147,7 +147,7 @@ export class Entities<C extends Components> {
 	}
 
 	rollback() {
-		return startRollback(this)
+		return startRollback(this, this.#onBeforeChange)
 	}
 }
 
