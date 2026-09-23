@@ -5,6 +5,7 @@ import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
 import {Components, ComponentValues, EntityId, Patch} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
+import { storeLoad, storeSave } from "./store/save.js"
 
 export class Entities<C extends Components> {
 	beforeChange = sub<[Change]>()
@@ -121,14 +122,13 @@ export class Entities<C extends Components> {
 	}
 
 	save() {
-		// // TODO
-		// return storeSave(this.#store)
+		return storeSave(this.#store)
 	}
 
 	load(file: Uint8Array) {
 		this.clear()
-		// // TODO
-		// storeLoad(this.#store, file)
+		storeLoad(this.#store, file)
+		this.#selector.rebuild()
 	}
 
 	select<N extends keyof C>(...componentNames: N[]) {

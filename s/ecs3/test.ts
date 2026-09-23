@@ -145,5 +145,25 @@ export default suite({
 				.not.is(new Entities({a: tuple(u8, u16)}).version)
 		}),
 	}),
+
+	"save/load": suite({
+		"roundtrip": test(async() => {
+			const entitiesA = setup()
+			entitiesA.set(makeId(), {health: 100, position: [1, 2, 3]})
+			entitiesA.set(makeId(), {payload: new Uint8Array([1, 2, 3])})
+			entitiesA.set(makeId(), {data: {alpha: 123}})
+			const entitiesB = setup()
+			entitiesB.load(entitiesA.save())
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
+
+		"schema mismatch throws": test(async() => {
+			const entitiesA = new Entities({health: i8, mana: u8})
+			const entitiesB = new Entities({health: i8, mana: i8})
+			expect(
+				() => entitiesB.load(entitiesA.save())
+			).throws()
+		}),
+	}),
 })
 

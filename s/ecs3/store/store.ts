@@ -82,6 +82,30 @@ export function storeWriteValue(
 	}
 }
 
+export function storeWriteBytes(
+		store: Store,
+		id: EntityId,
+		code: Code,
+		bytes: Uint8Array,
+	) {
+
+	const addresses = need(store.addresses, id)
+	const column = store.columns[code]!
+
+	if ("block" in column) {
+		if (bytes.length !== column.component.size)
+			throw new RangeError("invalid fixed component size")
+
+		const slot = blockAllocate(column.block)
+		blockGetBytes(column.block, slot).set(bytes)
+		addresses.set(code, slot)
+	}
+	else {
+		column.blobs.set(id, new Uint8Array(bytes))
+		addresses.set(code, null)
+	}
+}
+
 export function storeDeleteValue(store: Store, id: EntityId, code: Code) {
 	const addresses = store.addresses.get(id)
 	if (!addresses)

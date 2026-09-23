@@ -39,6 +39,15 @@ export class Selector<C extends Components> {
 			query.results.delete(id)
 	}
 
+	rebuild() {
+		for (const query of this.#index.values()) {
+			query.results.clear()
+
+			for (const [id, values] of this.entities)
+				updateQuery(query, id, values)
+		}
+	}
+
 	#query(names: (keyof C)[]) {
 		return guarantee(this.#index, queryKey(names as string[]), () => {
 			const query = <Query<C>>{
