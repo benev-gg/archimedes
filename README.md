@@ -17,7 +17,11 @@ but under the hood, archimedes is tightly packing most data into contiguous bloc
 
 **rollback multiplayer.**  
 archimedes is designed for singleplayer and multiplayer games alike.  
-you program your whole game as though it's singleplayer, archimedes automates the gnarly netcode.
+you basically program your whole game as though it's singleplayer, archimedes automates the gnarly netcode.
+
+**it's not a rendering engine.**  
+archimedes helps you structure your game's simulation, keeping it ready for multithreading and multiplayer.  
+for rendering, you might want something like [babylon lite](https://www.babylonjs.com/lite/).
 
 - 🎮 ***[#simple,](#simple)*** **game example**
 - 🧩 ***[#components,](#components)*** **properties your entities can have**
