@@ -1,7 +1,6 @@
 
 export type Id = string
 export type EntityId = Id
-export type EntityEntry<Values> = [id: EntityId, values: Values]
 
 export type FixedComponent<Value = any> = {
 	version: Id
@@ -25,19 +24,19 @@ export type Components = {[key: string]: Component<any>}
 export const asComponent = <V>(c: Component<V>) => c
 export const asComponents = <C extends Components>(c: C) => c
 
-export type ComponentValue<C extends Component<any>> = (
+export type EntityValue<C extends Component<any>> = (
 	C extends Component<infer V>
 		? V
 		: never
 )
 
-export type ComponentValues<C extends Components> = Readonly<{
-	[K in keyof C]: ComponentValue<C[K]>
+export type Entity<C extends Components> = Readonly<{
+	[K in keyof C]: EntityValue<C[K]>
 }>
 
 export type Selected<C extends Components, N extends keyof C> = (
-	Pick<ComponentValues<C>, N>
-		& Partial<ComponentValues<C>>
+	Pick<Entity<C>, N>
+		& Partial<Entity<C>>
 )
 
 export type SelectedEntry<C extends Components, N extends keyof C> = (
@@ -45,7 +44,7 @@ export type SelectedEntry<C extends Components, N extends keyof C> = (
 )
 
 export type Patch<C extends Components> = {
-	[K in keyof C]?: ComponentValues<C>[K] | undefined
+	[K in keyof C]?: Entity<C>[K] | undefined
 }
 
 export type Json =

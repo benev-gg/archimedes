@@ -1,13 +1,13 @@
 
 import {guarantee} from "@e280/stz"
 import type {Entities} from "../entities.js"
-import {Components, ComponentValues, EntityId, SelectedEntry} from "../types.js"
+import {Components, Entity, EntityId, SelectedEntry} from "../types.js"
 
 type QueryKey = string
 
 type Query<C extends Components> = {
 	names: Set<keyof C>
-	results: Map<EntityId, Partial<ComponentValues<C>>>
+	results: Map<EntityId, Partial<Entity<C>>>
 }
 
 function queryKey(names: string[]) {
@@ -29,7 +29,7 @@ export class Selector<C extends Components> {
 
 	constructor(private entities: Entities<C>) {}
 
-	entityChanged(id: EntityId, values: Partial<ComponentValues<C>>) {
+	entityChanged(id: EntityId, values: Partial<Entity<C>>) {
 		for (const query of this.#index.values())
 			updateQuery(query, id, values)
 	}

@@ -45,7 +45,10 @@ import {Entities, i8, vec2, makeId} from "@benev/archimedes"
     ```
 1. **create your first entity.**
     ```ts
-    const id = entities.set(makeId(), {health: 100, position: [1, 2]})
+    const id = entities.set(makeId(), {
+      health: 100,
+      position: [1, 2],
+    })
     ```
     ```ts
     entities.get(id)
@@ -56,13 +59,14 @@ import {Entities, i8, vec2, makeId} from "@benev/archimedes"
     function simulate() {
 
       // hazards deal damage
-      for (const [id, {health, position: [x, y]}] of entities.select("health", "position"))
-        if (y < 0)
-          entities.update(id, {health: health - 1})
+      for (const [id, entity] of entities.select("health", "position")) {
+        if (entity.position[1] < 0)
+          entities.update(id, {health: entity.health - 1})
+      }
 
       // dead things disappear
-      for (const [id, {health}] of entities.select("health"))
-        if (health <= 0)
+      for (const [id, entity] of entities.select("health"))
+        if (entity.health <= 0)
           entities.delete(id)
     }
     ```
@@ -101,8 +105,8 @@ import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archi
 - **how components work.**
     - each component has its own functions for encoding and decoding between binary and js values.
     - use the `asComponent` helper to make your own components from scratch.
-    - simple components are `FixedComponents`, values for these are stored in contiguous memory blocks.
-    - complex components (like `bytes` and `json`) are `VariableComponents`, values for these are stored differently (likely slower).
+    - simple components are `FixedComponent`, values for these are stored in contiguous memory blocks.
+    - complex components (like `bytes` and `json`) are `VariableComponent`, values for these are stored differently (likely slower).
     - if your brain is large, provide a `version` string as an option for `bytes` and `json` components, bump this string whenever you change your custom json/binary schema in a breaking way.
 
 
@@ -135,10 +139,11 @@ first of all, it looks and feels a lot like a normal js map. *(it's secretly not
     - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and have enough entropy to avoid collisions. now the cool part: if you supply makeId with parameters, the id will be a deterministic hash of those parameters. rollback netcode clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
 - **entities.get,** obtain an entity's values.
     ```ts
-    // get an entity's values
-    entities.get(id) // {health: 100, position: [1, 2, 3]}
+    entities.get(id)
+      // {health: 100, position: [1, 2, 3]}
     ```
-    - note, these values are just a snapshot (mutating them has no effect)
+    - entity values are always typescript readonly.
+    - even if you ignore the typescript rules, the entity object is a snapshot, mutation has no effect.
 - **entities.update,** apply a partial patch.
     ```ts
     entities.update(id, {health: 99})

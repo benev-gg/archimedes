@@ -3,10 +3,10 @@ import {makeId} from "./make-id.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
 import {isFixedComponent} from "../utils/is-component.js"
-import {asComponent, Component, ComponentValue, FixedComponent} from "../types.js"
+import {asComponent, Component, EntityValue, FixedComponent} from "../types.js"
 
 type TupleValues<C extends Component<any>[]> = {
-	[K in keyof C]: ComponentValue<C[K]>
+	[K in keyof C]: EntityValue<C[K]>
 }
 
 export function tuple<const C extends Component<any>[]>(

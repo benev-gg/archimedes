@@ -1,9 +1,9 @@
 
 import {Entities} from "../entities.js"
-import {ComponentValues, EntityId} from "../types.js"
+import {Entity, EntityId} from "../types.js"
 
 export function startRollback(entities: Entities<any>) {
-	const oldies = new Map<EntityId, Partial<ComponentValues<any>> | undefined>()
+	const oldies = new Map<EntityId, Partial<Entity<any>> | undefined>()
 
 	const stopListening = entities.beforeChange(([id]) => {
 		if (!oldies.has(id))

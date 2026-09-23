@@ -4,7 +4,7 @@ import {Change} from "./store/types.js"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
 import {storeLoad, storeSave} from "./store/save.js"
-import {Components, ComponentValues, EntityId, Patch} from "./types.js"
+import {Components, Entity, EntityId, Patch, Selected} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
 
 export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
@@ -42,7 +42,7 @@ export class Entities<C extends Components> {
 
 	get(id: EntityId) {
 		const values = storeGetValues(this.#store, id)
-		return values as Partial<ComponentValues<C>> | undefined
+		return values as Partial<Entity<C>> | undefined
 	}
 
 	got(id: EntityId) {
@@ -55,7 +55,7 @@ export class Entities<C extends Components> {
 		return storeDeleteEntity(this.#store, id)
 	}
 
-	set<V extends Partial<ComponentValues<C>>>(id: EntityId, values: V) {
+	set<V extends Partial<Entity<C>>>(id: EntityId, values: V) {
 		this.beforeChange.publish([id])
 		this.#selector.entityChanged(id, values)
 
@@ -102,9 +102,7 @@ export class Entities<C extends Components> {
 		for (const name of names)
 			if (!Object.hasOwn(values, name))
 				return undefined
-		return values as
-			& Pick<ComponentValues<C>, N>
-			& Partial<ComponentValues<C>>
+		return values as Selected<C, N>
 	}
 
 	get size() {
@@ -126,7 +124,7 @@ export class Entities<C extends Components> {
 
 	*entries() {
 		for (const id of this.#store.addresses.keys())
-			yield [id, got(this.get(id))] as [EntityId, Partial<ComponentValues<C>>]
+			yield [id, got(this.get(id))] as [EntityId, Partial<Entity<C>>]
 	}
 
 	*[Symbol.iterator]() {

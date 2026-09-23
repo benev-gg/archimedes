@@ -17,9 +17,8 @@ export default suite({
 	"entities": suite({
 		"set/get": test(async() => {
 			const entities = new Entities(setupComponents())
-			const id = makeId()
 			const unknown = makeId()
-			entities.set(id, {health: 100, position: [1, 2, 3]})
+			const id = entities.set(makeId(), {health: 100, position: [1, 2, 3]})
 			expect(entities.get(id)).deep({health: 100, position: [1, 2, 3]})
 			expect(entities.get(unknown)).is(undefined)
 		}),
