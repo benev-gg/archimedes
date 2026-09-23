@@ -1,11 +1,13 @@
 
 import {bytes, hex, txt} from "@e280/stz"
 import {Store} from "./types.js"
-import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./store.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
+import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./store.js"
 
-export const magic = txt.toBytes("@benev/archimedes:store:v1")
+const magic = txt.toBytes("@benev/archimedes:store:v1")
+const idSize = 16
+const u32Size = 4
 
 export function storeSave(store: Store) {
 	return bytes.concat([
@@ -15,10 +17,8 @@ export function storeSave(store: Store) {
 	])
 }
 
-export function saveData(store: Store) {
-	const parts: Uint8Array[] = [
-		u32(store.addresses.size),
-	]
+function saveData(store: Store) {
+	const parts: Uint8Array[] = [u32(store.addresses.size)]
 
 	for (const [id, addresses] of store.addresses) {
 		const codes = [...addresses.keys()].sort((a, b) => a - b)
@@ -32,15 +32,12 @@ export function saveData(store: Store) {
 			const column = store.columns[code]!
 			const data = storeGetBytes(store, id, code)
 
-			parts.push(u32(code))
-
-			if ("block" in column)
-				parts.push(data)
-			else
-				parts.push(
-					u32(data.length),
-					data,
-				)
+			parts.push(
+				u32(code),
+				...("block" in column
+					? [data]
+					: [u32(data.length), data]),
+			)
 		}
 	}
 
@@ -48,63 +45,68 @@ export function saveData(store: Store) {
 }
 
 export function storeLoad(store: Store, file: Uint8Array) {
-	const gobble = byteGobbler(file)
-	const storeVersion = hex.toBytes(store.version)
+	const read = byteReader(file)
+	const version = hex.toBytes(store.version)
 
-	if (!bytes.eq(gobble(magic.length), magic))
+	if (!bytes.eq(read.bytes(magic.length), magic))
 		throw new Error("invalid file type")
 
-	if (!bytes.eq(gobble(storeVersion.length), storeVersion))
+	if (!bytes.eq(read.bytes(version.length), version))
 		throw new Error("invalid schema structure")
 
-	loadData(store, file.subarray(magic.length + storeVersion.length))
+	loadData(store, read)
 }
 
-export function loadData(store: Store, file: Uint8Array) {
-	const gobble = byteGobbler(file)
-
-	const entityCount = readU32(gobble(4))
+function loadData(store: Store, read: ByteReader) {
+	const entityCount = read.u32()
 
 	for (let e = 0; e < entityCount; e++) {
-		const id = hex(gobble(16))
-		const componentCount = readU32(gobble(4))
+		const id = hex(read.bytes(idSize))
+		const componentCount = read.u32()
 
 		storeCreateEntity(store, id)
 
 		for (let c = 0; c < componentCount; c++) {
-			const code = readU32(gobble(4))
+			const code = read.u32()
 			const column = store.columns[code]
 
 			if (!column)
 				throw new RangeError(`invalid component code ${code}`)
 
 			const data = "block" in column
-				? gobble(column.component.size)
-				: gobble(readU32(gobble(4)))
+				? read.bytes(column.component.size)
+				: read.bytes(read.u32())
 
 			storeWriteBytes(store, id, code, data)
 		}
 	}
 }
 
-function readU32(data: Uint8Array) {
-	return dataView(data).getUint32(0, endian)
-}
-
 function u32(x: number) {
-	const data = new Uint8Array(4)
+	const data = new Uint8Array(u32Size)
 	dataView(data).setUint32(0, x, endian)
 	return data
 }
 
-function byteGobbler(b: Uint8Array) {
+type ByteReader = ReturnType<typeof byteReader>
+
+function byteReader(data: Uint8Array) {
 	let offset = 0
-	return (length: number) => {
+
+	const readBytes = (length: number) => {
 		const next = offset + length
-		if (next > b.length) throw new RangeError("unexpected end of file")
-		const chunk = b.subarray(offset, next)
+
+		if (next > data.length)
+			throw new RangeError("unexpected end of file")
+
+		const chunk = data.subarray(offset, next)
 		offset = next
 		return chunk
+	}
+
+	return {
+		bytes: readBytes,
+		u32: () => dataView(readBytes(u32Size)).getUint32(0, endian),
 	}
 }
 
