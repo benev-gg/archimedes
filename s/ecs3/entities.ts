@@ -10,12 +10,12 @@ export class Entities<C extends Components> {
 	#store
 
 	constructor(public readonly components: C) {
-		this.#store = makeStore(components, this.beforeChange.publish)
+		this.#store = makeStore(components)
 	}
 
 	clear() {
 		for (const id of this.keys()) this.beforeChange.publish([id])
-		this.#store = makeStore(this.components, this.beforeChange.publish)
+		this.#store = makeStore(this.components)
 	}
 
 	get version() {
@@ -32,10 +32,13 @@ export class Entities<C extends Components> {
 	}
 
 	delete(id: EntityId) {
+		this.beforeChange.publish([id])
 		return storeDeleteEntity(this.#store, id)
 	}
 
 	set<V extends Partial<ComponentValues<C>>>(id: EntityId, values: V) {
+		this.beforeChange.publish([id])
+
 		if (!this.#store.addresses.has(id))
 			storeCreateEntity(this.#store, id)
 
@@ -61,6 +64,7 @@ export class Entities<C extends Components> {
 
 		for (const [name, value] of Object.entries(patch)) {
 			const code = this.#store.namecoder.code(name)
+			this.beforeChange.publish([id, code])
 
 			if (value === undefined)
 				storeDeleteValue(this.#store, id, code)

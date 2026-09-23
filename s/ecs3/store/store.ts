@@ -37,7 +37,6 @@ export function storeHasEntity(store: Store, id: EntityId) {
 
 export function storeCreateEntity(store: Store, id: EntityId) {
 	if (store.addresses.has(id)) return false
-	store.beforeChange([id])
 	store.addresses.set(id, new Map())
 	return true
 }
@@ -59,8 +58,6 @@ export function storeWriteValue(
 		if (exists && previousSlot === null)
 			throw new Error("bad column address")
 
-		store.beforeChange([id, code])
-
 		const slot = exists
 			? previousSlot!
 			: blockAllocate(column.block)
@@ -78,7 +75,6 @@ export function storeWriteValue(
 			throw new Error("bad column address")
 
 		const bytes = column.component.encode(value)
-		store.beforeChange([id, code])
 		column.blobs.set(id, bytes)
 
 		if (!exists)
@@ -96,8 +92,6 @@ export function storeDeleteValue(store: Store, id: EntityId, code: Code) {
 
 	const slot = addresses.get(code)!
 	const column = store.columns[code]
-
-	store.beforeChange([id, code])
 
 	if ("block" in column) {
 		if (slot === null)
@@ -122,7 +116,6 @@ export function storeDeleteEntity(store: Store, id: EntityId) {
 	if (!addresses) return false
 	for (const code of [...addresses.keys()])
 		storeDeleteValue(store, id, code)
-	store.beforeChange([id])
 	store.addresses.delete(id)
 	return true
 }
