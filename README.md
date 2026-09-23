@@ -12,7 +12,7 @@ npm install @benev/archimedes
 
 **archimedes is an ecs toolkit for making great web games.**  
 entities look and feel like normal js data, so your game logic stays simple.  
-but under the hood, archimedes is tightly packing your data into contiguous blocks of memory.  
+but under the hood, archimedes is tightly packing binary data into contiguous blocks of memory.  
 *compact storage. efficient networking. strong typescript typings.*
 
 **rollback multiplayer.**  
@@ -95,6 +95,7 @@ import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archi
     - use the `asComponent` helper to make your own components from scratch.
     - simple components are `FixedComponents`, values for these are stored in contiguous memory blocks.
     - complex components (like `bytes` and `json`) are `VariableComponents`, values for these are stored differently (likely slower).
+    - if your brain is large, provide a `version` string as an option for `bytes` and `json` components, bump this string whenever you change your custom json/binary schema in a breaking way.
 
 
 
@@ -108,12 +109,12 @@ import {Entities, makeId} from "@benev/archimedes"
 
 ### `entities` feels like a js map
 
-1. **establish your entities**.
+1. **new Entities,** establish your entities.
     ```ts
     const entities = new Entities(components)
     ```
     - `entities` seems a lot like a normal js map... *(but it's secretly not, tee hee!)*
-1. **create an entity.**
+1. **entities.set,** create a new entity (or overwrite one).
     ```ts
     // create an entity
     const id = entities.set(makeId(), {
@@ -122,56 +123,63 @@ import {Entities, makeId} from "@benev/archimedes"
     })
     ```
     - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and have enough entropy to avoid collisions. now the cool part: if you supply makeId with parameters, the id will be a deterministic hash of those parameters. rollback netcode clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
-1. **get an entity.**
+1. **entities.get,** obtain an entity's values.
     ```ts
     // get an entity's values
     entities.get(id) // {health: 100, position: [1, 2, 3]}
     ```
     - note, these values are just a snapshot (mutating them has no effect)
-1. **update an entity,** applying a partial patch.
+1. **entities.update,** apply a partial patch.
     ```ts
     entities.update(id, {health: 99})
       // only update health value
     ```
     - in updates, and `undefined` value means "delete this value"
-1. **delete an entity.**
+1. **entity.delete,** destroy an entity.
     ```ts
     entities.delete(id)
     ```
-1. **typical map iteration fns.** (.keys(), .values(), .entries(), etc)
+1. **entities.clear,** nukes everything.
+    ```ts
+    entities.clear()
+    ```
+1. **iterating.** (.keys(), .values(), .entries(), etc)
     ```ts
     for (const [id, values] of entities)
       console.log(id, values)
     ```
-1. **clear,** nukes everything.
-    ```ts
-    entities.clear()
-    ```
 
 ### fancy entities methods
 
-1. **select specific entities,** at warp-speed thanks to indexing.
+1. **entities.select,** get entities based on what values they have.
     ```ts
     // only select entities with both 'health' and 'position'
     const selected = entities.select("health", "position")
     ```
     - your game logic systems should be doing a lot of these `select` calls.
-1. **save your entities,** as a binary file.
+1. **entities.save,** get a binary file.
     ```ts
     const file = entities.save()
     ```
-1. **load entities,** from a binary file.
+1. **entities.load,** overwrite with a binary file.
     ```ts
     entities.load(file)
     ```
-1. **version hash,** based on the component schema.
+1. **entity.version,** a hash of the component schema.
     ```ts
     entity.version
       // "ecf61ff8d547e6b06c4af5188e6c6cc7"
     ```
-    - any change to your component schema will change this hash automatically, thus breaking compatibility with old save files and networking.
-    - it's your responsibility to be careful about that and think about handling migrations.
-1. **rollback is easier than you think.**
+    - this version changes if your component schema changes at all.
+    - this can break compatibility with old saves and networking.
+    - it's up to you, to be careful about that, and plan for migrations.
+1. **entities.readonly,** i use this so much actually.
+    ```ts
+    setupMyRenderer(entities.readonly)
+    ```
+    - it's just a different typescript type (for the same object) that doesn't have set/update/etc.
+    - i love to pass this around to systems that shouldn't be meddling with my simulation (like a renderer).
+1. **startRollback,** rollback is easier than you think.
     ```ts
     import {startRollback} from "@benev/archimedes"
 

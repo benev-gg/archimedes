@@ -3,9 +3,17 @@ import {got, need, sub} from "@e280/stz"
 import {Change} from "./store/types.js"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
+import {storeLoad, storeSave} from "./store/save.js"
 import {Components, ComponentValues, EntityId, Patch} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
-import { storeLoad, storeSave } from "./store/save.js"
+
+export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
+	| "clear"
+	| "set"
+	| "update"
+	| "delete"
+	| "load"
+)>
 
 export class Entities<C extends Components> {
 	beforeChange = sub<[Change]>()
@@ -22,6 +30,10 @@ export class Entities<C extends Components> {
 			this.#selector.entityGone(id)
 		}
 		this.#store = makeStore(this.components)
+	}
+
+	get readonly() {
+		return this as EntitiesReadonly<C>
 	}
 
 	get version() {

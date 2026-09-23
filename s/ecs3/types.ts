@@ -31,9 +31,9 @@ export type ComponentValue<C extends Component<any>> = (
 		: never
 )
 
-export type ComponentValues<C extends Components> = {
+export type ComponentValues<C extends Components> = Readonly<{
 	[K in keyof C]: ComponentValue<C[K]>
-}
+}>
 
 export type Selected<C extends Components, N extends keyof C> = (
 	Pick<ComponentValues<C>, N>
