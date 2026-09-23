@@ -2,10 +2,11 @@
 import {expect, suite, test} from "@e280/science"
 import {tuple} from "./parts/tuple.js"
 import {Entities} from "./entities.js"
+import {asComponents} from "./types.js"
 import {makeId} from "./parts/make-id.js"
 import {bytes, i8, json, u16, u8, vec3} from "./components.js"
 
-const setup = () => new Entities({
+const setupComponents = () => asComponents({
 	health: i8,
 	position: vec3,
 	data: json(),
@@ -15,7 +16,7 @@ const setup = () => new Entities({
 export default suite({
 	"entities": suite({
 		"set/get": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = makeId()
 			const unknown = makeId()
 			entities.set(id, {health: 100, position: [1, 2, 3]})
@@ -24,7 +25,7 @@ export default suite({
 		}),
 
 		"maplike methods and iteration": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const a = entities.set(makeId(), {health: 101})
 			const b = entities.set(makeId(), {health: 102})
 			const c = entities.set(makeId(), {health: 103})
@@ -35,7 +36,7 @@ export default suite({
 		}),
 
 		"got": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = entities.set(makeId(), {health: 101})
 			const unknown = makeId()
 			expect(entities.got(id)).ok()
@@ -43,7 +44,7 @@ export default suite({
 		}),
 
 		"set replaces": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = makeId()
 			entities.set(id, {health: 100, position: [1, 2, 3]})
 			entities.set(id, {health: 64})
@@ -51,7 +52,7 @@ export default suite({
 		}),
 
 		"update": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = makeId()
 			entities.set(id, {health: 128, position: [1, 2, 3]})
 			entities.update(id, {health: 64, position: undefined})
@@ -59,7 +60,7 @@ export default suite({
 		}),
 
 		"empty entity": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = makeId()
 			entities.set(id, {health: 100})
 			entities.set(id, {})
@@ -68,7 +69,7 @@ export default suite({
 		}),
 
 		"delete": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = makeId()
 			entities.set(id, {health: 100})
 			entities.delete(id)
@@ -77,7 +78,7 @@ export default suite({
 		}),
 
 		"variable components": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const id = makeId()
 			entities.set(id, {
 				data: {name: "wizard", level: 7},
@@ -89,7 +90,7 @@ export default suite({
 		}),
 
 		"slot reuse": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			const a = makeId(), b = makeId(), c = makeId()
 			entities.set(a, {health: 10})
 			entities.set(b, {health: 20})
@@ -100,7 +101,7 @@ export default suite({
 		}),
 
 		"select": test(async() => {
-			const entities = setup()
+			const entities = new Entities(setupComponents())
 			entities.set(makeId(), {
 				health: 100,
 			})
@@ -148,11 +149,11 @@ export default suite({
 
 	"save/load": suite({
 		"roundtrip": test(async() => {
-			const entitiesA = setup()
+			const entitiesA = new Entities(setupComponents())
 			entitiesA.set(makeId(), {health: 100, position: [1, 2, 3]})
 			entitiesA.set(makeId(), {payload: new Uint8Array([1, 2, 3])})
 			entitiesA.set(makeId(), {data: {alpha: 123}})
-			const entitiesB = setup()
+			const entitiesB = new Entities(setupComponents())
 			entitiesB.load(entitiesA.save())
 			expect([...entitiesA]).deep([...entitiesB])
 		}),
@@ -160,9 +161,7 @@ export default suite({
 		"schema mismatch throws": test(async() => {
 			const entitiesA = new Entities({health: i8, mana: u8})
 			const entitiesB = new Entities({health: i8, mana: i8})
-			expect(
-				() => entitiesB.load(entitiesA.save())
-			).throws()
+			expect(() => entitiesB.load(entitiesA.save())).throws()
 		}),
 	}),
 })
