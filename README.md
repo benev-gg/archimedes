@@ -19,9 +19,9 @@ but under the hood, archimedes is tightly packing most data into contiguous bloc
 archimedes is designed for singleplayer and multiplayer games alike.  
 you program your whole game as though it's singleplayer, archimedes automates the gnarly netcode.
 
-- 🎮 **[#simple,](#simple)** game example
-- 🧩 **[#components,](#components)** properties your entities can have
-- 👾 **[#entities,](#entities)** the things in your game
+- 🎮 ***[#simple,](#simple)*** **game example**
+- 🧩 ***[#components,](#components)*** **properties your entities can have**
+- 👾 ***[#entities,](#entities)*** **things in your game**
 
 
 
@@ -95,7 +95,7 @@ import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archi
 
 <br/><a id="entities"></a>
 
-## 👾 entities, the things in your game
+## 👾 entities, things in your game
 
 ```ts
 import {Entities, makeId} from "@benev/archimedes"
