@@ -17,6 +17,10 @@ export class Entities<C extends Components> {
 		this.#store = makeStore(this.components, this.beforeChange.publish)
 	}
 
+	get version() {
+		return this.#store.version
+	}
+
 	get(id: EntityId) {
 		const values = storeGetValues(this.#store, id)
 		return values as Partial<ComponentValues<C>> | undefined
@@ -105,13 +109,13 @@ export class Entities<C extends Components> {
 
 	save() {
 		// // TODO
-		// return storeSave(this.#dataplate)
+		// return storeSave(this.#store)
 	}
 
 	load(file: Uint8Array) {
 		this.clear()
 		// // TODO
-		// storeLoad(this.#dataplate, file)
+		// storeLoad(this.#store, file)
 	}
 
 	select<N extends keyof C>(...componentNames: N[]): [EntityId, Pick<ComponentValues<C>, N>][] {

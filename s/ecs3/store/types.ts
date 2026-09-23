@@ -1,10 +1,11 @@
 
 import {Namecoder} from "../utils/namecoder.js"
-import {EntityId, FixedComponent, VariableComponent} from "../types.js"
+import {EntityId, FixedComponent, Id, VariableComponent} from "../types.js"
 
 export type Code = number
 
 export type Store = {
+	version: Id
 	namecoder: Namecoder
 	columns: (BlockColumn | BlobColumn)[] // indexed by Code
 	addresses: Map<EntityId, Map<Code, Slot | null>>

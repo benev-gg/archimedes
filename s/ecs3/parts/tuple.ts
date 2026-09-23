@@ -1,4 +1,5 @@
 
+import {makeId} from "./make-id.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
 import {isFixedComponent} from "../utils/is-component.js"
@@ -12,6 +13,7 @@ export function tuple<const C extends Component<any>[]>(
 		...components: C
 	): Component<TupleValues<C>> {
 
+	const version = makeId(...components.map(c => c.version))
 	const all_fixed = components.every(isFixedComponent)
 
 	if (all_fixed) {
@@ -19,6 +21,7 @@ export function tuple<const C extends Component<any>[]>(
 		const size = fixed.reduce((total, component) => total + component.size, 0)
 
 		return asComponent<TupleValues<C>>({
+			version,
 			size,
 
 			write(bytes, values) {
@@ -57,6 +60,8 @@ export function tuple<const C extends Component<any>[]>(
 	}
 
 	return asComponent<TupleValues<C>>({
+		version,
+
 		encode(values) {
 			const parts: Uint8Array[] = []
 

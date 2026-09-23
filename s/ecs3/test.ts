@@ -2,7 +2,8 @@
 import {expect, suite, test} from "@e280/science"
 import {Entities} from "./entities.js"
 import {makeId} from "./parts/make-id.js"
-import {bytes, json, u8, vec3} from "./components.js"
+import {bytes, json, u16, u8, vec3} from "./components.js"
+import { tuple } from "./parts/tuple.js"
 
 const setup = () => new Entities({
 	health: u8,
@@ -96,6 +97,38 @@ export default suite({
 			entities.set(c, {health: 30})
 			expect(entities.got(b)).deep({health: 20})
 			expect(entities.got(c)).deep({health: 30})
+		}),
+	}),
+
+	"component schema": suite({
+		"component rename changes version": test(async() => {
+			expect(new Entities({a: u8}).version)
+				.not.is(new Entities({b: u8}).version)
+		}),
+
+		"same schema is stable": test(async() => {
+			expect(new Entities({a: u8, b: tuple(u16, u8)}).version)
+				.is(new Entities({a: u8, b: tuple(u16, u8)}).version)
+		}),
+
+		"reordering is fine": test(async() => {
+			expect(new Entities({a: u8, b: u16}).version)
+				.is(new Entities({b: u16, a: u8}).version)
+		}),
+
+		"change one component, version changes": test(async() => {
+			expect(new Entities({a: u8, b: u16}).version)
+				.not.is(new Entities({a: u8, b: u8}).version)
+		}),
+
+		"add one component, version changes": test(async() => {
+			expect(new Entities({a: u8, b: u16}).version)
+				.not.is(new Entities({a: u8, b: u16, c: u8}).version)
+		}),
+
+		"component inside tuple changes, version changes": test(async() => {
+			expect(new Entities({a: tuple(u8, u8)}).version)
+				.not.is(new Entities({a: tuple(u8, u16)}).version)
 		}),
 	}),
 })

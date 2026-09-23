@@ -5,8 +5,8 @@ export class Namecoder {
 	#names = new Map<number, string>()
 	#codes = new Map<string, number>()
 
-	constructor(components: Record<PropertyKey, any>) {
-		for (const [code, name] of Object.keys(components).entries()) {
+	constructor(names: string[]) {
+		for (const [code, name] of names.entries()) {
 			this.#names.set(code, name)
 			this.#codes.set(name, code)
 		}
