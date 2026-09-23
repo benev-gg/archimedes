@@ -50,7 +50,7 @@ export class Entities<C extends Components> {
 		return id
 	}
 
-	patch(id: EntityId, patch: Patch<C>) {
+	update(id: EntityId, patch: Patch<C>) {
 		if (!this.#store.addresses.has(id))
 			return false
 

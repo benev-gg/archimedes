@@ -49,11 +49,11 @@ export default suite({
 			expect(entities.got(id)).deep({health: 64})
 		}),
 
-		"patch": test(async() => {
+		"update": test(async() => {
 			const entities = setup()
 			const id = makeId()
 			entities.set(id, {health: 128, position: [1, 2, 3]})
-			entities.patch(id, {health: 64, position: undefined})
+			entities.update(id, {health: 64, position: undefined})
 			expect(entities.got(id)).deep({health: 64})
 		}),
 

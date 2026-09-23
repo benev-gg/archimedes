@@ -32,10 +32,5 @@ export type Block = {
 
 export type Slot = number
 
-export enum ChangeKind {
-	Entity,
-	Component,
-}
-
 export type Change = [id: EntityId, code?: Code]
 
