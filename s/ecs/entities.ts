@@ -6,6 +6,7 @@ import {Selector} from "./utils/selector.js"
 import {storeLoad, storeSave} from "./store/save.js"
 import {Components, Entity, EntityId, Patch, Selected} from "./types.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
+import { startRollback } from "./utils/rollback.js"
 
 export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
 	| "clear"
@@ -143,6 +144,10 @@ export class Entities<C extends Components> {
 
 	select<N extends keyof C>(...componentNames: N[]) {
 		return this.#selector.select(...componentNames)
+	}
+
+	rollback() {
+		return startRollback(this)
 	}
 }
 

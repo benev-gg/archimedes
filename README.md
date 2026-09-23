@@ -198,19 +198,18 @@ entities has some more fancy tricks up its sleeve.
     ```
     - it's just a different typescript type (for the same object) that doesn't have set/update/etc.
     - i love to pass this around to systems that shouldn't be meddling with my simulation (like a renderer).
-- **startRollback,** rollback is easier than you think.
+- **entities.rollback,** it's easier than you think.
     ```ts
-    import {startRollback} from "@benev/archimedes"
-
-    // start your rollback session (it's watching for changes to undo)
-    const rollback = startRollback(entities)
+    // start your rollback session (it's collecting changes to undo)
+    const rollback = entities.rollback()
 
     // let a bunch of crap happen
-    entities.set(makeId(), {health: 99})
-    entities.update(wizardId, {position: [1, 2]})
+    const id = makeId()
+    entities.set(id, {health: 99})
+    entities.update(id, {position: [1, 2]})
 
     // screw that crap, let's revert!
-    rollback.revert()
+    rollback.execute()
       // now it's like none of that crap ever happened
     ```
     - you can also call `rollback.cancel()` to not rollback (and keep the crap).
