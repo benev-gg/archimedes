@@ -15,8 +15,9 @@ entities look and feel like normal js data, so your game logic stays simple.
 but under the hood, archimedes is tightly packing binary data into contiguous blocks of memory.  
 *compact storage. efficient networking. strong typescript typings.*
 
-**rollback multiplayer.**  
+**rollback multiplayer, and web workers.**  
 archimedes is designed for singleplayer and multiplayer games alike.  
+it's easy to run your simulation and renderer on a different thread, or even a different machine.  
 you basically program your whole game as though it's singleplayer, archimedes automates the gnarly netcode.
 
 **it's not a rendering engine.**  
@@ -44,7 +45,11 @@ import {Entities, i8, vec2, makeId} from "@benev/archimedes"
     ```
 1. **create your first entity.**
     ```ts
-    entities.set(makeId(), {health: 100, position: [0, 0]})
+    const id = entities.set(makeId(), {health: 100, position: [1, 2]})
+    ```
+    ```ts
+    entities.get(id)
+      // {health: 100, position: [1, 2]}
     ```
 1. **write your game logic.**
     ```ts
@@ -90,6 +95,9 @@ import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archi
 - **components are your entity schema.**
     - in archimedes terminology, a "component" is the binary schema for the "values" your entities can have.
     - you can click components together using the `tuple` helper.
+    - stock components include: `bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `f32`, `f64`, `bigu64`, `bigi64`, `bytes`, `json`, `vec2`, `vec3`, `vec4`, `dvec2`, `dvec3`, `dvec4`
+    - vec2, vec3, vec4 -- these are f32 tuples
+    - dvec2, dvec3, dvec4 -- these are f64 tuples
 - **how components work.**
     - each component has its own functions for encoding and decoding between binary and js values.
     - use the `asComponent` helper to make your own components from scratch.
@@ -107,14 +115,16 @@ import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archi
 import {Entities, makeId} from "@benev/archimedes"
 ```
 
-### `entities` feels like a js map
+this entities class is the bread and butter of archimedes.  
+it's a robust and flexible primitive that you can build a whole damn game around. it's ergonomic, efficient, and easily synced across network or web worker boundaries.
 
-1. **new Entities,** establish your entities.
+first of all, it looks and feels a lot like a normal js map. *(it's secretly not, tee hee!)*
+
+- **new Entities,** establish your entities.
     ```ts
     const entities = new Entities(components)
     ```
-    - `entities` seems a lot like a normal js map... *(but it's secretly not, tee hee!)*
-1. **entities.set,** create a new entity (or overwrite one).
+- **entities.set,** create a new entity (or overwrite one).
     ```ts
     // create an entity
     const id = entities.set(makeId(), {
@@ -123,49 +133,53 @@ import {Entities, makeId} from "@benev/archimedes"
     })
     ```
     - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and have enough entropy to avoid collisions. now the cool part: if you supply makeId with parameters, the id will be a deterministic hash of those parameters. rollback netcode clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
-1. **entities.get,** obtain an entity's values.
+- **entities.get,** obtain an entity's values.
     ```ts
     // get an entity's values
     entities.get(id) // {health: 100, position: [1, 2, 3]}
     ```
     - note, these values are just a snapshot (mutating them has no effect)
-1. **entities.update,** apply a partial patch.
+- **entities.update,** apply a partial patch.
     ```ts
     entities.update(id, {health: 99})
       // only update health value
     ```
-    - in updates, an `undefined` value means "delete this value"
-1. **entities.delete,** destroy an entity.
+    ```ts
+    entities.update(id, {color: undefined})
+      // undefined means "deletes the value"
+    ```
+- **entities.delete,** destroy an entity.
     ```ts
     entities.delete(id)
     ```
-1. **entities.clear,** nukes everything.
+- **entities.clear,** nukes everything.
     ```ts
     entities.clear()
     ```
-1. **iterating.** (.keys(), .values(), .entries(), etc)
+- **iterating.** (.keys(), .values(), .entries(), etc)
     ```ts
     for (const [id, values] of entities)
       console.log(id, values)
     ```
 
-### fancy entities methods
+entities has some more fancy tricks up its sleeve.
 
-1. **entities.select,** get entities based on what values they have.
+- **entities.select,** get entities based on what values they have.
     ```ts
     // only select entities with both 'health' and 'position'
     const selected = entities.select("health", "position")
     ```
-    - your game logic systems should be doing a lot of these `select` calls.
-1. **entities.save,** get a binary file.
+    - your game logic systems should be doing a lot of these select calls.
+    - select calls are optimized with indexes.
+- **entities.save,** get a binary file.
     ```ts
     const file = entities.save()
     ```
-1. **entities.load,** overwrite with a binary file.
+- **entities.load,** overwrite with a binary file.
     ```ts
     entities.load(file)
     ```
-1. **entities.version,** a hash of the component schema.
+- **entities.version,** a hash of the component schema.
     ```ts
     entities.version
       // "ecf61ff8d547e6b06c4af5188e6c6cc7"
@@ -173,13 +187,13 @@ import {Entities, makeId} from "@benev/archimedes"
     - this version changes if your component schema changes at all.
     - this will hard-break compatibility with old saves and networking.
     - it's up to you to be careful about that, and plan for migrations.
-1. **entities.readonly,** i use this so much actually.
+- **entities.readonly,** i use this so much actually.
     ```ts
     setupMyRenderer(entities.readonly)
     ```
     - it's just a different typescript type (for the same object) that doesn't have set/update/etc.
     - i love to pass this around to systems that shouldn't be meddling with my simulation (like a renderer).
-1. **startRollback,** rollback is easier than you think.
+- **startRollback,** rollback is easier than you think.
     ```ts
     import {startRollback} from "@benev/archimedes"
 
@@ -226,7 +240,9 @@ that being said here's one little helper we use a lot:
     `lifecycle` returns a system fn.
     ```ts
     const entities = new Entities(myComponents)
+
     const bleedLogging = setupBleedLogging(entities)
+      // this long-lived closure setup must be called once, not every tick
 
     function simulate() {
       bleeding()

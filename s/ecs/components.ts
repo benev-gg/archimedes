@@ -81,6 +81,14 @@ export const bigi64 = asComponent<bigint>({
 	read: bytes => dataView(bytes).getBigInt64(0, endian),
 })
 
+export const vec2 = tuple(f32, f32)
+export const vec3 = tuple(f32, f32, f32)
+export const vec4 = tuple(f32, f32, f32, f32)
+
+export const dvec2 = tuple(f64, f64)
+export const dvec3 = tuple(f64, f64, f64)
+export const dvec4 = tuple(f64, f64, f64, f64)
+
 export const bytes = ({
 		copy = true,
 		version = "764108dd23a178f50721e5d0aae20492",
@@ -107,12 +115,4 @@ export const json = (({
 		decode: bytes => JSON.parse(textDecoder.decode(bytes)),
 	})
 })()
-
-export const vec2 = tuple(f32, f32)
-export const vec3 = tuple(f32, f32, f32)
-export const vec4 = tuple(f32, f32, f32, f32)
-
-export const dvec2 = tuple(f64, f64)
-export const dvec3 = tuple(f64, f64, f64)
-export const dvec4 = tuple(f64, f64, f64, f64)
 
