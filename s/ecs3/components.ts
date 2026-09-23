@@ -70,10 +70,11 @@ export const bigi64 = asComponent<bigint>({
 	read: bytes => dataView(bytes).getBigInt64(0, endian),
 })
 
-export const bytes = asComponent<Uint8Array>({
-	encode: (value: Uint8Array) => value,
-	decode: bytes => bytes,
-})
+export const bytes = ({copy = true}: {copy?: boolean} = {}) =>
+	asComponent<Uint8Array>({
+		encode: value => copy ? new Uint8Array(value) : value,
+		decode: bytes => copy ? new Uint8Array(bytes) : bytes,
+	})
 
 export const json = (() => {
 	const textEncoder = new TextEncoder()

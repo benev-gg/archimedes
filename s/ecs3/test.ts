@@ -8,7 +8,7 @@ const setup = () => new Entities({
 	health: u8,
 	position: vec3,
 	data: json(),
-	payload: bytes,
+	payload: bytes(),
 })
 
 export default suite({
