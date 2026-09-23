@@ -10,7 +10,7 @@
 npm install @benev/archimedes
 ```
 
-**archimedes is a toolkit for making great web games.**  
+**archimedes is an ecs toolkit for making great web games.**  
 entities look and feel like normal js data, so your game logic stays simple.  
 but under the hood, archimedes is tightly packing most data into contiguous blocks of memory.  
 *compact storage. efficient networking. strong typescript typings.*
