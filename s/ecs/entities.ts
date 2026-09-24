@@ -76,7 +76,7 @@ export class Entities<C extends Components> {
 			storeWriteValue(this.#store, id, code, value)
 		}
 
-		this.#selector.entityChanged(id, values)
+		this.#selector.entityChanged(id, this.got(id))
 		return id
 	}
 
