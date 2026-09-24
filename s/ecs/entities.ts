@@ -15,6 +15,9 @@ export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
 	| "update"
 	| "delete"
 	| "load"
+	| "applyChanges"
+	| "startRecordingChanges"
+	| "startRecordingRollback"
 )>
 
 export class Entities<C extends Components> {
