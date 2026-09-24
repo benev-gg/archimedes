@@ -26,9 +26,10 @@
 	},
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"keywords": [
-		"networking",
-		"rollforward",
-		"web-games"
+		"ecs",
+		"game",
+		"web game",
+		"architecture"
 	],
 	"repository": {
 		"type": "git",
