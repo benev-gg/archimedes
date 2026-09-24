@@ -23,8 +23,8 @@ designed for multithreading, serialization, and rollback networking.
 archimedes helps structure your game simulation, but you bring your own renderer. try [babylon lite.](https://www.babylonjs.com/lite/)  
 
 - 🎮 ***[#simple,](#simple)*** **game example**
-- 🧩 ***[#components,](#components)*** **properties your entities can have**
 - 👾 ***[#entities,](#entities)*** **things in your game**
+- 🧩 ***[#components,](#components)*** **properties your entities can have**
 - ⚙️ ***[#systems,](#systems)*** **game logic**
 
 
@@ -75,40 +75,6 @@ import {Entities, i8, vec2, makeId} from "@benev/archimedes"
 
 
 
-<br/><a id="components"></a>
-
-## 🧩 components, properties your entities can have
-
-```ts
-import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archimedes"
-```
-
-- **establish your game's components.**
-    ```ts
-    const components = asComponents({
-      level: u8,
-      health: i16,
-      color: vec3,
-      position: tuple(f32, f32, f32), // same as vec3
-      avatar: bytes(), // variable-sized Uint8Array
-      inventory: json<string[]>(), // arbitrary json is allowed
-    })
-    ```
-- **components are your entity schema.**
-    - in archimedes terminology, a "component" is the binary schema for the "values" your entities can have.
-    - you can click components together using the `tuple` helper.
-    - stock components include: `bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `f32`, `f64`, `bigu64`, `bigi64`, `bytes`, `json`, `vec2`, `vec3`, `vec4`, `dvec2`, `dvec3`, `dvec4`
-    - vec2, vec3, vec4 -- these are f32 tuples
-    - dvec2, dvec3, dvec4 -- these are f64 tuples
-- **how components work.**
-    - each component has its own functions for encoding and decoding between binary and js values.
-    - use the `asComponent` helper to make your own components from scratch.
-    - simple components are `FixedComponent`, values for these are stored in contiguous memory blocks.
-    - complex components (like `bytes` and `json`) are `VariableComponent`, values for these are stored differently (likely slower).
-    - if your brain is large, provide a `version` string as an option for `bytes` and `json` components, bump this string whenever you change your custom json/binary schema in a breaking way.
-
-
-
 <br/><a id="entities"></a>
 
 ## 👾 entities, things in your game
@@ -120,7 +86,7 @@ import {Entities, makeId} from "@benev/archimedes"
 this entities class is the bread and butter of archimedes.  
 it's a robust and flexible primitive that you can build a whole damn game around. it's ergonomic, efficient, and easily synced across network or web worker boundaries.
 
-first of all, it looks and feels a lot like a normal js map. *(it's secretly not, tee hee!)*
+it looks and feels a lot like a normal js map *(but it's secretly not, tee hee!)*
 
 - **new Entities,** establish your entities.
     ```ts
@@ -235,6 +201,36 @@ entities has some more fancy tricks up its sleeve.
     rollback.cancel()
       // stop listening and discard the rollback
     ```
+
+
+
+<br/><a id="components"></a>
+
+## 🧩 components, properties your entities can have
+
+```ts
+import {asComponents, bool, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archimedes"
+```
+
+- **components tell archimedes how to store your entity data.**  
+    ```ts
+    const components = asComponents({
+      alive: bool,
+      level: u8,
+      health: i16,
+      color: vec3,
+      position: tuple(f32, f32, f32), // same as vec3
+      avatar: bytes(), // variable-sized Uint8Array
+      inventory: json<{items: string[]}>(), // arbitrary json data
+    })
+    ```
+- **built-in components:**
+    - numbers: (unsigned integers) `u8`, `u16`, `u32` (signed integers) `i8`, `i16`, `i32` (floats) `f32`, `f64` (bigints) `bigi64`, `bigu64`
+    - vectors: (f32) `vec2`, `vec3`, `vec4` (f64) `dvec2`, `dvec3`, `dvec4`
+    - other: `bool`, `bytes`, `json`
+    - combine components with `tuple(...)`
+    - `bytes` and `json` can accept a `version` string which you can bump for schema incompatibilities.
+- **define your own components,** with the `asComponents(...)` helper.
 
 
 
