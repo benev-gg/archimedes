@@ -217,7 +217,6 @@ entities has some more fancy tricks up its sleeve.
     // elsewhere on a remote copy of entities...
     entities.applyChanges(changes)
     ```
-    - you can also call `recording.cancel()` to stop listening and discard the delta.
 - **entities.startRecordingRollback,** it's easier than you think.
     ```ts
     // start your rollback session (it listens for changes)
