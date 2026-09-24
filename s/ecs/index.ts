@@ -1,11 +1,9 @@
 
-export * from "./entities/apply-delta.js"
-export * from "./entities/change.js"
-export * from "./entities/entities.js"
-export * from "./entities/make-id.js"
+export * from "./parts/lifecycle.js"
+export * from "./parts/make-id.js"
+export * from "./parts/tuple.js"
 
-export * from "./systems/lifecycle.js"
-export * from "./systems/consolidate.js"
-
+export * from "./components.js"
+export * from "./entities.js"
 export * from "./types.js"
 

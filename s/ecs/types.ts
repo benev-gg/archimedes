@@ -1,27 +1,57 @@
 
 export type Id = string
-export type Components = Record<string, unknown>
-export type AsComponents<C extends Components> = C
-export type Select<C extends Components, K extends keyof C> = Pick<C, K> & Partial<C>
-export type Entity<C extends Components> = [id: Id, components: Partial<C>]
+export type EntityId = Id
 
-export type System<Context> = (context: Context) => () => void
-export type Systems<Context> = System<Context> | {[key: string]: Systems<Context>}
-export const asSystem = <Context>(fn: System<Context>) => fn
-export const asSystems = <Context>(blueprint: Systems<Context>) => blueprint
+export type FixedComponent<Value = any> = Readonly<{
+	version: Id
+	size: number
+	write: (bytes: Uint8Array, value: Value) => void
+	read: (bytes: Uint8Array) => Value
+}>
 
-export enum DeltaKind {Set, Merge, Drop}
-export type DeltaSet<C extends Components> = [kind: DeltaKind.Set, id: Id, components?: Partial<C>]
-export type DeltaMerge<C extends Components> = [kind: DeltaKind.Merge, id: Id, patch: Partial<C>]
-export type DeltaDrop<C extends Components> = [kind: DeltaKind.Drop, id: Id, keys: (keyof C)[]]
-export type Delta<C extends Components> = DeltaSet<C> | DeltaMerge<C> | DeltaDrop<C>
+export type VariableComponent<Value = any> = Readonly<{
+	version: Id
+	encode: (value: Value) => Uint8Array
+	decode: (bytes: Uint8Array) => Value
+}>
 
-export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
-	tick: (components: Select<C, K>) => void
-	exit: () => void
+export type Component<Value = any> =
+	| FixedComponent<Value>
+	| VariableComponent<Value>
+
+export type Components = {[key: string]: Component<any>}
+
+export const asComponent = <V>(c: Component<V>) => Object.freeze(c)
+export const asComponents = <C extends Components>(c: C) => Object.freeze(c)
+
+export type EntityValue<C extends Component<any>> = (
+	C extends Component<infer V>
+		? V
+		: never
+)
+
+export type Entity<C extends Components> = Readonly<{
+	[K in keyof C]: EntityValue<C[K]>
+}>
+
+export type Selected<C extends Components, N extends keyof C> = (
+	Pick<Entity<C>, N>
+		& Partial<Entity<C>>
+)
+
+export type SelectedEntry<C extends Components, N extends keyof C> = (
+	[id: EntityId, values: Selected<C, N>]
+)
+
+export type Patch<C extends Components> = {
+	[K in keyof C]?: Entity<C>[K] | undefined
 }
 
-export type LifecycleEnter<C extends Components, K extends keyof C> = (
-	(id: Id, components: Select<C, K>) => LifecycleCallbacks<C, K>
-)
+export type Json =
+	| null
+	| boolean
+	| number
+	| string
+	| Json[]
+	| {[key: string]: Json}
 

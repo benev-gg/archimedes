@@ -1,7 +1,7 @@
 
-![](https://i.imgur.com/DYcrs49.png)
+![](https://i.imgur.com/mKSNcTS.png)
 
-# 🌀 archimedes, netlogic for multiplayer web games
+# 🌀 archimedes, architecture for web games
 
 > [***"do not disturb my circles!"***](https://en.wikipedia.org/wiki/noli_turbare_circulos_meos!)  
 > &nbsp; &nbsp; — *archimedes, c. 212 bc*
@@ -10,88 +10,274 @@
 npm install @benev/archimedes
 ```
 
-- 🧩 [**#ecs,**](#ecs) entities, components, systems.
-- 🔮 [**#sim,**](#sim) code like it's single-player, archimedes makes it multiplayer.
-- 🌎 [**#net,**](#net) whole-world rollforward, everything is clientside predicted for insta-feels.
+**archimedes is an ecs toolkit.**  
+robust architectural primitives, not an opinionated framework.  
+
+**entities feel like ordinary javascript objects.**  
+but underneath, archimedes is tightly packing bytes into contiguous memory blocks.  
+
+**built for where games get complicated.**  
+designed for multithreading, serialization, and rollback networking.  
+
+**not a rendering engine.**  
+archimedes helps structure your game simulation, but you bring your own renderer. try [babylon lite.](https://www.babylonjs.com/lite/)  
+
+- 🎮 ***[#simple,](#simple)*** **game example**
+- 🧩 ***[#components,](#components)*** **properties your entities can have**
+- 👾 ***[#entities,](#entities)*** **things in your game**
+- ⚙️ ***[#systems,](#systems)*** **game logic**
 
 
 
-<br/><a id="ecs"></a>
+<br/><a id="simple"></a>
 
-## 🧩 ecs — entities, components, systems
+## 🎮 simple, game example
 
 ```ts
-import {Entities, Change, makeId, consolidate} from "@benev/archimedes"
+import {Entities, i8, vec2, makeId} from "@benev/archimedes"
 ```
 
-1. ***define components.*** json-friendly data that entities could have.
+1. **establish entities and components.**
     ```ts
-    export type MyComponents = {
-      health: number
-      bleed: number
-    }
+    const entities = new Entities({health: i8, position: vec2})
     ```
-1. ***create entities map.*** indexed for speedy-fast lookups.
+1. **create your first entity.**
     ```ts
-    export const entities = new Entities<MyComponents>()
-    ```
-1. ***consolidate system fns,*** with context.
-    ```ts
-    const context = {
-      entities: entities.readonly,
-      change: new Change<MyComponents>(delta => applyDeltas(entities, delta)),
-    }
-
-    export const simulate = consolidate(context, {
-      bleeding: ({entities, change}) => () => {
-        for (const [id, components] of entities.select("health", "bleed")) {
-          if (components.bleed > 0) {
-            const health = components.health - components.bleed
-            change.merge(id, {health})
-          }
-        }
-      },
-
-      death: ({entities, change}) => () => {
-        for (const [id, components] of entities.select("health")) {
-          if (components.health <= 0)
-            change.delete(id)
-        }
-      },
+    const id = entities.set(makeId(), {
+      health: 100,
+      position: [1, 2],
     })
     ```
-1. ***manually insert your first entity.***
     ```ts
-    const wizardId = makeId()
-    entities.set(wizardId, {health: 100, bleed: 2})
-
-    console.log(entities.get(wizardId)?.health)
-      // 100
+    entities.get(id)
+      // {health: 100, position: [1, 2]}
     ```
-1. ***run your simulation,*** one tick at a time.
+1. **write your game logic.**
     ```ts
-    // simulate one tick
-    simulate()
+    function simulate() {
 
-    console.log(entities.get(wizardId)?.health)
-      // 98
+      // hazards deal damage
+      for (const [id, entity] of entities.select("health", "position")) {
+        if (entity.position[1] < 0)
+          entities.update(id, {health: entity.health - 1})
+      }
+
+      // dead things disappear
+      for (const [id, entity] of entities.select("health"))
+        if (entity.health <= 0)
+          entities.delete(id)
+    }
+    ```
+1. **start the simulation.**
+    ```ts
+    setInterval(simulate, 16.67)
     ```
 
 
 
-<br/><a id="sim"></a>
+<br/><a id="components"></a>
 
-## 🔮 sim — networkable simulation architecture
+## 🧩 components, properties your entities can have
 
-*coming soon*
+```ts
+import {asComponents, u8, i16, vec3, f32, tuple, bytes, json} from "@benev/archimedes"
+```
+
+- **establish your game's components.**
+    ```ts
+    const components = asComponents({
+      level: u8,
+      health: i16,
+      color: vec3,
+      position: tuple(f32, f32, f32), // same as vec3
+      avatar: bytes(), // variable-sized Uint8Array
+      inventory: json<string[]>(), // arbitrary json is allowed
+    })
+    ```
+- **components are your entity schema.**
+    - in archimedes terminology, a "component" is the binary schema for the "values" your entities can have.
+    - you can click components together using the `tuple` helper.
+    - stock components include: `bool`, `u8`, `i8`, `u16`, `i16`, `u32`, `i32`, `f32`, `f64`, `bigu64`, `bigi64`, `bytes`, `json`, `vec2`, `vec3`, `vec4`, `dvec2`, `dvec3`, `dvec4`
+    - vec2, vec3, vec4 -- these are f32 tuples
+    - dvec2, dvec3, dvec4 -- these are f64 tuples
+- **how components work.**
+    - each component has its own functions for encoding and decoding between binary and js values.
+    - use the `asComponent` helper to make your own components from scratch.
+    - simple components are `FixedComponent`, values for these are stored in contiguous memory blocks.
+    - complex components (like `bytes` and `json`) are `VariableComponent`, values for these are stored differently (likely slower).
+    - if your brain is large, provide a `version` string as an option for `bytes` and `json` components, bump this string whenever you change your custom json/binary schema in a breaking way.
 
 
 
-<br/><a id="net"></a>
+<br/><a id="entities"></a>
 
-## 🌎 net — connect and run multiplayer games
+## 👾 entities, things in your game
 
-*coming soon*
+```ts
+import {Entities, makeId} from "@benev/archimedes"
+```
+
+this entities class is the bread and butter of archimedes.  
+it's a robust and flexible primitive that you can build a whole damn game around. it's ergonomic, efficient, and easily synced across network or web worker boundaries.
+
+first of all, it looks and feels a lot like a normal js map. *(it's secretly not, tee hee!)*
+
+- **new Entities,** establish your entities.
+    ```ts
+    const entities = new Entities(components)
+    ```
+- **entities.set,** create a new entity (or overwrite one).
+    ```ts
+    // create an entity
+    const id = entities.set(makeId(), {
+      health: 100,
+      position: [1, 2, 3],
+    })
+    ```
+    - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and have enough entropy to avoid collisions. now the cool part: if you supply makeId with parameters, the id will be a deterministic hash of those parameters. rollback netcode clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
+- **entities.get,** obtain an entity's values.
+    ```ts
+    entities.get(id)
+      // {health: 100, position: [1, 2, 3]}
+    ```
+    - entity values are always typescript readonly.
+    - even if you ignore the typescript rules, the entity object is a snapshot, mutation has no effect.
+- **entities.update,** apply a partial patch.
+    ```ts
+    entities.update(id, {health: 99})
+      // only update health value
+    ```
+    ```ts
+    entities.update(id, {color: undefined})
+      // undefined means "deletes the value"
+    ```
+- **entities.delete,** destroy an entity.
+    ```ts
+    entities.delete(id)
+    ```
+- **entities.clear,** nukes everything.
+    ```ts
+    entities.clear()
+    ```
+- **iterating.** (.keys(), .values(), .entries(), etc)
+    ```ts
+    for (const [id, values] of entities)
+      console.log(id, values)
+    ```
+
+entities has some more fancy tricks up its sleeve.
+
+- **entities.select,** get entities based on what values they have.
+    ```ts
+    // only select entities with both 'health' and 'position'
+    const selected = entities.select("health", "position")
+    ```
+    - your game logic systems should be doing a lot of these select calls.
+    - select calls are optimized with indexes.
+- **entities.save,** get a binary file.
+    ```ts
+    const file = entities.save()
+    ```
+- **entities.load,** overwrite with a binary file.
+    ```ts
+    entities.load(file)
+    ```
+- **entities.version,** a hash of the component schema.
+    ```ts
+    entities.version
+      // "ecf61ff8d547e6b06c4af5188e6c6cc7"
+    ```
+    - this version changes if your component schema changes at all.
+    - this will hard-break compatibility with old saves and networking.
+    - it's up to you to be careful about that, and plan for migrations.
+- **entities.readonly,** i use this so much actually.
+    ```ts
+    setupMyRenderer(entities.readonly)
+    ```
+    - it's just a different typescript type (for the same object) that doesn't have set/update/etc.
+    - i love to pass this around to systems that shouldn't be meddling with my simulation (like a renderer).
+- **entities.startRecordingChanges,** for recording changes.
+    ```ts
+    // start a recording (it listens for changes)
+    const recording = entities.startRecordingChanges()
+
+    // let changes happen
+    const id = makeId()
+    entities.set(id, {health: 99})
+    entities.update(id, {position: [1, 2]})
+
+    // get Uint8Array of changes (and stop listening)
+    const changes = recording.done()
+    ```
+    ```ts
+    recording.cancel()
+      // stop listening and discard the changes
+    ```
+    ```ts
+    // elsewhere on a remote copy of entities...
+    entities.applyChanges(changes)
+    ```
+- **entities.startRecordingRollback,** it's easier than you think.
+    ```ts
+    // start your rollback session (it listens for changes)
+    const rollback = entities.startRecordingRollback()
+
+    // let a bunch of crap happen
+    const id = makeId()
+    entities.set(id, {health: 99})
+    entities.update(id, {position: [1, 2]})
+
+    // screw that crap, let's revert! (and stop listening)
+    rollback.execute()
+      // now it's like none of that crap ever happened
+    ```
+    ```ts
+    rollback.cancel()
+      // stop listening and discard the rollback
+    ```
+
+
+
+<br/><a id="systems"></a>
+
+## ⚙️ systems, game logic
+
+you can structure your game logic however you like.  
+your game logic can just be a looping function that changes entities over time, using `entities.update` etc.
+
+we use the term "system" casually to refer to a game logic function, especially one that selects entities by the components it works on. ecs philosophers like such systems...
+
+anyways, here's one little helper we use a lot:
+- `lifecycle` helps you observe events regarding a set of components:
+    ```ts
+    import {lifecycle} from "@benev/archimedes"
+
+    function setupBleedLogging(entities: Entities<MyComponents>) {
+      return lifecycle(entities, ["health", "bleed"], (id, {health}) => {
+        console.log("bleed started", id, health)
+        return {
+          tick: ({health}) => console.log("bleed running", health),
+          exit: () => console.log("bleed stopped"),
+        }
+      })
+    }
+    ```
+    and here's how you might use it:
+    ```ts
+    const entities = new Entities(myComponents)
+
+    const bleedLogging = setupBleedLogging(entities)
+      // call this setup fn once, to establish its long-lived closure
+
+    function simulate() {
+      bleeding()
+      deathWhenNoHealth()
+      bleedLogging() // <-- our special lifecycle system
+    }
+
+    setInterval(simulate, 16.67)
+    ```
+    we use this a lot in our rendering systems, to manage the lifecycles of 3d mesh objects etc.
 
 
 

@@ -1,7 +1,7 @@
 {
 	"name": "@benev/archimedes",
-	"version": "0.1.0-10",
-	"description": "🏛️ game ecs and netcode",
+	"version": "0.2.0-0",
+	"description": "🌀 architecture for web games",
 	"license": "MIT",
 	"type": "module",
 	"main": "x/index.js",
@@ -16,6 +16,7 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
+		"@awasm/noble": "^0.1.4",
 		"@e280/stz": "^0.4.2"
 	},
 	"devDependencies": {
@@ -25,9 +26,10 @@
 	},
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
 	"keywords": [
-		"networking",
-		"rollforward",
-		"web-games"
+		"ecs",
+		"game",
+		"web game",
+		"architecture"
 	],
 	"repository": {
 		"type": "git",

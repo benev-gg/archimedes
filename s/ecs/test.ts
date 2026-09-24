@@ -1,178 +1,215 @@
 
-import {need} from "@e280/stz"
-import {suite, test, expect} from "@e280/science"
-import {lifecycle} from "./systems/lifecycle.js"
-import {setupExample} from "./test/setup-example.js"
-import {setupLifecycleCounts} from "./test/setup-lifecycle-counts.js"
+import {expect, suite, test} from "@e280/science"
+import {tuple} from "./parts/tuple.js"
+import {Entities} from "./entities.js"
+import {asComponents} from "./types.js"
+import {makeId} from "./parts/make-id.js"
+import {bytes, i8, json, u16, u8, vec3} from "./components.js"
+
+const setupComponents = () => asComponents({
+	health: i8,
+	position: vec3,
+	data: json(),
+	payload: bytes(),
+})
 
 export default suite({
-	"create an entity": test(async() => {
-		const {entities, change} = setupExample()
-		expect(entities.size).is(0)
-		change.create({health: 100})
-		expect(entities.size).is(1)
+	"entities": suite({
+		"set/get": test(async() => {
+			const entities = new Entities(setupComponents())
+			const unknown = makeId()
+			const id = entities.set(makeId(), {health: 100, position: [1, 2, 3]})
+			expect(entities.get(id)).deep({health: 100, position: [1, 2, 3]})
+			expect(entities.get(unknown)).is(undefined)
+		}),
+
+		"maplike methods and iteration": test(async() => {
+			const entities = new Entities(setupComponents())
+			const a = entities.set(makeId(), {health: 101})
+			const b = entities.set(makeId(), {health: 102})
+			const c = entities.set(makeId(), {health: 103})
+			expect(entities.has(a)).is(true)
+			expect(entities.size).is(3)
+			expect([...entities.keys()]).deep([a, b, c])
+			expect([...entities.entries()].length).is(3)
+		}),
+
+		"got": test(async() => {
+			const entities = new Entities(setupComponents())
+			const id = entities.set(makeId(), {health: 101})
+			const unknown = makeId()
+			expect(entities.got(id)).ok()
+			expect(() => entities.got(unknown)).throws()
+		}),
+
+		"set replaces": test(async() => {
+			const entities = new Entities(setupComponents())
+			const id = makeId()
+			entities.set(id, {health: 100, position: [1, 2, 3]})
+			entities.set(id, {health: 64})
+			expect(entities.got(id)).deep({health: 64})
+		}),
+
+		"update": test(async() => {
+			const entities = new Entities(setupComponents())
+			const id = makeId()
+			entities.set(id, {health: 128, position: [1, 2, 3]})
+			entities.update(id, {health: 64, position: undefined})
+			expect(entities.got(id)).deep({health: 64})
+		}),
+
+		"empty entity": test(async() => {
+			const entities = new Entities(setupComponents())
+			const id = makeId()
+			entities.set(id, {health: 100})
+			entities.set(id, {})
+			expect(entities.has(id)).is(true)
+			expect(entities.got(id)).deep({})
+		}),
+
+		"delete": test(async() => {
+			const entities = new Entities(setupComponents())
+			const id = makeId()
+			entities.set(id, {health: 100})
+			entities.delete(id)
+			expect(entities.has(id)).is(false)
+			expect(entities.size).is(0)
+		}),
+
+		"variable components": test(async() => {
+			const entities = new Entities(setupComponents())
+			const id = makeId()
+			entities.set(id, {
+				data: {name: "wizard", level: 7},
+				payload: new Uint8Array([1, 2, 3]),
+			})
+			const v = entities.got(id)
+			expect(v.data).deep({name: "wizard", level: 7})
+			expect([...v.payload!]).deep([1, 2, 3])
+		}),
+
+		"slot reuse": test(async() => {
+			const entities = new Entities(setupComponents())
+			const a = makeId(), b = makeId(), c = makeId()
+			entities.set(a, {health: 10})
+			entities.set(b, {health: 20})
+			entities.delete(a)
+			entities.set(c, {health: 30})
+			expect(entities.got(b)).deep({health: 20})
+			expect(entities.got(c)).deep({health: 30})
+		}),
+
+		"select": test(async() => {
+			const entities = new Entities(setupComponents())
+			entities.set(makeId(), {
+				health: 100,
+			})
+			entities.set(makeId(), {
+				health: 100,
+				position: [1, 2, 3],
+			})
+			expect(entities.select("health").length).is(2)
+			expect(entities.select("position").length).is(1)
+			expect(entities.select("health", "position").length).is(1)
+		}),
 	}),
 
-	"delete an entity": test(async() => {
-		const {entities, change} = setupExample()
-		const id = change.create({health: 100})
-		expect(entities.size).is(1)
-		change.delete(id)
-		expect(entities.size).is(0)
+	"component schema": suite({
+		"component rename changes version": test(async() => {
+			expect(new Entities({a: u8}).version)
+				.not.is(new Entities({b: u8}).version)
+		}),
+
+		"same schema is stable": test(async() => {
+			expect(new Entities({a: u8, b: tuple(u16, u8)}).version)
+				.is(new Entities({a: u8, b: tuple(u16, u8)}).version)
+		}),
+
+		"reordering is fine": test(async() => {
+			expect(new Entities({a: u8, b: u16}).version)
+				.is(new Entities({b: u16, a: u8}).version)
+		}),
+
+		"change one component, version changes": test(async() => {
+			expect(new Entities({a: u8, b: u16}).version)
+				.not.is(new Entities({a: u8, b: u8}).version)
+		}),
+
+		"add one component, version changes": test(async() => {
+			expect(new Entities({a: u8, b: u16}).version)
+				.not.is(new Entities({a: u8, b: u16, c: u8}).version)
+		}),
+
+		"component inside tuple changes, version changes": test(async() => {
+			expect(new Entities({a: tuple(u8, u8)}).version)
+				.not.is(new Entities({a: tuple(u8, u16)}).version)
+		}),
 	}),
 
-	"merge components into entity": test(async() => {
-		const {entities, change} = setupExample()
-		const id = change.create({health: 100, mana: 100})
-		expect(need(entities, id).health).is(100)
-		change.merge(id, {health: 99})
-		expect(need(entities, id).health).is(99)
-		expect(need(entities, id).mana).is(100)
+	"changes": suite({
+		"stream changes from one entities to another": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			const entitiesB = new Entities(setupComponents())
+
+			const recording = entitiesA.startRecordingChanges()
+			const id = entitiesA.set(makeId(), {health: 99, position: [1, 2, 3]})
+			entitiesA.update(id, {data: {bingus: 5}})
+			entitiesA.update(id, {position: undefined})
+			const changes = recording.done()
+
+			expect([...entitiesA]).not.deep([...entitiesB])
+			entitiesB.applyChanges(changes)
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
+
+		"patch and delete": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			const entitiesB = new Entities(setupComponents())
+			const id = entitiesA.set(makeId(), {health: 100, position: [1, 2, 3]})
+			entitiesB.load(entitiesA.save())
+
+			const recording = entitiesA.startRecordingChanges()
+			entitiesA.update(id, {
+				health: 50,
+				position: undefined,
+				data: {bingus: 5},
+			})
+			entitiesB.applyChanges(recording.done())
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
+
+		"create and destroy": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			const entitiesB = new Entities(setupComponents())
+
+			const existing = entitiesA.set(makeId(), {health: 100})
+			entitiesB.load(entitiesA.save())
+
+			const recording = entitiesA.startRecordingChanges()
+			entitiesA.delete(existing)
+			entitiesA.set(makeId(), {health: 77, data: {wizard: true}})
+			entitiesB.applyChanges(recording.done())
+
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
 	}),
 
-	"ignore merge after delete": test(async() => {
-		const {entities, change} = setupExample()
-		const id = change.create({health: 100, mana: 100})
-		expect(entities.get(id)).ok()
-		change.delete(id)
-		expect(entities.get(id)).not.ok()
-		change.merge(id, {health: 99})
-		expect(entities.get(id)).not.ok()
-	}),
+	"save/load": suite({
+		"roundtrip": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			entitiesA.set(makeId(), {health: 100, position: [1, 2, 3]})
+			entitiesA.set(makeId(), {payload: new Uint8Array([1, 2, 3])})
+			entitiesA.set(makeId(), {data: {alpha: 123}})
+			const entitiesB = new Entities(setupComponents())
+			entitiesB.load(entitiesA.save())
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
 
-	"ignore drop after delete": test(async() => {
-		const {entities, change} = setupExample()
-		const id = change.create({health: 100, mana: 100})
-		expect(entities.get(id)).ok()
-		change.delete(id)
-		expect(entities.get(id)).not.ok()
-		change.drop(id, "health")
-		expect(entities.get(id)).not.ok()
-	}),
-
-	"select an entity": test(async() => {
-		const {entities, change} = setupExample()
-		change.create({health: 100})
-		expect(entities.select("health").length).is(1)
-	}),
-
-	"drop components from entity": test(async() => {
-		const {entities, change} = setupExample()
-		const id = change.create({health: 100, mana: 100})
-		expect(entities.select("health", "mana").length).is(1)
-		change.drop(id, "mana")
-		expect("mana" in need(entities, id)).is(false)
-		expect(entities.select("health", "mana").length).is(0)
-	}),
-
-	"select two entities": test(async() => {
-		const {entities, change} = setupExample()
-		change.create({health: 100})
-		change.create({health: 100})
-		expect(entities.select("health").length).is(2)
-	}),
-
-	"select with no component keys selects all": test(async() => {
-		const {entities, change} = setupExample()
-		change.create({health: 100})
-		change.create({health: 100})
-		expect(entities.select().length).is(2)
-	}),
-
-	"select doesn't include non-match": test(async() => {
-		const {entities, change} = setupExample()
-		change.create({health: 100})
-		expect(entities.select("mana").length).is(0)
-	}),
-
-	"select includes entities with extra components": test(async() => {
-		const {entities, change} = setupExample()
-		change.create({health: 100, mana: 100})
-		expect(entities.select("health").length).is(1)
-	}),
-
-	"wizard regens mana": test(async() => {
-		const {entities, change, execute} = setupExample()
-		const wizardId = change.create({health: 100, mana: 50, manaRegen: 1})
-		const changes = execute()
-		expect(changes.length).is(1)
-		expect(need(entities, wizardId).mana).is(51)
-	}),
-
-	"death by bleeding": test(async() => {
-		const {entities, change, execute} = setupExample()
-		const wizardId = change.create({health: 3, bleed: 2})
-		expect(need(entities, wizardId).health).is(3)
-		execute()
-		expect(need(entities, wizardId).health).is(1)
-		execute()
-		expect(entities.has(wizardId)).is(false)
-	}),
-
-	"lifecycles": test(async() => {
-		const {entities, change, execute} = setupExample({
-			moreSystems: {
-				check: ({entities}) => lifecycle(entities, ["health"], () => {
-					counts.enters++
-					return {
-						tick: () => void counts.ticks++,
-						exit: () => void counts.exits++,
-					}
-				}),
-			},
-		})
-		const counts = setupLifecycleCounts()
-		counts.expect({enters: 0, ticks: 0, exits: 0})
-
-		const wizardId = change.create({health: 100, mana: 50})
-		execute()
-		counts.expect({enters: 1, ticks: 1, exits: 0})
-
-		change.merge(wizardId, {health: 100, mana: 100})
-		execute()
-		counts.expect({enters: 1, ticks: 2, exits: 0})
-
-		change.delete(wizardId)
-		execute()
-		counts.expect({enters: 1, ticks: 2, exits: 1})
-		expect(entities.size).is(0)
-	}),
-
-	"lifecycle can commit changes": test(async() => {
-		const {entities, change, execute} = setupExample({
-			moreSystems: {
-				check: ({entities, change}) => lifecycle(entities, ["health"], () => {
-					change.create({mana: 50})
-					return {
-						tick: () => {},
-						exit: () => {},
-					}
-				}),
-			},
-		})
-		change.create({health: 100})
-		execute()
-		expect(entities.select("mana").length).is(1)
-	}),
-
-	"lifecycle self-deletion immediate cleanup": test(async() => {
-		const {entities, change, execute} = setupExample({
-			moreSystems: {
-				check: ({entities, change}) => lifecycle(entities, ["health"], (id) => {
-					return {
-						tick: () => change.delete(id),
-						exit: () => { ranExit++ },
-					}
-				}),
-			},
-		})
-		let ranExit = 0
-		change.create({health: 100})
-		expect(entities.select("health").length).is(1)
-		expect(ranExit).is(0)
-		execute()
-		expect(ranExit).is(1)
-		expect(entities.select("health").length).is(0)
+		"schema mismatch throws": test(async() => {
+			const entitiesA = new Entities({health: i8, mana: u8})
+			const entitiesB = new Entities({health: i8, mana: i8})
+			expect(() => entitiesB.load(entitiesA.save())).throws()
+		}),
 	}),
 })
 
