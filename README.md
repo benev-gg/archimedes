@@ -20,8 +20,7 @@ but underneath, archimedes is tightly packing bytes into contiguous memory block
 designed for multithreading, serialization, and rollback networking.  
 
 **not a rendering engine.**  
-archimedes helps structure your game simulation, but you bring your own renderer.  
-consider [babylon lite.](https://www.babylonjs.com/lite/)  
+archimedes helps structure your game simulation, but you bring your own renderer. try [babylon lite.](https://www.babylonjs.com/lite/)  
 
 - 🎮 ***[#simple,](#simple)*** **game example**
 - 🧩 ***[#components,](#components)*** **properties your entities can have**
