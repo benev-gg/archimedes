@@ -30,10 +30,7 @@ export class Entities<C extends Components> {
 	}
 
 	clear() {
-		for (const id of this.keys()) {
-			this.#onBeforeChange.publish(id)
-			this.#selector.entityGone(id)
-		}
+		this.#notifyClearance()
 		this.#store = makeStore(this.components)
 	}
 
@@ -141,8 +138,9 @@ export class Entities<C extends Components> {
 	}
 
 	load(file: Uint8Array) {
-		this.clear()
-		storeLoad(this.#store, file)
+		const store = storeLoad(this.components, file)
+		this.#notifyClearance()
+		this.#store = store
 		this.#selector.rebuild()
 	}
 
@@ -160,6 +158,13 @@ export class Entities<C extends Components> {
 
 	applyChanges(changes: Changes) {
 		applyChanges(this, this.#store, changes)
+	}
+
+	#notifyClearance() {
+		for (const id of this.keys()) {
+			this.#onBeforeChange.publish(id)
+			this.#selector.entityGone(id)
+		}
 	}
 }
 

@@ -4,6 +4,8 @@ import {Store} from "./types.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
 import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./fns.js"
+import { Components } from "../types.js"
+import { makeStore } from "./make.js"
 
 const magic = txt.toBytes("@benev/archimedes:store:v1")
 const idSize = 16
@@ -45,7 +47,8 @@ function saveData(store: Store) {
 	return bytes.concat(parts)
 }
 
-export function storeLoad(store: Store, file: Uint8Array) {
+export function storeLoad(components: Components, file: Uint8Array) {
+	const store = makeStore(components)
 	const read = byteReader(file)
 	const version = hex.toBytes(store.version)
 
@@ -56,6 +59,7 @@ export function storeLoad(store: Store, file: Uint8Array) {
 		throw new Error("invalid schema structure")
 
 	loadData(store, read)
+	return store
 }
 
 function loadData(store: Store, read: ByteReader) {
