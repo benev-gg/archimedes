@@ -219,7 +219,7 @@ entities has some more fancy tricks up its sleeve.
     entities.applyChanges(changes)
     ```
     - you can also call `recording.cancel()` to stop listening and discard the delta.
-- **entities.startRollback,** it's easier than you think.
+- **entities.startRecordingRollback,** it's easier than you think.
     ```ts
     // start your rollback session (it listens for changes)
     const rollback = entities.startRecordingRollback()
