@@ -73,7 +73,10 @@ export class Entities<C extends Components> {
 
 		for (const [name, value] of Object.entries(values)) {
 			const code = this.#store.namecoder.code(name)
-			storeWriteValue(this.#store, id, code, value)
+			if (value === undefined)
+				storeDeleteValue(this.#store, id, code)
+			else
+				storeWriteValue(this.#store, id, code, value)
 		}
 
 		this.#selector.entityChanged(id, this.got(id))
