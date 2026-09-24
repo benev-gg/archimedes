@@ -198,21 +198,46 @@ entities has some more fancy tricks up its sleeve.
     ```
     - it's just a different typescript type (for the same object) that doesn't have set/update/etc.
     - i love to pass this around to systems that shouldn't be meddling with my simulation (like a renderer).
-- **entities.rollback,** it's easier than you think.
+- **entities.startRecordingChanges,** for recording changes.
     ```ts
-    // start your rollback session (it's collecting changes to undo)
-    const rollback = entities.rollback()
+    // start a recording (it listens for changes)
+    const recording = entities.startRecordingChanges()
+
+    // let changes happen
+    const id = makeId()
+    entities.set(id, {health: 99})
+    entities.update(id, {position: [1, 2]})
+
+    // get Uint8Array of changes (and stop listening)
+    const changes = recording.done()
+    ```
+    ```ts
+    recording.cancel()
+      // stop listening and discard the changes
+    ```
+    ```ts
+    // elsewhere on a remote copy of entities...
+    entities.applyChanges(changes)
+    ```
+    - you can also call `recording.cancel()` to stop listening and discard the delta.
+- **entities.startRollback,** it's easier than you think.
+    ```ts
+    // start your rollback session (it listens for changes)
+    const rollback = entities.startRecordingRollback()
 
     // let a bunch of crap happen
     const id = makeId()
     entities.set(id, {health: 99})
     entities.update(id, {position: [1, 2]})
 
-    // screw that crap, let's revert!
+    // screw that crap, let's revert! (and stop listening)
     rollback.execute()
       // now it's like none of that crap ever happened
     ```
-    - you can also call `rollback.cancel()` to not rollback (and keep the crap).
+    ```ts
+    rollback.cancel()
+      // stop listening and discard the rollback
+    ```
 
 
 

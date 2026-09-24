@@ -2,11 +2,12 @@
 import {got, need} from "@e280/stz"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
-import {startRollback} from "./utils/rollback.js"
+import {startRecordingRollback} from "./utils/rollback.js"
 import {storeLoad, storeSave} from "./store/save.js"
 import {Components, Entity, EntityId, Patch, Selected} from "./types.js"
-import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/store.js"
+import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/fns.js"
 import { makeOnBeforeChange } from "./utils/before-change.js"
+import { applyChanges, Changes, startRecordingChanges } from "./store/changes.js"
 
 export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
 	| "clear"
@@ -146,8 +147,16 @@ export class Entities<C extends Components> {
 		return this.#selector.select(...componentNames)
 	}
 
-	rollback() {
-		return startRollback(this, this.#onBeforeChange)
+	startRecordingRollback() {
+		return startRecordingRollback(this, this.#onBeforeChange)
+	}
+
+	startRecordingChanges() {
+		return startRecordingChanges(this, this.#onBeforeChange, this.#store)
+	}
+
+	applyChanges(changes: Changes) {
+		applyChanges(this, this.#store, changes)
 	}
 }
 

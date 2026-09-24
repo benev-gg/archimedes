@@ -3,7 +3,7 @@ import {Entities} from "../entities.js"
 import {Entity, EntityId} from "../types.js"
 import {OnBeforeChange} from "./before-change.js"
 
-export function startRollback(
+export function startRecordingRollback(
 		entities: Entities<any>,
 		onBeforeChange: OnBeforeChange,
 	) {

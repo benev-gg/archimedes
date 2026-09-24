@@ -3,7 +3,7 @@ import {bytes, hex, txt} from "@e280/stz"
 import {Store} from "./types.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
-import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./store.js"
+import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./fns.js"
 
 const magic = txt.toBytes("@benev/archimedes:store:v1")
 const idSize = 16
