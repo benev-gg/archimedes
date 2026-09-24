@@ -21,7 +21,7 @@ export type Component<Value = any> =
 
 export type Components = {[key: string]: Component<any>}
 
-export const asComponent = <V>(c: Component<V>) => c
+export const asComponent = <V>(c: Component<V>) => Object.freeze(c)
 export const asComponents = <C extends Components>(c: C) => c
 
 export type EntityValue<C extends Component<any>> = (
