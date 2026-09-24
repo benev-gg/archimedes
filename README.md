@@ -10,19 +10,18 @@
 npm install @benev/archimedes
 ```
 
-**archimedes is an ecs toolkit for making great web games.**  
-entities look and feel like normal js data, so your game logic stays simple.  
-but under the hood, archimedes is tightly packing binary data into contiguous blocks of memory.  
-*compact storage. efficient networking. strong typescript typings.*
+**archimedes is an ecs toolkit.**  
+robust architectural primitives, not an opinionated framework.  
 
-**rollback multiplayer, and web workers.**  
-archimedes is designed for singleplayer and multiplayer games alike.  
-it's easy to run your simulation and renderer on a different thread, or even a different machine.  
-you basically program your whole game as though it's singleplayer, archimedes automates the gnarly netcode.
+**entities feel like ordinary javascript objects.**  
+but underneath, archimedes is tightly packing bytes into contiguous memory blocks.  
 
-**it's not a rendering engine.**  
-archimedes helps you structure your game's simulation, keeping it ready for multithreading and multiplayer.  
-for rendering, you might want something like [babylon lite](https://www.babylonjs.com/lite/).
+**built for where games get complicated.**  
+designed for multithreading, serialization, and rollback networking.  
+
+**not a rendering engine.**  
+archimedes helps structure your game simulation, but you bring your own renderer.  
+consider [babylon lite.](https://www.babylonjs.com/lite/)  
 
 - 🎮 ***[#simple,](#simple)*** **game example**
 - 🧩 ***[#components,](#components)*** **properties your entities can have**
