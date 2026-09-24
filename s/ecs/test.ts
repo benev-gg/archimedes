@@ -146,6 +146,54 @@ export default suite({
 		}),
 	}),
 
+	"changes": suite({
+		"stream changes from one entities to another": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			const entitiesB = new Entities(setupComponents())
+
+			const recording = entitiesA.startRecordingChanges()
+			const id = entitiesA.set(makeId(), {health: 99, position: [1, 2, 3]})
+			entitiesA.update(id, {data: {bingus: 5}})
+			entitiesA.update(id, {position: undefined})
+			const changes = recording.done()
+
+			expect([...entitiesA]).not.deep([...entitiesB])
+			entitiesB.applyChanges(changes)
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
+
+		"patch and delete": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			const entitiesB = new Entities(setupComponents())
+			const id = entitiesA.set(makeId(), {health: 100, position: [1, 2, 3]})
+			entitiesB.load(entitiesA.save())
+
+			const recording = entitiesA.startRecordingChanges()
+			entitiesA.update(id, {
+				health: 50,
+				position: undefined,
+				data: {bingus: 5},
+			})
+			entitiesB.applyChanges(recording.done())
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
+
+		"create and destroy": test(async() => {
+			const entitiesA = new Entities(setupComponents())
+			const entitiesB = new Entities(setupComponents())
+
+			const existing = entitiesA.set(makeId(), {health: 100})
+			entitiesB.load(entitiesA.save())
+
+			const recording = entitiesA.startRecordingChanges()
+			entitiesA.delete(existing)
+			entitiesA.set(makeId(), {health: 77, data: {wizard: true}})
+			entitiesB.applyChanges(recording.done())
+
+			expect([...entitiesA]).deep([...entitiesB])
+		}),
+	}),
+
 	"save/load": suite({
 		"roundtrip": test(async() => {
 			const entitiesA = new Entities(setupComponents())

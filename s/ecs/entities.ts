@@ -2,12 +2,12 @@
 import {got, need} from "@e280/stz"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
-import {startRecordingRollback} from "./utils/rollback.js"
 import {storeLoad, storeSave} from "./store/save.js"
+import {startRecordingRollback} from "./utils/rollback.js"
+import {makeOnBeforeChange} from "./utils/before-change.js"
 import {Components, Entity, EntityId, Patch, Selected} from "./types.js"
+import {applyChanges, Changes, startRecordingChanges} from "./store/changes.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/fns.js"
-import { makeOnBeforeChange } from "./utils/before-change.js"
-import { applyChanges, Changes, startRecordingChanges } from "./store/changes.js"
 
 export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
 	| "clear"
