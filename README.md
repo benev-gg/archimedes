@@ -100,7 +100,7 @@ it looks and feels a lot like a normal js map *(but it's secretly not, tee hee!)
       position: [1, 2, 3],
     })
     ```
-    - note about `makeId()` -- archimedes entity ids are hex-coded 128 bit strings. they are random, and have enough entropy to avoid collisions. now the cool part: if you supply makeId with parameters, the id will be a deterministic hash of those parameters. rollback netcode clientside prediction works smoother whenever the id of a new entity can be causally determined, like `makeId(playerId, "arrow", arrowCount)`
+    - `makeId()` creates random 128-bit ids. provide parameters to make a deterministic hash id instead, which is better for multiplayer clientside prediction. `makeId(playerId, "arrow", arrowCount)`
 - **entities.get,** obtain an entity's values.
     ```ts
     entities.get(id)
