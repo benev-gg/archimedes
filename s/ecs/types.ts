@@ -2,18 +2,18 @@
 export type Id = string
 export type EntityId = Id
 
-export type FixedComponent<Value = any> = {
+export type FixedComponent<Value = any> = Readonly<{
 	version: Id
 	size: number
 	write: (bytes: Uint8Array, value: Value) => void
 	read: (bytes: Uint8Array) => Value
-}
+}>
 
-export type VariableComponent<Value = any> = {
+export type VariableComponent<Value = any> = Readonly<{
 	version: Id
 	encode: (value: Value) => Uint8Array
 	decode: (bytes: Uint8Array) => Value
-}
+}>
 
 export type Component<Value = any> =
 	| FixedComponent<Value>
