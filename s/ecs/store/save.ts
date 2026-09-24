@@ -8,6 +8,7 @@ import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./fns.js"
 const magic = txt.toBytes("@benev/archimedes:store:v1")
 const idSize = 16
 const u32Size = 4
+const u16Size = 2
 
 export function storeSave(store: Store) {
 	return bytes.concat([
@@ -33,7 +34,7 @@ function saveData(store: Store) {
 			const data = storeGetBytes(store, id, code)
 
 			parts.push(
-				u32(code),
+				u16(code),
 				...("block" in column
 					? [data]
 					: [u32(data.length), data]),
@@ -67,7 +68,7 @@ function loadData(store: Store, read: ByteReader) {
 		storeCreateEntity(store, id)
 
 		for (let c = 0; c < componentCount; c++) {
-			const code = read.u32()
+			const code = read.u16()
 			const column = store.columns[code]
 
 			if (!column)
@@ -85,6 +86,12 @@ function loadData(store: Store, read: ByteReader) {
 function u32(x: number) {
 	const data = new Uint8Array(u32Size)
 	dataView(data).setUint32(0, x, endian)
+	return data
+}
+
+function u16(x: number) {
+	const data = new Uint8Array(u16Size)
+	dataView(data).setUint16(0, x, endian)
 	return data
 }
 
@@ -107,6 +114,7 @@ function byteReader(data: Uint8Array) {
 	return {
 		bytes: readBytes,
 		u32: () => dataView(readBytes(u32Size)).getUint32(0, endian),
+		u16: () => dataView(readBytes(u16Size)).getUint16(0, endian),
 	}
 }
 

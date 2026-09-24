@@ -73,7 +73,7 @@ export function startRecordingChanges(
 						.u16(values.length)
 
 					for (const [code, value] of values) {
-						write.u8(code)
+						write.u16(code)
 						writeValue(write, store, code, value)
 					}
 				}
@@ -91,14 +91,14 @@ export function startRecordingChanges(
 						if (Object.hasOwn(entity, name)) {
 							write
 								.u8(ChangeOp.Set)
-								.u8(code)
+								.u16(code)
 
 							writeValue(write, store, code, entity[name])
 						}
 						else {
 							write
 								.u8(ChangeOp.Del)
-								.u8(code)
+								.u16(code)
 						}
 					}
 				}
@@ -139,7 +139,7 @@ export function applyChanges(
 				const entity: Record<string, any> = {}
 
 				for (let n = read.u16(); n > 0; n--) {
-					const code = read.u8()
+					const code = read.u16()
 					const name = store.namecoder.name(code)
 					entity[name] = readValue(read, store, code)
 				}
@@ -153,7 +153,7 @@ export function applyChanges(
 
 				for (let n = read.u16(); n > 0; n--) {
 					const op = read.u8()
-					const code = read.u8()
+					const code = read.u16()
 					const name = store.namecoder.name(code)
 
 					switch (op) {
