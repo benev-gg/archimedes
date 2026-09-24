@@ -244,13 +244,12 @@ entities has some more fancy tricks up its sleeve.
 
 ## ⚙️ systems, game logic
 
-you can structure your game logic however you like.
+you can structure your game logic however you like.  
+your game logic can just be a looping function that changes entities over time, using `entities.update` etc.
 
-your game logic can just be a looping tick function that edits entities over time, using `entities.update` etc.
+we use the term "system" casually to refer to a game logic function, especially one that selects entities by the components it works on. ecs philosophers like such systems...
 
-for archimedes, "system" is a casual term for a game logic function, especially one that selects entities by the components it cares about. ecs philosophers like such systems.
-
-that being said here's one little helper we use a lot:
+anyways, here's one little helper we use a lot:
 - `lifecycle` helps you observe events regarding a set of components:
     ```ts
     import {lifecycle} from "@benev/archimedes"
@@ -265,22 +264,22 @@ that being said here's one little helper we use a lot:
       })
     }
     ```
-    `lifecycle` returns a system fn.
+    and here's how you might use it:
     ```ts
     const entities = new Entities(myComponents)
 
     const bleedLogging = setupBleedLogging(entities)
-      // this long-lived closure setup must be called once, not every tick
+      // call this setup fn once, to establish its long-lived closure
 
     function simulate() {
       bleeding()
       deathWhenNoHealth()
-      bleedLogging() // <-- our special lifecycle
+      bleedLogging() // <-- our special lifecycle system
     }
 
     setInterval(simulate, 16.67)
     ```
-    we use this a lot in our rendering systems.
+    we use this a lot in our rendering systems, to manage the lifecycles of 3d mesh objects etc.
 
 
 
