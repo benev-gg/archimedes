@@ -102,14 +102,14 @@ export const bytes = ({
 		decode: bytes => copy ? new Uint8Array(bytes) : bytes,
 	})
 
-export const json = (({
-		version = "70ff6e2383fafeb83e54350349ab2818",
-	}: {
-		version?: string
-	} = {}) => {
+export const json = (() => {
 	const textEncoder = new TextEncoder()
 	const textDecoder = new TextDecoder()
-	return <X extends Json = Json>() => asComponent<X>({
+	return <X extends Json = Json>({
+			version = "70ff6e2383fafeb83e54350349ab2818",
+		}: {
+			version?: string
+		} = {}) => asComponent<X>({
 		version,
 		encode: value => textEncoder.encode(JSON.stringify(value)),
 		decode: bytes => JSON.parse(textDecoder.decode(bytes)),
