@@ -1,7 +1,7 @@
 {
 	"name": "@benev/archimedes",
 	"version": "0.2.0-0",
-	"description": "🏛️ game ecs and netcode",
+	"description": "🌀 architecture for web games",
 	"license": "MIT",
 	"type": "module",
 	"main": "x/index.js",
