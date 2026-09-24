@@ -13,6 +13,9 @@ export function tuple<const C extends Component<any>[]>(
 		...components: C
 	): Component<TupleValues<C>> {
 
+	if (components.length === 0)
+		throw new RangeError("tuple requires at least one sub component")
+
 	const version = makeId(...components.map(c => c.version))
 	const all_fixed = components.every(isFixedComponent)
 
