@@ -62,7 +62,6 @@ export class Entities<C extends Components> {
 
 	set<V extends Partial<Entity<C>>>(id: EntityId, values: V) {
 		this.#onBeforeChange.publish(id)
-		this.#selector.entityChanged(id, values)
 
 		if (!this.#store.addresses.has(id))
 			storeCreateEntity(this.#store, id)
@@ -80,6 +79,7 @@ export class Entities<C extends Components> {
 			storeWriteValue(this.#store, id, code, value)
 		}
 
+		this.#selector.entityChanged(id, values)
 		return id
 	}
 
