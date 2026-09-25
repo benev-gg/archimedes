@@ -17,7 +17,7 @@ export function tuple<const C extends FixedComponent[]>(
 	if (components.length === 0)
 		throw new RangeError("tuple requires at least one sub component")
 
-	const version = makeId(...components.map(c => c.version))
+	const version = makeId("tuple", ...components.map(c => c.version))
 	const size = components.reduce(
 		(total, component) => total + component.size,
 		0,
@@ -69,7 +69,7 @@ export function vtuple<const C extends Component[]>(
 	if (components.length === 0)
 		throw new RangeError("vtuple requires at least one sub component")
 
-	const version = makeId(...components.map(c => c.version))
+	const version = makeId("vtuple", ...components.map(c => c.version))
 
 	return {
 		version,
