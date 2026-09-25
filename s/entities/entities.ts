@@ -1,5 +1,6 @@
 
 import {got, need} from "@e280/stz"
+import {Store} from "./store/types.js"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
 import {assertIdIsValid} from "./utils/is-id.js"
@@ -32,8 +33,7 @@ export class Entities<C extends Components> {
 	}
 
 	clear() {
-		this.#notifyClearance()
-		this.#store = makeStore(this.components)
+		this.#replaceStore(makeStore(this.components))
 	}
 
 	get readonly() {
@@ -144,10 +144,7 @@ export class Entities<C extends Components> {
 	}
 
 	load(file: Uint8Array) {
-		const store = storeLoad(this.components, file)
-		this.#notifyClearance()
-		this.#store = store
-		this.#selector.rebuild()
+		this.#replaceStore(storeLoad(this.components, file))
 	}
 
 	select<N extends keyof C>(...componentNames: N[]) {
@@ -166,11 +163,17 @@ export class Entities<C extends Components> {
 		applyChanges(this, this.#store, changes)
 	}
 
-	#notifyClearance() {
-		for (const id of this.keys()) {
+	#replaceStore(store: Store) {
+		const ids = new Set([
+			...this.#store.addresses.keys(),
+			...store.addresses.keys(),
+		])
+
+		for (const id of ids)
 			this.#onBeforeChange.publish(id)
-			this.#selector.entityGone(id)
-		}
+
+		this.#store = store
+		this.#selector.rebuild()
 	}
 }
 
