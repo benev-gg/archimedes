@@ -2,6 +2,7 @@
 import {got, need} from "@e280/stz"
 import {makeStore} from "./store/make.js"
 import {Selector} from "./utils/selector.js"
+import {assertIdIsValid} from "./utils/is-id.js"
 import {storeLoad, storeSave} from "./store/save.js"
 import {startRecordingRollback} from "./utils/rollback.js"
 import {makeOnBeforeChange} from "./utils/before-change.js"
@@ -58,6 +59,7 @@ export class Entities<C extends Components> {
 	}
 
 	set<V extends Partial<Entity<C>>>(id: EntityId, values: V) {
+		assertIdIsValid(id)
 		this.#onBeforeChange.publish(id)
 
 		if (!this.#store.addresses.has(id))
