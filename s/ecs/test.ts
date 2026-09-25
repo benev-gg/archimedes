@@ -1,6 +1,6 @@
 
 import {expect, suite, test} from "@e280/science"
-import {tuple} from "./parts/tuple.js"
+import {tuple, vtuple} from "./parts/tuple.js"
 import {Entities} from "./entities.js"
 import {asComponents} from "./types.js"
 import {makeId} from "./parts/make-id.js"
@@ -115,6 +115,20 @@ export default suite({
 	}),
 
 	"component schema": suite({
+		"tuple": test(async() => {
+			const entities = new Entities({a: tuple(u8, u16)})
+			const id = entities.set(makeId(), {a: [1, 2]})
+			expect(entities.got(id).a).deep([1, 2])
+		}),
+
+		"vtuple": test(async() => {
+			const entities = new Entities({a: vtuple(u8, json())})
+			const id = entities.set(makeId(), {a: [1, {hello: "world"}]})
+			expect(entities.got(id).a).deep([1, {hello: "world"}])
+		}),
+	}),
+
+	"component versioning": suite({
 		"component rename changes version": test(async() => {
 			expect(new Entities({a: u8}).version)
 				.not.is(new Entities({b: u8}).version)

@@ -3,66 +3,74 @@ import {makeId} from "./make-id.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
 import {isFixedComponent} from "../utils/is-component.js"
-import {asComponent, Component, EntityValue, FixedComponent} from "../types.js"
+import {Component, EntityValue, FixedComponent, VariableComponent} from "../types.js"
 
-type TupleValues<C extends Component<any>[]> = {
+type TupleValues<C extends Component[]> = {
 	[K in keyof C]: EntityValue<C[K]>
 }
 
-export function tuple<const C extends Component<any>[]>(
+export function tuple<const C extends FixedComponent[]>(
 		...components: C
-	): Component<TupleValues<C>> {
+	): FixedComponent<TupleValues<C>> {
 
 	if (components.length === 0)
 		throw new RangeError("tuple requires at least one sub component")
 
 	const version = makeId(...components.map(c => c.version))
-	const all_fixed = components.every(isFixedComponent)
+	const size = components.reduce(
+		(total, component) => total + component.size,
+		0,
+	)
 
-	if (all_fixed) {
-		const fixed = components as any as FixedComponent<any>[]
-		const size = fixed.reduce((total, component) => total + component.size, 0)
+	return {
+		version,
+		size,
 
-		return asComponent<TupleValues<C>>({
-			version,
-			size,
+		write(bytes, values) {
+			let offset = 0
 
-			write(bytes, values) {
-				let offset = 0
+			for (let i = 0; i < components.length; i++) {
+				const component = components[i]!
+				const end = offset + component.size
 
-				for (let i = 0; i < fixed.length; i++) {
-					const component = fixed[i]!
-					const end = offset + component.size
+				component.write(
+					bytes.subarray(offset, end),
+					values[i],
+				)
 
-					component.write(
-						bytes.subarray(offset, end),
-						values[i],
-					)
+				offset = end
+			}
+		},
 
-					offset = end
-				}
-			},
+		read(bytes) {
+			let offset = 0
+			const values: unknown[] = []
 
-			read(bytes) {
-				let offset = 0
-				const values: unknown[] = []
+			for (const component of components) {
+				const end = offset + component.size
 
-				for (const component of fixed) {
-					const end = offset + component.size
+				values.push(
+					component.read(bytes.subarray(offset, end)),
+				)
 
-					values.push(
-						component.read(bytes.subarray(offset, end)),
-					)
+				offset = end
+			}
 
-					offset = end
-				}
-
-				return values as TupleValues<C>
-			},
-		})
+			return values as TupleValues<C>
+		},
 	}
+}
 
-	return asComponent<TupleValues<C>>({
+export function vtuple<const C extends Component[]>(
+		...components: C
+	): VariableComponent<TupleValues<C>> {
+
+	if (components.length === 0)
+		throw new RangeError("vtuple requires at least one sub component")
+
+	const version = makeId(...components.map(c => c.version))
+
+	return {
 		version,
 
 		encode(values) {
@@ -72,7 +80,7 @@ export function tuple<const C extends Component<any>[]>(
 				const component = components[i]!
 				const value = values[i]
 
-				if ("size" in component) {
+				if (isFixedComponent(component)) {
 					const bytes = new Uint8Array(component.size)
 					component.write(bytes, value)
 					parts.push(bytes)
@@ -105,7 +113,7 @@ export function tuple<const C extends Component<any>[]>(
 			const values: unknown[] = []
 
 			for (const component of components) {
-				if ("size" in component) {
+				if (isFixedComponent(component)) {
 					const end = offset + component.size
 
 					values.push(
@@ -115,8 +123,9 @@ export function tuple<const C extends Component<any>[]>(
 					offset = end
 				}
 				else {
-					const length = dataView(bytes.subarray(offset, offset + 4))
-						.getUint32(0, endian)
+					const length = dataView(
+						bytes.subarray(offset, offset + 4),
+					).getUint32(0, endian)
 
 					offset += 4
 
@@ -132,6 +141,6 @@ export function tuple<const C extends Component<any>[]>(
 
 			return values as TupleValues<C>
 		},
-	})
+	}
 }
 

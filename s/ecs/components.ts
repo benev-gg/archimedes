@@ -13,8 +13,8 @@ export const bool = asComponent<boolean>({
 })
 
 export const id = asComponent<Id>({
-	size: 16,
 	version: "3f06f73563d2a4d529ce8e7337a744ee",
+	size: 16,
 	read: bytes => hex(bytes),
 	write: (bytes, value) => bytes.set(hex.toBytes(value)),
 })
