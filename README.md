@@ -13,7 +13,7 @@ npm install @benev/archimedes
 **archimedes is an ecs toolkit.**  
 entities feel like ordinary javascript objects.  
 but underneath, archimedes is tightly packing bytes into contiguous memory blocks.  
-*easy ergonomics. compact storage. efficient networking. strong ts types.*  
+*ergonomic. compact. efficient. strongly typed.*  
 
 **built for where games get complicated.**  
 designed for multithreading, serialization, and rollback networking.  
@@ -114,7 +114,7 @@ it feels like normal js map *(but it's secretly not, tee hee!)*
     entities.update(id, {color: undefined})
       // update undefined means "deletes that value".
     ```
-- **has, get, got, delete, clear** -- all work as you'd expect.
+- **has, get, got, delete, clear.**
     ```ts
     entities.has(id)
       // true or false.
@@ -187,9 +187,9 @@ it feels like normal js map *(but it's secretly not, tee hee!)*
     ```
     ```ts
     // elsewhere on a remote copy of entities...
-    entities.applyChanges(changes)
+    remoteEntities.applyChanges(changes)
     ```
-- **entities.startRecordingRollback,** it's easier than you think.
+- **entities.startRecordingRollback,** rollback is easier than you'd think.
     ```ts
     // start your rollback session (it listens for changes)
     const rollback = entities.startRecordingRollback()
@@ -236,7 +236,7 @@ import {asComponents, bool, u8, i16, vec3, f32, tuple, bytes, json} from "@benev
     - other: `bool`, `id`
     - variable components: `bytes`, `json`
     - combine components with `tuple(...)`
-    - combine variable components with `vtuple(...)`
+    - combine variable-and-fixed components with `vtuple(...)`
     - `bytes` and `json` can accept a `version` string which you can bump for schema incompatibilities.
 - **define your own components,** with the `asComponent(...)` helper.
 
