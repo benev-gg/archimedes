@@ -87,15 +87,16 @@ import {Entities, makeId} from "@benev/archimedes"
 ```
 
 this entities class is the bread and butter of archimedes.  
-it's a robust and flexible primitive that you can build a whole damn game around. it's ergonomic, efficient, and easily synced across network or web worker boundaries.
+it's a robust flexible primitive that you can build a whole damn game around.  
+it's ergonomic, efficient, and easily synced across network or web worker boundaries.  
 
-it looks and feels a lot like a normal js map *(but it's secretly not, tee hee!)*
+it feels like normal js map *(but it's secretly not, tee hee!)*
 
 - **new Entities,** establish your entities.
     ```ts
     const entities = new Entities(components)
     ```
-- **entities.set,** create a new entity (or overwrite one).
+- **entities.set,** create or overwrite an entity.
     ```ts
     // create an entity
     const id = entities.set(makeId(), {
@@ -104,38 +105,40 @@ it looks and feels a lot like a normal js map *(but it's secretly not, tee hee!)
     })
     ```
     - `makeId()` creates random 128-bit ids. provide parameters to make a deterministic hash id instead, which is better for multiplayer clientside prediction. `makeId(playerId, "arrow", arrowCount)`
-- **entities.get,** obtain an entity's values.
-    ```ts
-    entities.get(id)
-      // {health: 100, position: [1, 2, 3]}
-    ```
-    - entity values are always typescript readonly.
-    - even if you ignore the typescript rules, the entity object is a snapshot, mutation has no effect.
-- **entities.update,** apply a partial patch.
+- **entities.update,** apply a partial patch for an existing entity.
     ```ts
     entities.update(id, {health: 99})
-      // only update health value
+      // update only the health value.
     ```
     ```ts
     entities.update(id, {color: undefined})
-      // undefined means "deletes the value"
+      // update undefined means "deletes that value".
     ```
-- **entities.delete,** destroy an entity.
+- **has, get, got, delete, clear** -- all work as you'd expect.
+    ```ts
+    entities.has(id)
+      // true or false.
+    ```
+    ```ts
+    entities.get(id)
+      // {health: 100, position: [1, 2, 3]} or undefined.
+      // entity values are typescript readonly.
+    ```
+    ```ts
+    entities.got(id)
+      // {health: 100, position: [1, 2, 3]} or throw error.
+    ```
     ```ts
     entities.delete(id)
     ```
-- **entities.clear,** nukes everything.
     ```ts
     entities.clear()
     ```
-- **iterate.** (.keys(), .values(), .entries(), etc)
     ```ts
+    // iteration, there's also .entries(), .keys(), .values().
     for (const [id, values] of entities)
       console.log(id, values)
     ```
-
-entities has some more fancy tricks up its sleeve.
-
 - **entities.select,** get entities based on what values they have.
     ```ts
     // only select entities with both 'health' and 'position'
@@ -143,7 +146,7 @@ entities has some more fancy tricks up its sleeve.
     ```
     - your game logic systems should be doing a lot of these select calls.
     - select calls are optimized with indexes.
-- **entities.save,** get a binary file.
+- **entities.save,** get a binary snapshot file.
     ```ts
     const file = entities.save()
     ```
@@ -157,13 +160,13 @@ entities has some more fancy tricks up its sleeve.
       // "ecf61ff8d547e6b06c4af5188e6c6cc7"
     ```
     - this version changes if your component schema changes at all.
-    - this will hard-break compatibility with old saves and networking.
+    - a changed version will hard-break compatibility with old saves and networking.
     - it's up to you to be careful about that, and plan for migrations.
 - **entities.readonly,** i use this so much actually.
     ```ts
     setupMyRenderer(entities.readonly)
     ```
-    - it's just a different typescript type (for the same object) that doesn't have set/update/etc.
+    - it's the same object as `entities` but with a modified typescript type.
     - i love to pass this around to systems that shouldn't be meddling with my simulation (like a renderer).
 - **entities.startRecordingChanges,** for recording changes.
     ```ts
