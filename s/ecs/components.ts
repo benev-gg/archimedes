@@ -1,14 +1,22 @@
 
+import {hex} from "@e280/stz"
 import {tuple} from "./parts/tuple.js"
 import {endian} from "./utils/consts.js"
-import {asComponent, Json} from "./types.js"
 import {dataView} from "./utils/data-view.js"
+import {asComponent, Id, Json} from "./types.js"
 
 export const bool = asComponent<boolean>({
 	version: "abbf2bd9163054c5b0f3819b33041476",
 	size: 1,
 	write: (bytes, value) => bytes[0] = value ?1 :0,
 	read: bytes => (bytes[0]! !== 0),
+})
+
+export const id = asComponent<Id>({
+	size: 16,
+	version: "3f06f73563d2a4d529ce8e7337a744ee",
+	read: bytes => hex(bytes),
+	write: (bytes, value) => bytes.set(hex.toBytes(value)),
 })
 
 export const u8 = asComponent<number>({
