@@ -12,7 +12,7 @@ export function makeStore(components: Components): Store {
 	const sortedComponents = entries.map(([,c]) => c)
 
 	return {
-		version: makeId(...entries.flatMap(([name, c]) => [name, c.version])),
+		version: makeId("store", ...entries.flatMap(([name, c]) => [name, c.version])),
 		namecoder: new Namecoder(sortedNames),
 		addresses: new Map(),
 		columns: sortedComponents.map(component => (
