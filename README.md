@@ -36,7 +36,7 @@ archimedes helps structure your game simulation, but you bring your own renderer
 import {Entities, i8, vec2, makeId, gameloop} from "@benev/archimedes"
 ```
 
-1. **entities with components schema.**
+1. **entities and components.**
     ```ts
     const entities = new Entities({
       health: i8,
@@ -50,7 +50,7 @@ import {Entities, i8, vec2, makeId, gameloop} from "@benev/archimedes"
       position: [1, 2],
     })
     ```
-    (here's how'd you read it later)
+    (here's how you'd read it later)
     ```ts
     entities.get(id)
       // {health: 100, position: [1, 2]}
@@ -310,6 +310,8 @@ if you like, archimedes does provide a composable concept of system functions:
     ```
 - **now your supersystem, like any system, takes in context and returns a tick fn.**  
     ```ts
+    import {gameloop} from "@benev/archimedes"
+
     gameloop(60, supersystem({
       entities: new Entities(myComponents),
       whatever: new Whatever(),
