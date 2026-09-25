@@ -10,7 +10,7 @@ export type EntityValue<C extends Component<any>> = (
 		: never
 )
 
-export type Entity<C extends Components> = Readonly<{
+export type Entity<C extends Components = any> = Readonly<{
 	[K in keyof C]: EntityValue<C[K]>
 }>
 

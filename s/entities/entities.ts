@@ -11,7 +11,7 @@ import {Entity, EntityId, Patch, Selected} from "./types.js"
 import {applyChanges, Changes, startRecordingChanges} from "./store/changes.js"
 import {storeCreateEntity, storeDeleteEntity, storeDeleteValue, storeGetValues, storeWriteValue} from "./store/fns.js"
 
-export type EntitiesReadonly<C extends Components> = Omit<Entities<C>, (
+export type EntitiesReadonly<C extends Components = any> = Omit<Entities<C>, (
 	| "clear"
 	| "set"
 	| "update"
