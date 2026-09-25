@@ -235,7 +235,7 @@ import {asComponents, bool, u8, i16, vec3, f32, tuple, bytes, json} from "@benev
     - combine components with `tuple(...)`
     - combine variable components with `vtuple(...)`
     - `bytes` and `json` can accept a `version` string which you can bump for schema incompatibilities.
-- **define your own components,** with the `asComponents(...)` helper.
+- **define your own components,** with the `asComponent(...)` helper.
 
 
 
