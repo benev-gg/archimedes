@@ -1,9 +1,10 @@
 
 import {makeId} from "./make-id.js"
-import {endian} from "../utils/consts.js"
-import {dataView} from "../utils/data-view.js"
-import {isFixedComponent} from "../utils/is-component.js"
-import {Component, EntityValue, FixedComponent, VariableComponent} from "../types.js"
+import {EntityValue} from "./types.js"
+import {endian} from "./utils/consts.js"
+import {dataView} from "./utils/data-view.js"
+import {isFixedComponent} from "./utils/is-component.js"
+import type {Component, FixedComponent, VariableComponent} from "../components/types.js"
 
 type TupleValues<C extends Component[]> = {
 	[K in keyof C]: EntityValue<C[K]>

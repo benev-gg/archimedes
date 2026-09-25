@@ -1,11 +1,11 @@
 
 import {bytes, hex, txt} from "@e280/stz"
 import {Store} from "./types.js"
+import {makeStore} from "./make.js"
 import {endian} from "../utils/consts.js"
 import {dataView} from "../utils/data-view.js"
+import {Components} from "../../components/types.js"
 import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./fns.js"
-import { Components } from "../types.js"
-import { makeStore } from "./make.js"
 
 const magic = txt.toBytes("@benev/archimedes:store:v1")
 const idSize = 16

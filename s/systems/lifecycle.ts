@@ -1,7 +1,8 @@
 
 import {guarantee} from "@e280/stz"
-import {EntitiesReadonly} from "../entities.js"
-import {Components, EntityId, Selected} from "../types.js"
+import type {Components} from "../components/types.js"
+import type {EntityId, Selected} from "../entities/types.js"
+import type {EntitiesReadonly} from "../entities/entities.js"
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
 	tick: (values: Selected<C, K>) => void

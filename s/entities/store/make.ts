@@ -1,10 +1,10 @@
 
 import {Block, Store} from "./types.js"
-import {makeId} from "../parts/make-id.js"
+import {makeId} from "../make-id.js"
 import {Namecoder} from "../utils/namecoder.js"
-import {Components, FixedComponent} from "../types.js"
 import {isFixedComponent} from "../utils/is-component.js"
 import {sortComponents} from "../utils/sort-components.js"
+import {Components, FixedComponent} from "../../components/types.js"
 
 export function makeStore(components: Components): Store {
 	const entries = sortComponents(components)

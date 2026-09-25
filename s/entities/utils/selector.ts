@@ -1,7 +1,8 @@
 
 import {guarantee} from "@e280/stz"
 import type {Entities} from "../entities.js"
-import {Components, Entity, EntityId, SelectedEntry} from "../types.js"
+import {Components} from "../../components/types.js"
+import {Entity, EntityId, SelectedEntry} from "../types.js"
 
 type QueryKey = string
 

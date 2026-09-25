@@ -1,9 +1,10 @@
 
 import {hex} from "@e280/stz"
-import {tuple} from "./parts/tuple.js"
-import {endian} from "./utils/consts.js"
-import {dataView} from "./utils/data-view.js"
-import {asComponent, Id, Json} from "./types.js"
+import {asComponent} from "./types.js"
+import type {Id, Json} from "../types.js"
+import {tuple} from "../entities/tuple.js"
+import {endian} from "../entities/utils/consts.js"
+import {dataView} from "../entities/utils/data-view.js"
 
 export const bool = asComponent<boolean>({
 	version: "abbf2bd9163054c5b0f3819b33041476",

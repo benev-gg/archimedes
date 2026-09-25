@@ -1,5 +1,5 @@
 
-import {Id} from "../types.js"
+import {Id} from "../../types.js"
 
 export function isId(id: string): this is Id {
 	return (id.length === 32)
