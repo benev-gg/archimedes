@@ -11,10 +11,9 @@ npm install @benev/archimedes
 ```
 
 **archimedes is an ecs toolkit.**  
-robust architectural primitives, not an opinionated framework.  
-
-**entities feel like ordinary javascript objects.**  
+entities feel like ordinary javascript objects.  
 but underneath, archimedes is tightly packing bytes into contiguous memory blocks.  
+*easy ergonomics. compact storage. efficient networking. strong ts types.*  
 
 **built for where games get complicated.**  
 designed for multithreading, serialization, and rollback networking.  
@@ -34,12 +33,15 @@ archimedes helps structure your game simulation, but you bring your own renderer
 ## 🎮 simple, game example
 
 ```ts
-import {Entities, i8, vec2, makeId} from "@benev/archimedes"
+import {Entities, i8, vec2, makeId, gameloop} from "@benev/archimedes"
 ```
 
-1. **establish entities and components.**
+1. **entities with components schema.**
     ```ts
-    const entities = new Entities({health: i8, position: vec2})
+    const entities = new Entities({
+      health: i8,
+      position: vec2,
+    })
     ```
 1. **create your first entity.**
     ```ts
@@ -48,11 +50,12 @@ import {Entities, i8, vec2, makeId} from "@benev/archimedes"
       position: [1, 2],
     })
     ```
+    (here's how'd you read it later)
     ```ts
     entities.get(id)
       // {health: 100, position: [1, 2]}
     ```
-1. **write your game logic.**
+1. **write some game logic.**
     ```ts
     function simulate() {
 
@@ -68,9 +71,9 @@ import {Entities, i8, vec2, makeId} from "@benev/archimedes"
           entities.delete(id)
     }
     ```
-1. **start the simulation.**
+1. **start the simulation at 60 hertz.**
     ```ts
-    setInterval(simulate, 16.67)
+    gameloop(60, simulate)
     ```
 
 
@@ -125,7 +128,7 @@ it looks and feels a lot like a normal js map *(but it's secretly not, tee hee!)
     ```ts
     entities.clear()
     ```
-- **iterating.** (.keys(), .values(), .entries(), etc)
+- **iterate.** (.keys(), .values(), .entries(), etc)
     ```ts
     for (const [id, values] of entities)
       console.log(id, values)
@@ -305,26 +308,12 @@ if you like, archimedes does provide a composable concept of system functions:
       },
     })
     ```
-- **now in your simulation loop, run them all in order:**  
+- **now your supersystem, like any system, takes in context and returns a tick fn.**  
     ```ts
-    const simulate = supersystem({
+    gameloop(60, supersystem({
       entities: new Entities(myComponents),
       whatever: new Whatever(),
-    })
-
-    setInterval(simulate, 16.67)
-    ```
-- **okay but seriously, use `gameloop`:**  
-    setInterval is terrible, i only used it as a familiar example.  
-    gameloop maintains a target frequency much better.  
-    ```ts
-    import {gameloop} from "@benev/archimedes"
-
-    // 60 hertz
-    const stop = gameloop(60, simulate)
-
-    // stop the gameloop
-    stop()
+    }))
     ```
 
 
