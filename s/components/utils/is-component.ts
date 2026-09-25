@@ -1,5 +1,5 @@
 
-import type {Component, FixedComponent, VariableComponent} from "../../components/types.js"
+import type {Component, FixedComponent, VariableComponent} from "../types.js"
 
 export function isFixedComponent<Value>(component: Component<Value>): component is FixedComponent<Value> {
 	return "size" in component

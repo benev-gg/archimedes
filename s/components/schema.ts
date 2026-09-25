@@ -1,10 +1,9 @@
 
-import {hex} from "@e280/stz"
+import {dataViewFrom as dv, hex} from "@e280/stz"
+import {endian} from "../consts.js"
 import {asComponent} from "./types.js"
 import type {Id, Json} from "../types.js"
 import {tuple} from "../entities/tuple.js"
-import {endian} from "../entities/utils/consts.js"
-import {dataView} from "../entities/utils/data-view.js"
 
 export const bool = asComponent<boolean>({
 	version: "abbf2bd9163054c5b0f3819b33041476",
@@ -30,64 +29,64 @@ export const u8 = asComponent<number>({
 export const u16 = asComponent<number>({
 	version: "2f5924fae4c7604a6f2b79d8ac735327",
 	size: 2,
-	write: (bytes, x) => dataView(bytes).setUint16(0, x, endian),
-	read: bytes => dataView(bytes).getUint16(0, endian),
+	write: (bytes, x) => dv(bytes).setUint16(0, x, endian),
+	read: bytes => dv(bytes).getUint16(0, endian),
 })
 
 export const u32 = asComponent<number>({
 	version: "3a2027117722ad4220f0b2082d21a711",
 	size: 4,
-	write: (bytes, x) => dataView(bytes).setUint32(0, x, endian),
-	read: bytes => dataView(bytes).getUint32(0, endian),
+	write: (bytes, x) => dv(bytes).setUint32(0, x, endian),
+	read: bytes => dv(bytes).getUint32(0, endian),
 })
 
 export const i8 = asComponent<number>({
 	version: "f08c13a29db557f6d04e90848c66770e",
 	size: 1,
-	write: (bytes, x) => dataView(bytes).setInt8(0, x),
-	read: bytes => dataView(bytes).getInt8(0),
+	write: (bytes, x) => dv(bytes).setInt8(0, x),
+	read: bytes => dv(bytes).getInt8(0),
 })
 
 export const i16 = asComponent<number>({
 	version: "569187b062a88366cee61e7ff0b2248d",
 	size: 2,
-	write: (bytes, x) => dataView(bytes).setInt16(0, x, endian),
-	read: bytes => dataView(bytes).getInt16(0, endian),
+	write: (bytes, x) => dv(bytes).setInt16(0, x, endian),
+	read: bytes => dv(bytes).getInt16(0, endian),
 })
 
 export const i32 = asComponent<number>({
 	version: "fac7a25850a9c7e05f83e1f9d6ee217b",
 	size: 4,
-	write: (bytes, x) => dataView(bytes).setInt32(0, x, endian),
-	read: bytes => dataView(bytes).getInt32(0, endian),
+	write: (bytes, x) => dv(bytes).setInt32(0, x, endian),
+	read: bytes => dv(bytes).getInt32(0, endian),
 })
 
 export const f32 = asComponent<number>({
 	version: "bb09fe9a6b36f6f2b843476eece5e7ec",
 	size: 4,
-	write: (bytes, x) => dataView(bytes).setFloat32(0, x, endian),
-	read: bytes => dataView(bytes).getFloat32(0, endian),
+	write: (bytes, x) => dv(bytes).setFloat32(0, x, endian),
+	read: bytes => dv(bytes).getFloat32(0, endian),
 })
 
 export const f64 = asComponent<number>({
 	version: "3d653af09f52a55420b43ad32f12e623",
 	size: 8,
-	write: (b, x) => dataView(b).setFloat64(0, x, endian),
-	read: b => dataView(b).getFloat64(0, endian),
+	write: (b, x) => dv(b).setFloat64(0, x, endian),
+	read: b => dv(b).getFloat64(0, endian),
 })
 
 export const bigu64 = asComponent<bigint>({
 	version: "2cbcd33de0587c1a090d7c7b4b2f2e49",
 	size: 8,
-	write: (bytes, x) => dataView(bytes).setBigUint64(0, x, endian),
-	read: bytes => dataView(bytes).getBigUint64(0, endian),
+	write: (bytes, x) => dv(bytes).setBigUint64(0, x, endian),
+	read: bytes => dv(bytes).getBigUint64(0, endian),
 })
 
 export const bigi64 = asComponent<bigint>({
 	version: "17ec0a6a54a6cfa6aae87b8bfbcaef1f",
 	size: 8,
-	write: (bytes, x) => dataView(bytes).setBigInt64(0, x, endian),
-	read: bytes => dataView(bytes).getBigInt64(0, endian),
+	write: (bytes, x) => dv(bytes).setBigInt64(0, x, endian),
+	read: bytes => dv(bytes).getBigInt64(0, endian),
 })
 
 export const vec2 = tuple(f32, f32)

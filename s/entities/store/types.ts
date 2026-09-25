@@ -1,7 +1,7 @@
 
-import {Namecoder} from "../utils/namecoder.js"
 import {Id} from "../../types.js"
 import {EntityId} from "../types.js"
+import {Namecoder} from "../utils/namecoder.js"
 import {FixedComponent, VariableComponent} from "../../components/types.js"
 
 export type Code = number

@@ -1,7 +1,6 @@
 
-import {bytes} from "@e280/stz"
-import {endian} from "./consts.js"
-import {dataView} from "./data-view.js"
+import {bytes, dataViewFrom} from "@e280/stz"
+import {endian} from "../../consts.js"
 
 export class BinWriter {
 	#parts: Uint8Array[] = []
@@ -19,14 +18,14 @@ export class BinWriter {
 	u16(value: number) {
 		checkUint(value, 0xffff)
 		const data = new Uint8Array(2)
-		dataView(data).setUint16(0, value, endian)
+		dataViewFrom(data).setUint16(0, value, endian)
 		return this.bytes(data)
 	}
 
 	u32(value: number) {
 		checkUint(value, 0xffffffff)
 		const data = new Uint8Array(4)
-		dataView(data).setUint32(0, value, endian)
+		dataViewFrom(data).setUint32(0, value, endian)
 		return this.bytes(data)
 	}
 
@@ -61,11 +60,11 @@ export class BinReader {
 	}
 
 	u16() {
-		return dataView(this.bytes(2)).getUint16(0, endian)
+		return dataViewFrom(this.bytes(2)).getUint16(0, endian)
 	}
 
 	u32() {
-		return dataView(this.bytes(4)).getUint32(0, endian)
+		return dataViewFrom(this.bytes(4)).getUint32(0, endian)
 	}
 }
 

@@ -1,9 +1,8 @@
 
-import {bytes, hex, txt} from "@e280/stz"
+import {bytes, dataViewFrom, hex, txt} from "@e280/stz"
 import {Store} from "./types.js"
 import {makeStore} from "./make.js"
-import {endian} from "../utils/consts.js"
-import {dataView} from "../utils/data-view.js"
+import {endian} from "../../consts.js"
 import {Components} from "../../components/types.js"
 import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./fns.js"
 
@@ -89,13 +88,13 @@ function loadData(store: Store, read: ByteReader) {
 
 function u32(x: number) {
 	const data = new Uint8Array(u32Size)
-	dataView(data).setUint32(0, x, endian)
+	dataViewFrom(data).setUint32(0, x, endian)
 	return data
 }
 
 function u16(x: number) {
 	const data = new Uint8Array(u16Size)
-	dataView(data).setUint16(0, x, endian)
+	dataViewFrom(data).setUint16(0, x, endian)
 	return data
 }
 
@@ -117,8 +116,8 @@ function byteReader(data: Uint8Array) {
 
 	return {
 		bytes: readBytes,
-		u32: () => dataView(readBytes(u32Size)).getUint32(0, endian),
-		u16: () => dataView(readBytes(u16Size)).getUint16(0, endian),
+		u32: () => dataViewFrom(readBytes(u32Size)).getUint32(0, endian),
+		u16: () => dataViewFrom(readBytes(u16Size)).getUint16(0, endian),
 	}
 }
 

@@ -1,9 +1,7 @@
 
-import {txt} from "@e280/stz"
+import {dataViewFrom, txt} from "@e280/stz"
 import {blake3} from "@awasm/noble"
-
-import {endian} from "./consts.js"
-import {dataView} from "./data-view.js"
+import {endian} from "../../consts.js"
 
 enum EntropyType {String, Number, Bytes}
 
@@ -14,7 +12,7 @@ export function hash(...entropy: (string | number | Uint8Array)[]) {
 	const hasher = blake3.create()
 	const typeTag = new Uint8Array(1)
 	const lengthTag = new Uint8Array(4)
-	const lengthDataview = dataView(lengthTag)
+	const lengthDataview = dataViewFrom(lengthTag)
 
 	for (const part of entropy) {
 		if (typeof part === "string") {
@@ -27,7 +25,7 @@ export function hash(...entropy: (string | number | Uint8Array)[]) {
 		}
 		else if (typeof part === "number") {
 			const bytes = new Uint8Array(8)
-			dataView(bytes).setFloat64(0, part, endian)
+			dataViewFrom(bytes).setFloat64(0, part, endian)
 			typeTag[0] = EntropyType.Number
 			lengthDataview.setUint32(0, bytes.byteLength, endian)
 			hasher.update(typeTag)

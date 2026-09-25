@@ -1,9 +1,9 @@
 
+import {dataViewFrom} from "@e280/stz"
 import {makeId} from "./make-id.js"
+import {endian} from "../consts.js"
 import {EntityValue} from "./types.js"
-import {endian} from "./utils/consts.js"
-import {dataView} from "./utils/data-view.js"
-import {isFixedComponent} from "./utils/is-component.js"
+import {isFixedComponent} from "../components/utils/is-component.js"
 import type {Component, FixedComponent, VariableComponent} from "../components/types.js"
 
 type TupleValues<C extends Component[]> = {
@@ -90,7 +90,7 @@ export function vtuple<const C extends Component[]>(
 					const payload = component.encode(value)
 					const bytes = new Uint8Array(4 + payload.length)
 
-					dataView(bytes).setUint32(0, payload.length, endian)
+					dataViewFrom(bytes).setUint32(0, payload.length, endian)
 					bytes.set(payload, 4)
 
 					parts.push(bytes)
@@ -124,7 +124,7 @@ export function vtuple<const C extends Component[]>(
 					offset = end
 				}
 				else {
-					const length = dataView(
+					const length = dataViewFrom(
 						bytes.subarray(offset, offset + 4),
 					).getUint32(0, endian)
 

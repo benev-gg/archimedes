@@ -1,6 +1,6 @@
 
 import {Block, Slot} from "./types.js"
-import {slotsPerPage} from "../utils/consts.js"
+import {slotsPerPage} from "../../consts.js"
 
 export function blockAllocate(block: Block): Slot {
 	const recycled = block.freeSlots.pop()
