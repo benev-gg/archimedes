@@ -1,6 +1,6 @@
 
 import {guarantee} from "@e280/stz"
-import {Entities} from "../entities.js"
+import {EntitiesReadonly} from "../entities.js"
 import {Components, EntityId, Selected} from "../types.js"
 
 export type LifecycleCallbacks<C extends Components, K extends keyof C> = {
@@ -13,7 +13,7 @@ export type LifecycleSpawn<C extends Components, K extends keyof C> = (
 )
 
 export function lifecycle<C extends Components, K extends keyof C>(
-		entities: Entities<C>,
+		entities: EntitiesReadonly<C>,
 		componentNames: K[],
 		enter: LifecycleSpawn<C, K>
 	) {

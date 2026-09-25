@@ -240,42 +240,92 @@ import {asComponents, bool, u8, i16, vec3, f32, tuple, bytes, json} from "@benev
 
 ## ⚙️ systems, game logic
 
-you can structure your game logic however you like.  
-your game logic can just be a looping function that changes entities over time, using `entities.update` etc.
+you can really structure your game logic however you like.  
+your game logic can just be a looping function that changes entities over time, using `entities.update` etc...  
 
-we use the term "system" casually to refer to a game logic function, especially one that selects entities by the components it works on. ecs philosophers like such systems...
+ecs philosophers like "system" functions, where each function selects entities by the few components they work on.
 
-anyways, here's one little helper we use a lot:
-- `lifecycle` helps you observe events regarding a set of components:
+if you like, archimedes does provide a composable concept of system functions:
+- **declare a context that every system should get:**
     ```ts
-    import {lifecycle} from "@benev/archimedes"
-
-    function setupBleedLogging(entities: Entities<MyComponents>) {
-      return lifecycle(entities, ["health", "bleed"], (id, {health}) => {
-        console.log("bleed started", id, health)
-        return {
-          tick: ({health}) => console.log("bleed running", health),
-          exit: () => console.log("bleed stopped"),
-        }
-      })
+    type Context = {
+      entities: Entities<MyComponents>
+      whatever: MyWhatever
     }
     ```
-    and here's how you might use it:
+- **here's one formal system fn:**  
     ```ts
-    const entities = new Entities(myComponents)
+    import {asSystem} from "@benev/archimedes"
 
-    const bleedLogging = setupBleedLogging(entities)
-      // call this setup fn once, to establish its long-lived closure
+    const bleeding = asSystem<Context>(context => {
+      const {entities} = context
 
-    function simulate() {
-      bleeding()
-      deathWhenNoHealth()
-      bleedLogging() // <-- our special lifecycle system
-    }
+      // this gets called every tick
+      return () => {
+        for (const [id, values] of entities.select("health", "bleed"))
+          entities.update(id, {health: values.health - values.bleed})
+      }
+    })
+    ```
+- **consolidate a nested tree of systems:**  
+    ```ts
+    import {consolidateSystems, lifecycle} from "@benev/archimedes"
+
+    const supersystem = consolidateSystems<Context>({
+      movement: {
+        walking,
+        jumping,
+      },
+      health: {
+        healing,
+        bleeding,
+
+        // use `lifecycle` to create a system that watches.
+        // great for stateful rendering concepts like 3d meshes etc.
+        bleedLogging: context => lifecycle(
+          context.entities,
+          ["health", "bleed"],
+          (id, {health, bleed}) => {
+            console.log("bleed started", id, health)
+            return {
+              tick: ({health}) => console.log("bleed running", health),
+              exit: () => console.log("bleed stopped"),
+            }
+          },
+        ),
+
+        potions: {
+          fullHealthPotion,
+          slowHealingPotion,
+        },
+      },
+      victory: {
+        winAtFinishZone,
+        winKilledAllEnemies,
+      },
+    })
+    ```
+- **now in your simulation loop, run them all in order:**  
+    ```ts
+    const simulate = supersystem({
+      entities: new Entities(myComponents),
+      whatever: new Whatever(),
+    })
 
     setInterval(simulate, 16.67)
     ```
-    we use this a lot in our rendering systems, to manage the lifecycles of 3d mesh objects etc.
+- **okay but seriously, use `gameloop`:**  
+    setInterval is terrible, i only used it as a familiar example.  
+    gameloop maintains a target frequency much better.  
+    ```ts
+    import {gameloop} from "@benev/archimedes"
+
+    // 60 hertz
+    const stop = gameloop(60, simulate)
+
+    // stop the gameloop
+    stop()
+    ```
 
 
 
