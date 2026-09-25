@@ -6,7 +6,7 @@ import {endian} from "../../consts.js"
 import {Components} from "../../components/types.js"
 import {storeCreateEntity, storeGetBytes, storeWriteBytes} from "./fns.js"
 
-const magic = txt.toBytes("@benev/archimedes:store:v1")
+const magic = txt.toBytes("ARC1")
 const idSize = 16
 const u32Size = 4
 const u16Size = 2
