@@ -1,8 +1,10 @@
 
 import type {Id} from "../types.js"
+import type {Entities} from "./entities.js"
 import type {Component, Components} from "../components/types.js"
 
 export type EntityId = Id
+export type ComponentsOf<E> = E extends Entities<infer C> ? C : never
 
 export type EntityValue<C extends Component<any>> = (
 	C extends Component<infer V>
