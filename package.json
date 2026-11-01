@@ -17,11 +17,11 @@
 	},
 	"dependencies": {
 		"@awasm/noble": "^0.1.4",
-		"@e280/stz": "^0.4.2"
+		"@e280/stz": "^0.4.14"
 	},
 	"devDependencies": {
-		"@e280/octo": "^0.1.5",
-		"@e280/science": "^0.1.12",
+		"@e280/octo": "^0.1.7",
+		"@e280/science": "^0.1.14",
 		"typescript": "^7.0.2"
 	},
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
