@@ -59,7 +59,7 @@ export class Entities<C extends Components> {
 		return storeDeleteEntity(this.#store, id)
 	}
 
-	set<V extends Partial<Entity<C>>>(id: EntityId, values: V) {
+	set(id: EntityId, values: Partial<Entity<C>>) {
 		assertIdIsValid(id)
 		this.#onBeforeChange.publish(id)
 
