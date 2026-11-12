@@ -151,6 +151,18 @@ export class Entities<C extends Components> {
 		return this.#selector.select(...componentNames)
 	}
 
+	first<N extends keyof C>(...componentNames: N[]) {
+		return this.#selector.first(...componentNames)
+	}
+
+	id<N extends keyof C>(...componentNames: N[]) {
+		return this.first(...componentNames)?.[0]
+	}
+
+	find<N extends keyof C>(...componentNames: N[]) {
+		return this.first(...componentNames)?.[1]
+	}
+
 	startRecordingRollback() {
 		return startRecordingRollback(this, this.#onBeforeChange)
 	}

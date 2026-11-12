@@ -139,13 +139,35 @@ it feels like normal js map *(but it's secretly not, tee hee!)*
     for (const [id, values] of entities)
       console.log(id, values)
     ```
-- **entities.select,** get entities based on what values they have.
+- **entities.select,** query entities based on what components they have.
     ```ts
     // only select entities with both 'health' and 'position'
-    const selected = entities.select("health", "position")
+    for (const [id, entity] of entities.select("health", "position"))
+      console.log(id, entity)
     ```
-    - your game logic systems should be doing a lot of these select calls.
-    - select calls are optimized with indexes.
+    - these select queries are optimized with indexes.
+    - your game logic should be doing a lot of these select queries.
+- **entities.first, find, id,** convenient ways to grab the first matching entity.
+    ```ts
+    entities.first("health", "position")
+      // [id, entity] or undefined.
+
+    entities.find("health", "position")
+      // entity or undefined.
+
+    entities.id("health", "position")
+      // id or undefined.
+    ```
+- **entities.getWith,** get an entity by id, but only if it has the required components.
+    ```ts
+    entities.getWith(id, "health", "position")
+      // entity or undefined.
+      // good typings.
+    ```
+- **entities.size,** the total number of entities.
+    ```ts
+    entities.size // 42
+    ```
 - **entities.save,** get a binary snapshot file.
     ```ts
     const file = entities.save()

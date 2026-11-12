@@ -64,5 +64,13 @@ export class Selector<C extends Components> {
 	select<N extends keyof C>(...names: N[]) {
 		return [...this.#query(names).results.entries()] as SelectedEntry<C, N>[]
 	}
+
+	first<N extends keyof C>(...names: N[]): SelectedEntry<C, N> | undefined {
+		const iterator = this.#query(names).results.entries()
+		const first = iterator.next()
+		return first.done
+			? undefined
+			: first.value as SelectedEntry<C, N>
+	}
 }
 
